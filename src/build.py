@@ -69,10 +69,7 @@ def header():
 </div>
 <header class="site-header">
   <div class="container">
-    <a class="logo" href="/" aria-label="Coach Masters Academy home">
-      <span class="logo__mark">CMA</span>
-      <span class="logo__text"><b>Coach Masters Academy</b><span>Inspiring positive change</span></span>
-    </a>
+    <a class="logo" href="/" aria-label="Coach Masters Academy home"><img src="/assets/img/logo.png" alt="Coach Masters Academy" width="250" height="70"></a>
     <nav class="nav" aria-label="Main">{nav}</nav>
     <div class="header__cta">
       {btn('Registration', '/registration', 'btn--sm')}
@@ -90,7 +87,7 @@ def footer():
   <div class="container">
     <div class="footer-grid">
       <div>
-        <a class="logo" href="/"><span class="logo__mark">CMA</span><span class="logo__text"><b>Coach Masters Academy</b><span>Inspiring positive change</span></span></a>
+        <a class="logo logo--light" href="/"><img src="/assets/img/logo.png" alt="Coach Masters Academy" width="250" height="70"></a>
         <h4>Contact US</h4>
         <ul>
           <li>{esc(ADDRESS)}</li>
@@ -155,6 +152,44 @@ def layout(page, body, extra_head='', extra_js='', body_class=''):
 <script src="/assets/js/main.js"></script>
 </body>
 </html>'''
+
+def laurel(flip=False):
+    """Orange laurel branch (SVG): quadratic stem with leaf pairs along it, tapering to the tip."""
+    import math
+    P0, P1, P2 = (64, 116), (4, 86), (34, 6)
+    def pt(t):
+        x = (1-t)**2*P0[0] + 2*(1-t)*t*P1[0] + t*t*P2[0]; y = (1-t)**2*P0[1] + 2*(1-t)*t*P1[1] + t*t*P2[1]; return x, y
+    def tan(t):
+        dx = 2*(1-t)*(P1[0]-P0[0]) + 2*t*(P2[0]-P1[0]); dy = 2*(1-t)*(P1[1]-P0[1]) + 2*t*(P2[1]-P1[1]); return math.degrees(math.atan2(dy, dx))
+    leaves = ''
+    for i in range(7):
+        t = 0.06 + 0.86 * i / 6
+        x, y = pt(t); a = tan(t); size = 1.05 - 0.5 * t
+        for side in (-1, 1):
+            rot = a + 90 + side * 42                    # leaf points forward along the stem, splayed to each side
+            L = 24 * size; W = 6.5 * size
+            leaves += f'<path d="M0 0 C {W} -{L*0.35:.1f}, {W} -{L*0.75:.1f}, 0 -{L:.1f} C -{W} -{L*0.75:.1f}, -{W} -{L*0.35:.1f}, 0 0 Z" transform="translate({x:.1f} {y:.1f}) rotate({rot:.1f})"/>'
+    stem = f'M{P0[0]} {P0[1]} Q{P1[0]} {P1[1]} {P2[0]} {P2[1]}'
+    return f'<svg class="laurel{" laurel--flip" if flip else ""}" viewBox="0 0 100 120" aria-hidden="true"><path d="{stem}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><g fill="currentColor">{leaves}</g></svg>'
+
+def awards_band():
+    """Transformative Edge (TM) Foundational Advantage banner (from the client graphic), rebuilt in HTML."""
+    def award(title, line, accent):
+        return f'<div class="award" data-reveal>{laurel()}<div class="award__text"><b>{title}</b><span>{line}</span><em>{accent}</em></div>{laurel(True)}</div>'
+    return f'''
+<section class="section section--tight awards">
+  <div class="container">
+    <div class="awards__head">
+      <h2 data-split><span class="awards__l1">Transformative Edge <sup>(TM)</sup></span><span class="awards__l2">Foundational Advantage</span></h2>
+      <p class="awards__sub" data-reveal>ICF-Accredited Professional Coaching Certification Program</p>
+    </div>
+    <div class="awards__row">
+      {award('Coaching Impact Award', 'Distinguished Coaching Education', 'International Coaching Federation')}
+      {award('Best Education Award', 'Grade “A” Status', '')}
+      {award('Best Coaching Skill Training', '', 'in Asia Pacific 2021')}
+    </div>
+  </div>
+</section>'''
 
 # ---------------------------------------------------------------- generic building blocks
 def subnav(page):

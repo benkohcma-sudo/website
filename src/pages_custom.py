@@ -4,7 +4,7 @@ that every sentence from the crawled page still appears in the generated one.
 """
 import re, html
 from bs4 import BeautifulSoup
-from build import (PAGES, layout, page_hero, subnav, crumbs, btn, link, aside, esc, ARROW, PIN, generic_page, SITE, PHONE, EMAIL, page_heading)
+from build import (PAGES, layout, page_hero, subnav, crumbs, btn, link, aside, esc, ARROW, PIN, generic_page, SITE, PHONE, EMAIL, page_heading, awards_band)
 
 IMG = SITE + '/public/storage/'
 
@@ -29,11 +29,12 @@ def home(page):
     <div class="hero__gallery" aria-hidden="true">
       <div class="media g1"><img src="{IMG}featured_image1/1/about-us-img-1.jpg" alt=""></div>
       <div class="media g2"><img src="{IMG}image_item/services-2.jpg_1749723874" alt=""></div>
-      <div class="media g3"><img src="{IMG}image_item/learning-3.jpg_1749727088" alt=""></div>
+      <div class="media g3"><img src="{IMG}image_item/services-3.jpg_1749723934" alt=""></div>
       <div class="chip"><i></i>Live Coaching Discovery Sessions</div>
     </div>
   </div>
 </section>
+{awards_band()}
 
 <section class="section">
   <div class="container split split--wide">
@@ -247,7 +248,7 @@ def news_card(href, img, title, reveal=True):
 # ====================================================================== ABOUT US (globe hero)
 def about(page):
     body = subnav(page) + f'''
-<section class="globe-hero">
+<section class="globe-hero globe-hero--video">
   <div class="container globe-hero__grid">
     <div>
       {crumbs(page)}
@@ -261,7 +262,11 @@ def about(page):
         <div class="stat" data-reveal><div class="stat__num" data-count="6200">0</div><div class="stat__label">Graduates across the globe</div></div>
       </div>
     </div>
-    <div class="globe-wrap"><canvas class="globe" aria-label="Coach Masters Academy regional offices around the world" role="img"></canvas></div>
+    <div class="globe-video" data-reveal="scale">
+      <video class="globe-video__el" muted playsinline preload="auto" poster="/assets/video/about-globe-poster.jpg" aria-label="Globe turning from the Americas to Singapore">
+        <source src="/assets/video/about-globe.mp4" type="video/mp4">
+      </video>
+    </div>
   </div>
   <div class="globe-hint"><i></i>Scroll to spin</div>
 </section>
@@ -659,7 +664,7 @@ def certification(page):
         if part == '@@JOURNEY@@': out += f'</div></div></section><section class="section section--surface"><div class="container">{journey}</div></section><section class="section"><div class="container"><div class="prose prose--wide" data-auto-reveal>'
         elif part == '@@TRACKS@@': out += f'</div>{rows}<div class="prose prose--wide" data-auto-reveal>'
         else: out += part
-    body = subnav(page) + page_hero(page) + f'''
+    body = subnav(page) + page_hero(page) + awards_band() + f'''
 <section class="section section--tight">
   <div class="container"><div class="prose prose--wide" data-auto-reveal style="max-width:820px">{out}</div></div>
 </section>

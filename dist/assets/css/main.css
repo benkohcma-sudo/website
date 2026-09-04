@@ -162,6 +162,8 @@ p { margin: 0 0 1.1em; }
 .site-header .container { display: flex; align-items: center; justify-content: space-between; height: 76px; gap: 16px; }
 .logo__text b { white-space: nowrap; }
 .logo { display: flex; align-items: center; gap: 12px; font-family: var(--font-head); color: var(--ink); }
+.logo img { height: 46px; width: auto; }
+.logo--light img { filter: brightness(0) invert(1); opacity: .95; }
 .logo__mark {
   width: 42px; height: 42px; border-radius: 12px; background: var(--orange); color: #fff;
   display: grid; place-items: center; font-weight: 700; font-size: 15px; letter-spacing: .04em;
@@ -516,6 +518,33 @@ p { margin: 0 0 1.1em; }
 .globe-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 40px; }
 .globe-stats .stat { padding: 20px 22px; background: rgba(255,255,255,.7); }
 @media (max-width: 960px) { .globe-hero__grid { grid-template-columns: 1fr; } .globe-hero { min-height: 0; } .globe-stats { grid-template-columns: repeat(2, 1fr); } }
+
+/* ---------- about hero video (scroll-scrubbed globe) ---------- */
+.globe-hero--video { min-height: 100svh; }
+.globe-video { position: relative; aspect-ratio: 16 / 9; }
+.globe-video video { width: 100%; height: 100%; object-fit: contain; display: block; mix-blend-mode: multiply; }
+@media (max-width: 960px) { .globe-hero--video { min-height: 0; } }
+
+/* ---------- awards band (Transformative Edge banner) ---------- */
+.awards { background: #fff; border-block: 1px solid var(--line); }
+.awards__head { text-align: left; margin-bottom: clamp(32px, 4vw, 56px); }
+.awards__head h2 { font-weight: 600; letter-spacing: -0.03em; line-height: 1.02; font-size: clamp(36px, 6vw, 84px); margin: 0 0 16px; }
+.awards__head h2 span { display: block; }
+.awards__l1 { color: var(--ink); }
+.awards__l1 sup { font-size: .32em; font-weight: 600; letter-spacing: 0; vertical-align: super; margin-left: .15em; }
+.awards__l2 { color: var(--orange); }
+.awards__sub { font-family: var(--font-head); font-size: clamp(17px, 1.7vw, 24px); color: var(--ink); margin: 0; }
+.awards__row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.award { display: grid; grid-template-columns: 78px 1fr 78px; align-items: center; text-align: center; padding: 22px 8px; color: var(--orange); border-right: 1px solid var(--line); }
+.award:last-child { border-right: 0; }
+.award__text { display: grid; gap: 2px; padding: 0 6px; }
+.award__text b { font-family: var(--font-head); font-size: clamp(17px, 1.5vw, 21px); color: var(--ink); font-weight: 600; line-height: 1.2; }
+.award__text span { font-size: 14.5px; color: var(--body); }
+.award__text em { font-style: normal; font-size: 14.5px; color: var(--orange); }
+.award__text span:empty, .award__text em:empty { display: none; }
+.laurel { width: 78px; height: 96px; }
+.laurel--flip { transform: scaleX(-1); }
+@media (max-width: 900px) { .awards__row { grid-template-columns: 1fr; } .award { border-right: 0; border-bottom: 1px solid var(--line); } .award:last-child { border-bottom: 0; } }
 
 /* ---------- journey (curved orange timeline) ---------- */
 .journey { position: relative; }

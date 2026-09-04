@@ -55,7 +55,7 @@
   if (reduce || !hasGsap) {
     doc.querySelectorAll('[data-reveal]').forEach(function (el) { el.style.opacity = 1; el.style.transform = 'none'; });
     doc.querySelectorAll('[data-count]').forEach(function (el) { el.textContent = parseFloat(el.dataset.count).toLocaleString() + (el.dataset.suffix || ''); });
-    initFaculty(); initGlobe(true); initJourney(true); return;
+    initFaculty(); initGlobe(true); initJourney(true); initHeroVideo(true); return;
   }
 
   /* ---------- split headline into rising words ---------- */
@@ -119,6 +119,7 @@
   initFaculty();
   initGlobe(false);
   initJourney();
+  initHeroVideo();
   win.addEventListener('load', function () { ScrollTrigger.refresh(); });
   // safety net: anything still hidden 4s after load is shown (e.g. if ScrollTrigger never fires)
   setTimeout(function () { doc.querySelectorAll('[data-reveal]').forEach(function (el) { if (getComputedStyle(el).opacity === '0' && el.getBoundingClientRect().top < win.innerHeight) gsap.to(el, { opacity: 1, x: 0, y: 0, scale: 1, duration: .6 }); }); }, 4000);
@@ -271,6 +272,28 @@
     gsap.to(rot, { y: rot.y + Math.PI * 2, ease: 'none', scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: 0.6 } });
     gsap.from(canvas, { scale: .8, opacity: 0, duration: 1.4, ease: 'power3.out' });
     gsap.ticker.add(function (time, dt) { idle += dt * 0.00008; draw(); });
+  }
+
+  /* ============================================================
+     About hero video — the globe turns once over a single scroll.
+     The hero is pinned for one viewport of scrolling and the video's
+     currentTime is tied to scroll progress (video is encoded with a
+     keyframe on every frame so seeking is instant).
+     ============================================================ */
+  function initHeroVideo(staticOnly) {
+    var video = doc.querySelector('.globe-video__el');
+    if (!video) return;
+    var hero = video.closest('.globe-hero');
+    if (staticOnly || win.matchMedia('(max-width: 960px)').matches) { video.loop = true; video.autoplay = true; video.play().catch(function () {}); return; }
+    var state = { t: 0 }, dur = 0;
+    function seek() { if (dur) video.currentTime = Math.min(dur - 0.05, state.t * dur); }
+    function ready() { dur = video.duration || 6; seek(); }
+    if (video.readyState >= 1) ready(); else video.addEventListener('loadedmetadata', ready);
+    video.load();
+    gsap.to(state, {
+      t: 1, ease: 'none', onUpdate: seek,
+      scrollTrigger: { trigger: hero, start: 'top top', end: '+=120%', scrub: 0.5, pin: true, anticipatePin: 1 }
+    });
   }
 
   /* ============================================================
