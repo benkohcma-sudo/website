@@ -258,11 +258,14 @@ def about(page):
         <h1 data-split>Inspiring Positive Change Through mastery of coaching.</h1>
         <p class="lead" data-reveal>At Coach Masters Academy, we take great pride in our unwavering dedication to enhancing professional coaching standards and empowering coaches and leaders to drive transformative change and deliver impactful results.</p>
       </div>
-      <div class="globe-stats globe-stats--reveal" aria-live="polite">
+      <div class="globe-hero__figures">
+        <p class="globe-stats__head" aria-hidden="true">Inspiring Positive Change Through mastery of coaching.</p>
+        <div class="globe-stats globe-stats--reveal" aria-live="polite">
         <div class="stat"><div class="stat__num" data-count="5">0</div><div class="stat__label">Continents Actively Present</div></div>
         <div class="stat"><div class="stat__num" data-count="10">0</div><div class="stat__label">Regional Offices</div></div>
         <div class="stat"><div class="stat__num" data-count="58">0</div><div class="stat__label">Faculty Members</div></div>
-        <div class="stat"><div class="stat__num" data-count="6200">0</div><div class="stat__label">Graduates across the globe</div></div>
+          <div class="stat"><div class="stat__num" data-count="6200">0</div><div class="stat__label">Graduates across the globe</div></div>
+        </div>
       </div>
     </div>
   </div>
@@ -406,30 +409,50 @@ def parse_faculty(page):
             cur['people'][-1]['role'] = el.get_text(' ', strip=True)
     return [g for g in groups if g['people']]
 
-def person_card(p, feature=False):
-    name = p['name']; cred = ''
-    if ' I ' in name: name, cred = [x.strip() for x in name.split(' I ', 1)]
-    parts = [x.strip() for x in p['role'].split(' I ') if x.strip()]
+def split_person(p):
+    """Name / credential / role / location, all taken from the two verbatim CMS lines.
+    Only whitespace is normalised; no wording is changed."""
+    full = re.sub(r'\s+', ' ', p['name']).strip()
+    role = re.sub(r'\s+', ' ', p['role']).strip()
+    name = full; cred = ''
+    if ' I ' in full: name, cred = [x.strip() for x in full.split(' I ', 1)]
+    parts = [x.strip() for x in role.split(' I ') if x.strip()]
     loc = parts[-1] if len(parts) > 1 else ''
-    role_parts = parts[:-1] if len(parts) > 1 else parts
-    if not cred and role_parts and 'Certified Coach' in role_parts[0]: cred = role_parts.pop(0)
-    role = ' · '.join(role_parts)
-    return f'''<article class="person{' person--feature' if feature else ''}">
-  <div class="person__photo"><img src="{esc(p['img'] or '')}" alt="{esc(name)}" loading="lazy"></div>
+    return {'name': name, 'cred': cred, 'role': role, 'loc': loc, 'img': p['img'] or ''}
+
+def feature_card(d):
+    """The large card. Its content is swapped by JS when another person is selected."""
+    return f'''<article class="person person--feature" data-feature>
+  <div class="person__photo"><img src="{esc(d['img'])}" alt="{esc(d['name'])}" data-f-img></div>
   <div class="person__body">
-    <h3>{esc(name)}</h3>
-    {f'<p class="role">{esc(cred)}</p>' if cred else ''}
-    <p class="role">{esc(p['role'])}</p>
-    {f'<div class="loc">{PIN}<span>{esc(loc)}</span></div>' if loc else ''}
+    <h3 data-f-name>{esc(d['name'])}</h3>
+    <p class="role role--cred" data-f-cred>{esc(d['cred'])}</p>
+    <p class="role" data-f-role>{esc(d['role'])}</p>
+    <div class="loc" data-f-locwrap>{PIN}<span data-f-loc>{esc(d['loc'])}</span></div>
     {link('View profile', '/our-faculty')}
   </div>
 </article>'''
 
+def person_card(p):
+    d = split_person(p)
+    return f'''<button class="person person--sm" type="button"
+  data-name="{esc(d['name'])}" data-cred="{esc(d['cred'])}" data-role="{esc(d['role'])}" data-loc="{esc(d['loc'])}" data-img="{esc(d['img'])}"
+  aria-label="Show {esc(d['name'])}">
+  <span class="person__photo"><img src="{esc(d['img'])}" alt="{esc(d['name'])}" loading="lazy"></span>
+  <span class="person__body">
+    <span class="person__name">{esc(d['name'])}</span>
+    {f'<span class="role">{esc(d["cred"])}</span>' if d['cred'] else ''}
+    <span class="role">{esc(d['role'])}</span>
+    {f'<span class="loc">{PIN}<span>{esc(d["loc"])}</span></span>' if d['loc'] else ''}
+  </span>
+</button>'''
+
 def faculty_section(page, compact=False):
     groups = parse_faculty(page)
-    total = sum(len(g['people']) for g in groups)
+    first = split_person(groups[0]['people'][0]) if groups and groups[0]['people'] else {'name': '', 'cred': '', 'role': '', 'loc': '', 'img': ''}
     tabs = ''.join(f'<button type="button"{" class=is-active" if i == 0 else ""}>{esc(g["title"])}</button>' for i, g in enumerate(groups))
-    tracks = ''.join('<div class="faculty__track"' + (' hidden' if i else '') + '>' + ''.join(person_card(p, feature=(j == 0)) for j, p in enumerate(g['people'])) + '</div>' for i, g in enumerate(groups))
+    tracks = ''.join('<div class="faculty__track"' + (' hidden' if i else '') + '>' + ''.join(person_card(p) for p in g['people']) + '</div>' for i, g in enumerate(groups))
+    n0 = len(groups[0]['people']) if groups else 0
     return f'''
 <section class="section faculty">
   <div class="container">
@@ -441,7 +464,7 @@ def faculty_section(page, compact=False):
       </div>
       <div class="faculty__controls" data-reveal>
         <button class="arrow-btn" type="button" data-prev aria-label="Previous"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5m7-7-7 7 7 7"/></svg></button>
-        <div><div class="counter">01 <span>/ {total:02d}</span></div><div class="bar" style="margin-top:8px"><i></i></div></div>
+        <div><div class="counter">01 <span>/ {n0:02d}</span></div><div class="bar" style="margin-top:8px"><i></i></div></div>
         <button class="arrow-btn arrow-btn--accent" type="button" data-next aria-label="Next"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-7-7 7 7-7 7"/></svg></button>
       </div>
     </div>
@@ -449,9 +472,9 @@ def faculty_section(page, compact=False):
     <div class="faculty__stage">
       <canvas class="faculty__map" aria-hidden="true"></canvas>
       <svg class="faculty__line" viewBox="0 0 1200 40" preserveAspectRatio="none" aria-hidden="true"><path d="M0 20 C 200 -10, 400 50, 600 20 S 1000 -10, 1200 20" fill="none" stroke="#eb6422" stroke-width="1.5" stroke-dasharray="4 6" opacity=".6"/></svg>
+      {feature_card(first)}
       {tracks}
     </div>
-    {'' if compact else ''}
   </div>
 </section>'''
 

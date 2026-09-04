@@ -132,29 +132,75 @@
     doc.querySelectorAll('.faculty').forEach(function (root) {
       var tabs = root.querySelectorAll('.tabs button');
       var groups = root.querySelectorAll('.faculty__track');
+      var feature = root.querySelector('[data-feature]');
       var prev = root.querySelector('[data-prev]'), next = root.querySelector('[data-next]');
       var counter = root.querySelector('.counter'), bar = root.querySelector('.bar i');
-      var active = null;
-      function show(i) {
-        tabs.forEach(function (b, j) { b.classList.toggle('is-active', j === i); });
-        groups.forEach(function (g, j) { g.hidden = j !== i; });
-        active = groups[i]; active.scrollTo({ left: 0 }); update();
-        if (hasGsap && !reduce) gsap.from(active.children, { opacity: 0, y: 24, duration: .7, stagger: .06, ease: 'power3.out', clearProps: 'all' });
+      var track = null, index = 0;
+
+      function cards() { return track ? track.querySelectorAll('.person--sm') : []; }
+
+      function paint(card) {
+        if (!feature || !card) return;
+        var img = feature.querySelector('[data-f-img]');
+        var set = function (sel, val) {
+          var el = feature.querySelector(sel); if (!el) return;
+          el.textContent = val || '';
+        };
+        var apply = function () {
+          if (img && img.getAttribute('src') !== card.dataset.img) { img.src = card.dataset.img; img.alt = card.dataset.name; }
+          set('[data-f-name]', card.dataset.name);
+          set('[data-f-cred]', card.dataset.cred);
+          set('[data-f-role]', card.dataset.role);
+          set('[data-f-loc]', card.dataset.loc);
+          var lw = feature.querySelector('[data-f-locwrap]'); if (lw) lw.hidden = !card.dataset.loc;
+        };
+        if (!hasGsap || reduce) { apply(); return; }
+        var body = feature.querySelector('.person__body');
+        gsap.timeline()
+          .to([body, img], { opacity: 0, duration: .18, ease: 'power2.in', onComplete: apply })
+          .fromTo(img, { scale: 1.04 }, { scale: 1, opacity: 1, duration: .5, ease: 'power3.out' })
+          .fromTo(body, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: .45, ease: 'power3.out' }, '<');
       }
-      function cardW() { var c = active.children[1] || active.children[0]; return c ? c.getBoundingClientRect().width + 24 : 300; }
-      function update() {
-        if (!active) return;
-        var n = active.children.length;
-        var idx = Math.min(n, Math.round(active.scrollLeft / cardW()) + 1);
-        if (counter) counter.innerHTML = String(idx).padStart(2, '0') + ' <span>/ ' + String(n).padStart(2, '0') + '</span>';
-        if (bar) { bar.style.width = (100 / n) + '%'; bar.style.left = ((idx - 1) * 100 / n) + '%'; }
+
+      function select(i, scroll) {
+        var list = cards(); if (!list.length) return;
+        index = Math.max(0, Math.min(list.length - 1, i));
+        list.forEach(function (c, j) { c.classList.toggle('is-active', j === index); c.setAttribute('aria-current', j === index ? 'true' : 'false'); });
+        paint(list[index]);
+        if (counter) counter.innerHTML = String(index + 1).padStart(2, '0') + ' <span>/ ' + String(list.length).padStart(2, '0') + '</span>';
+        if (bar) { bar.style.width = (100 / list.length) + '%'; bar.style.left = (index * 100 / list.length) + '%'; }
+        if (prev) prev.disabled = index === 0;
+        if (next) next.disabled = index === list.length - 1;
+        if (scroll !== false) {
+          var c = list[index], t = track;
+          var left = c.offsetLeft - (t.clientWidth - c.offsetWidth) / 2;
+          t.scrollTo({ left: Math.max(0, left), behavior: 'smooth' });
+        }
       }
-      tabs.forEach(function (b, i) { b.addEventListener('click', function () { show(i); }); });
-      groups.forEach(function (g) { g.addEventListener('scroll', update, { passive: true }); });
-      if (prev) prev.addEventListener('click', function () { active.scrollBy({ left: -cardW(), behavior: 'smooth' }); });
-      if (next) next.addEventListener('click', function () { active.scrollBy({ left: cardW(), behavior: 'smooth' }); });
-      if (groups.length) show(0);
-      // dotted world map behind the stage
+
+      function showGroup(g) {
+        tabs.forEach(function (b, j) { b.classList.toggle('is-active', j === g); });
+        groups.forEach(function (t, j) { t.hidden = j !== g; });
+        track = groups[g];
+        track.scrollTo({ left: 0 });
+        select(0, false);
+        if (hasGsap && !reduce) gsap.from(track.children, { opacity: 0, y: 20, duration: .6, stagger: .04, ease: 'power3.out', clearProps: 'all' });
+      }
+
+      groups.forEach(function (t) {
+        t.querySelectorAll('.person--sm').forEach(function (card, i) {
+          card.addEventListener('click', function () { if (t === track) select(i); });
+        });
+      });
+      tabs.forEach(function (b, i) { b.addEventListener('click', function () { showGroup(i); }); });
+      if (prev) prev.addEventListener('click', function () { select(index - 1); });
+      if (next) next.addEventListener('click', function () { select(index + 1); });
+      root.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowRight') { select(index + 1); }
+        else if (e.key === 'ArrowLeft') { select(index - 1); }
+      });
+      if (groups.length) showGroup(0);
+
       var map = root.querySelector('canvas.faculty__map');
       if (map && win.CMA_LAND) drawFlatMap(map);
     });
@@ -286,55 +332,62 @@
     if (!video) return;
     var hero = video.closest('.globe-hero');
     var copy = hero.querySelector('.globe-hero__copy');
+    var head = hero.querySelector('.globe-stats__head');
     var stats = hero.querySelectorAll('.globe-stats--reveal .stat');
     var hint = hero.querySelector('.globe-hint');
     function showStatsNow() {
+      if (head) { head.style.opacity = 1; head.style.transform = 'none'; }
       stats.forEach(function (st) { st.style.opacity = 1; st.style.transform = 'none'; var n = st.querySelector('[data-count]'); if (n) n.textContent = parseFloat(n.dataset.count).toLocaleString(); });
     }
     if (staticOnly || win.matchMedia('(max-width: 960px)').matches || win.scrollY > 40 || location.hash) {
       video.loop = true; video.autoplay = true; video.play().catch(function () {}); showStatsNow(); return;
     }
     doc.documentElement.classList.add('js-motion');
-    // Enter: first frame only, headline + subheading. One scroll: the globe plays to the end at 2x
-    // (about 3s) while the headline words give way to the counters. Then the page is released.
-    var html = doc.documentElement, started = false, done = false;
+
+    // Enter on the first frame with only the headline. One scroll runs the globe to the end in ~3s
+    // while the headline gives way to the counters. Scrolling back up runs the whole thing in reverse.
+    var html = doc.documentElement, locked = true, dur = 6, TOTAL = 3;
     html.classList.add('is-locked');
     win.scrollTo(0, 0);
     video.pause(); video.currentTime = 0;
-    var RATE = 2, dur = 6;
-    video.addEventListener('loadedmetadata', function () { dur = video.duration || 6; });
-    function release() {
-      if (done) return; done = true;
-      html.classList.remove('is-locked');
-      if (hint) hint.classList.add('is-done');
-      ScrollTrigger.refresh();
+    var vs = { t: 0 };
+    function seek() { if (dur) video.currentTime = Math.min(dur - 0.03, vs.t * dur); }
+    video.addEventListener('loadedmetadata', function () { dur = video.duration || 6; seek(); });
+
+    function release() { locked = false; html.classList.remove('is-locked'); if (hint) hint.classList.add('is-done'); ScrollTrigger.refresh(); }
+    function relock() { locked = true; html.classList.add('is-locked'); win.scrollTo(0, 0); if (hint) hint.classList.remove('is-done', 'is-playing'); }
+
+    var tl = gsap.timeline({ paused: true, onComplete: release, onReverseComplete: relock });
+    tl.to(vs, { t: 1, duration: TOTAL, ease: 'none', onUpdate: seek }, 0)
+      .to(copy.querySelectorAll('.split-word > span'), { yPercent: -110, duration: .5, ease: 'power3.in', stagger: .02 }, 0)
+      .to(copy.querySelector('.lead'), { opacity: 0, y: -16, duration: .35, ease: 'power2.in' }, 0);
+    if (head) tl.to(head, { opacity: 1, y: 0, duration: .5, ease: 'power3.out' }, .5);
+    stats.forEach(function (st, i) {
+      var num = st.querySelector('[data-count]'); var target = num ? parseFloat(num.dataset.count) : 0; var obj = { v: 0 };
+      var at = 0.7 + i * ((TOTAL - 0.7 - 0.8) / stats.length);
+      tl.to(st, { opacity: 1, y: 0, duration: .6, ease: 'power3.out' }, at);
+      if (num) tl.to(obj, { v: target, duration: .8, ease: 'power2.out', onUpdate: function () { num.textContent = Math.round(obj.v).toLocaleString(); } }, at);
+    });
+
+    function forward() { if (hint) hint.classList.add('is-playing'); tl.play(); }
+    function backward() { if (hint) hint.classList.remove('is-playing'); tl.reverse(); }
+    function onWheel(e) {
+      if (locked) { e.preventDefault(); if (e.deltaY > 0) forward(); else if (e.deltaY < 0) backward(); return; }
+      if (win.scrollY <= 0 && e.deltaY < 0) { e.preventDefault(); relock(); backward(); }
     }
-    function start() {
-      if (started) return; started = true;
-      if (hint) hint.classList.add('is-playing');
-      video.playbackRate = RATE;
-      var p = video.play(); if (p && p.catch) p.catch(function () {});
-      var total = dur / RATE;                                   // ~3s
-      var tl = gsap.timeline({ onComplete: release });
-      // headline words fall away, subheading fades
-      tl.to(copy.querySelectorAll('.split-word > span'), { yPercent: -110, duration: .55, ease: 'power3.in', stagger: .025 }, 0)
-        .to(copy.querySelector('.lead'), { opacity: 0, y: -16, duration: .4, ease: 'power2.in' }, 0)
-        .set(copy, { visibility: 'hidden' });
-      // counters take their place, one after another, finishing with the globe
-      stats.forEach(function (st, i) {
-        var num = st.querySelector('[data-count]'); var target = num ? parseFloat(num.dataset.count) : 0; var obj = { v: 0 };
-        var at = 0.55 + i * ((total - 0.55 - 1.0) / stats.length);
-        tl.to(st, { opacity: 1, y: 0, duration: .7, ease: 'power3.out' }, at);
-        if (num) tl.to(obj, { v: target, duration: 1.0, ease: 'power2.out', onUpdate: function () { num.textContent = Math.round(obj.v).toLocaleString(); } }, at);
-      });
-      video.addEventListener('ended', function () { video.pause(); });
-      setTimeout(release, (total + 2) * 1000);                    // safety net
+    function onKey(e) {
+      if (locked && /^(ArrowDown|PageDown|Space| )$/.test(e.key)) { e.preventDefault(); forward(); }
+      else if (locked && /^(ArrowUp|PageUp)$/.test(e.key)) { e.preventDefault(); backward(); }
+      else if (!locked && win.scrollY <= 0 && /^(ArrowUp|PageUp)$/.test(e.key)) { e.preventDefault(); relock(); backward(); }
     }
-    function onWheel(e) { if (!done) { e.preventDefault(); if (e.deltaY > 0) start(); } }
-    function onKey(e) { if (!done && /^(ArrowDown|PageDown|Space| )$/.test(e.key)) { e.preventDefault(); start(); } }
     var touchY = null;
     function onTouchStart(e) { touchY = e.touches[0].clientY; }
-    function onTouchMove(e) { if (!done) { e.preventDefault(); if (touchY !== null && touchY - e.touches[0].clientY > 8) start(); } }
+    function onTouchMove(e) {
+      if (touchY === null) return;
+      var dy = touchY - e.touches[0].clientY;
+      if (locked) { e.preventDefault(); if (dy > 8) forward(); else if (dy < -8) backward(); }
+      else if (win.scrollY <= 0 && dy < -8) { e.preventDefault(); relock(); backward(); }
+    }
     win.addEventListener('wheel', onWheel, { passive: false });
     win.addEventListener('keydown', onKey);
     win.addEventListener('touchstart', onTouchStart, { passive: true });

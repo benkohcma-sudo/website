@@ -10,7 +10,7 @@ def norm(t): return re.sub(r'\s+', ' ', html.unescape(t)).replace('\xa0',' ').st
 def sentences(txt):
     out = []
     for line in txt.split('\n'):
-        for s in re.split(r'(?<=[.!?])\s+', line):
+        for s in re.split(r'(?<=[.!?])\s+| I ', line):
             s = norm(s)
             if len(s) > 25: out.append(s)
     return out
