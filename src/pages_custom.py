@@ -249,23 +249,19 @@ def news_card(href, img, title, reveal=True):
 def about(page):
     body = subnav(page) + f'''
 <section class="globe-hero globe-hero--video">
-  <div class="container globe-hero__grid">
-    <div>
-      {crumbs(page)}
-      <p class="eyebrow" data-reveal>About Us</p>
+  <video class="globe-video__el" muted playsinline preload="auto" poster="/assets/video/about-globe-poster.jpg" aria-label="Globe turning from the Americas to Singapore">
+    <source src="/assets/video/about-globe.mp4" type="video/mp4">
+  </video>
+  <div class="container globe-hero__inner">
+    <div class="globe-hero__copy">
       <h1 data-split>Inspiring Positive Change Through mastery of coaching.</h1>
       <p class="lead" data-reveal>At Coach Masters Academy, we take great pride in our unwavering dedication to enhancing professional coaching standards and empowering coaches and leaders to drive transformative change and deliver impactful results.</p>
-      <div class="globe-stats">
-        <div class="stat" data-reveal><div class="stat__num" data-count="5">0</div><div class="stat__label">Continents Actively Present</div></div>
-        <div class="stat" data-reveal><div class="stat__num" data-count="10">0</div><div class="stat__label">Regional Offices</div></div>
-        <div class="stat" data-reveal><div class="stat__num" data-count="58">0</div><div class="stat__label">Faculty Members</div></div>
-        <div class="stat" data-reveal><div class="stat__num" data-count="6200">0</div><div class="stat__label">Graduates across the globe</div></div>
-      </div>
     </div>
-    <div class="globe-video" data-reveal="scale">
-      <video class="globe-video__el" muted playsinline preload="auto" poster="/assets/video/about-globe-poster.jpg" aria-label="Globe turning from the Americas to Singapore">
-        <source src="/assets/video/about-globe.mp4" type="video/mp4">
-      </video>
+    <div class="globe-stats globe-stats--reveal">
+      <div class="stat"><div class="stat__num" data-count="5">0</div><div class="stat__label">Continents Actively Present</div></div>
+      <div class="stat"><div class="stat__num" data-count="10">0</div><div class="stat__label">Regional Offices</div></div>
+      <div class="stat"><div class="stat__num" data-count="58">0</div><div class="stat__label">Faculty Members</div></div>
+      <div class="stat"><div class="stat__num" data-count="6200">0</div><div class="stat__label">Graduates across the globe</div></div>
     </div>
   </div>
   <div class="globe-hint"><i></i>Scroll to spin</div>

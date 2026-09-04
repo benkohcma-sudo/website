@@ -87,6 +87,7 @@
 
   /* ---------- counters ---------- */
   doc.querySelectorAll('[data-count]').forEach(function (el) {
+    if (el.closest('.globe-stats--reveal')) return;
     var target = parseFloat(el.dataset.count), suffix = el.dataset.suffix || '';
     var obj = { v: 0 };
     ScrollTrigger.create({
@@ -284,15 +285,25 @@
     var video = doc.querySelector('.globe-video__el');
     if (!video) return;
     var hero = video.closest('.globe-hero');
-    if (staticOnly || win.matchMedia('(max-width: 960px)').matches) { video.loop = true; video.autoplay = true; video.play().catch(function () {}); return; }
+    var stats = hero ? hero.querySelectorAll('.globe-stats--reveal .stat') : [];
+    if (staticOnly || win.matchMedia('(max-width: 960px)').matches) {
+      video.loop = true; video.autoplay = true; video.play().catch(function () {});
+      stats.forEach(function (st) { st.style.opacity = 1; st.style.transform = 'none'; var n = st.querySelector('[data-count]'); if (n) n.textContent = parseFloat(n.dataset.count).toLocaleString(); });
+      return;
+    }
+    doc.documentElement.classList.add('js-motion');
     var state = { t: 0 }, dur = 0;
     function seek() { if (dur) video.currentTime = Math.min(dur - 0.05, state.t * dur); }
     function ready() { dur = video.duration || 6; seek(); }
     if (video.readyState >= 1) ready(); else video.addEventListener('loadedmetadata', ready);
     video.load();
-    gsap.to(state, {
-      t: 1, ease: 'none', onUpdate: seek,
-      scrollTrigger: { trigger: hero, start: 'top top', end: '+=120%', scrub: 0.5, pin: true, anticipatePin: 1 }
+    // One pinned scroll: the globe turns, and the four counters rise and count up one after another.
+    var tl = gsap.timeline({ scrollTrigger: { trigger: hero, start: 'top top', end: '+=160%', scrub: 0.6, pin: true, anticipatePin: 1 } });
+    tl.to(state, { t: 1, ease: 'none', duration: 10, onUpdate: seek }, 0);
+    stats.forEach(function (st, i) {
+      var num = st.querySelector('[data-count]'); var target = num ? parseFloat(num.dataset.count) : 0; var obj = { v: 0 };
+      tl.to(st, { opacity: 1, y: 0, duration: 1.2, ease: 'power2.out' }, 2.2 + i * 1.6);
+      if (num) tl.to(obj, { v: target, duration: 1.6, ease: 'power1.out', onUpdate: function () { num.textContent = Math.round(obj.v).toLocaleString(); } }, 2.2 + i * 1.6);
     });
   }
 

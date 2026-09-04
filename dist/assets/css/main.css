@@ -520,10 +520,30 @@ p { margin: 0 0 1.1em; }
 @media (max-width: 960px) { .globe-hero__grid { grid-template-columns: 1fr; } .globe-hero { min-height: 0; } .globe-stats { grid-template-columns: repeat(2, 1fr); } }
 
 /* ---------- about hero video (scroll-scrubbed globe) ---------- */
-.globe-hero--video { min-height: 100svh; }
-.globe-video { position: relative; aspect-ratio: 16 / 9; }
-.globe-video video { width: 100%; height: 100%; object-fit: contain; display: block; mix-blend-mode: multiply; }
-@media (max-width: 960px) { .globe-hero--video { min-height: 0; } }
+.globe-hero--video { min-height: 100svh; padding: 0; display: block; background: #FBF8F3; }
+.globe-hero--video .globe-video__el {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; object-position: 100% 50%;
+  mix-blend-mode: multiply; pointer-events: none;
+}
+.globe-hero--video::after {
+  content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background: linear-gradient(90deg, #FBF8F3 0%, rgba(251,248,243,.92) 30%, rgba(251,248,243,0) 52%);
+}
+.globe-hero__inner { position: relative; z-index: 1; min-height: 100svh; padding: 96px 0 64px; display: grid; grid-template-rows: 1fr auto; gap: 24px; align-content: space-between; }
+.globe-hero__copy { max-width: min(520px, 42vw); }
+.globe-hero__copy h1 { max-width: 12ch; font-size: clamp(34px, 4vw, 58px); margin-bottom: 16px; }
+.globe-hero__copy .lead { max-width: 44ch; font-size: clamp(15px, 1.15vw, 18px); margin: 0; }
+.globe-stats--reveal { margin-top: 0; max-width: none; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.globe-stats--reveal .stat { background: rgba(255,255,255,.78); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); padding: 16px 18px; }
+.globe-stats--reveal .stat__num { font-size: clamp(30px, 3vw, 42px); }
+.globe-stats--reveal .stat__label { font-size: 13.5px; margin-top: 6px; }
+.js-motion .globe-stats--reveal .stat { opacity: 0; transform: translateY(28px); }
+@media (max-width: 960px) {
+  .globe-hero--video { min-height: 0; }
+  .globe-hero--video .globe-video__el { position: relative; inset: auto; height: auto; aspect-ratio: 16 / 9; object-fit: contain; order: -1; }
+  .globe-hero__inner { padding: 24px 0 56px; min-height: 0; }
+  .globe-stats--reveal { grid-template-columns: repeat(2, 1fr); }
+}
 
 /* ---------- awards band (Transformative Edge banner) ---------- */
 .awards { background: #fff; border-block: 1px solid var(--line); }
