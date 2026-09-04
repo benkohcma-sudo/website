@@ -285,8 +285,9 @@
     var video = doc.querySelector('.globe-video__el');
     if (!video) return;
     var hero = video.closest('.globe-hero');
-    var stats = hero ? hero.querySelectorAll('.globe-stats--reveal .stat') : [];
-    var hint = hero ? hero.querySelector('.globe-hint') : null;
+    var copy = hero.querySelector('.globe-hero__copy');
+    var stats = hero.querySelectorAll('.globe-stats--reveal .stat');
+    var hint = hero.querySelector('.globe-hint');
     function showStatsNow() {
       stats.forEach(function (st) { st.style.opacity = 1; st.style.transform = 'none'; var n = st.querySelector('[data-count]'); if (n) n.textContent = parseFloat(n.dataset.count).toLocaleString(); });
     }
@@ -294,26 +295,16 @@
       video.loop = true; video.autoplay = true; video.play().catch(function () {}); showStatsNow(); return;
     }
     doc.documentElement.classList.add('js-motion');
-    // The page is held still. The first scroll gesture plays the globe to the end;
-    // the counters rise in while it turns; then the page is released.
+    // Enter: first frame only, headline + subheading. One scroll: the globe plays to the end at 2x
+    // (about 3s) while the headline words give way to the counters. Then the page is released.
     var html = doc.documentElement, started = false, done = false;
     html.classList.add('is-locked');
     win.scrollTo(0, 0);
-    var shown = 0, dur = 6;
+    video.pause(); video.currentTime = 0;
+    var RATE = 2, dur = 6;
     video.addEventListener('loadedmetadata', function () { dur = video.duration || 6; });
-    function revealStat(i) {
-      var st = stats[i]; if (!st) return;
-      var num = st.querySelector('[data-count]'); var target = num ? parseFloat(num.dataset.count) : 0; var obj = { v: 0 };
-      gsap.to(st, { opacity: 1, y: 0, duration: .8, ease: 'power3.out' });
-      if (num) gsap.to(obj, { v: target, duration: 1.4, ease: 'power2.out', onUpdate: function () { num.textContent = Math.round(obj.v).toLocaleString(); } });
-    }
-    function tick() {
-      var p = video.currentTime / dur;               // reveal the four counters between 25% and 85% of the spin
-      while (shown < stats.length && p > 0.25 + shown * 0.2) revealStat(shown++);
-    }
     function release() {
       if (done) return; done = true;
-      while (shown < stats.length) revealStat(shown++);
       html.classList.remove('is-locked');
       if (hint) hint.classList.add('is-done');
       ScrollTrigger.refresh();
@@ -321,11 +312,23 @@
     function start() {
       if (started) return; started = true;
       if (hint) hint.classList.add('is-playing');
-      video.currentTime = 0;
-      var p = video.play(); if (p && p.catch) p.catch(release);
-      video.addEventListener('timeupdate', tick);
-      video.addEventListener('ended', release);
-      setTimeout(release, (dur + 1.5) * 1000);   // safety net
+      video.playbackRate = RATE;
+      var p = video.play(); if (p && p.catch) p.catch(function () {});
+      var total = dur / RATE;                                   // ~3s
+      var tl = gsap.timeline({ onComplete: release });
+      // headline words fall away, subheading fades
+      tl.to(copy.querySelectorAll('.split-word > span'), { yPercent: -110, duration: .55, ease: 'power3.in', stagger: .025 }, 0)
+        .to(copy.querySelector('.lead'), { opacity: 0, y: -16, duration: .4, ease: 'power2.in' }, 0)
+        .set(copy, { visibility: 'hidden' });
+      // counters take their place, one after another, finishing with the globe
+      stats.forEach(function (st, i) {
+        var num = st.querySelector('[data-count]'); var target = num ? parseFloat(num.dataset.count) : 0; var obj = { v: 0 };
+        var at = 0.55 + i * ((total - 0.55 - 1.0) / stats.length);
+        tl.to(st, { opacity: 1, y: 0, duration: .7, ease: 'power3.out' }, at);
+        if (num) tl.to(obj, { v: target, duration: 1.0, ease: 'power2.out', onUpdate: function () { num.textContent = Math.round(obj.v).toLocaleString(); } }, at);
+      });
+      video.addEventListener('ended', function () { video.pause(); });
+      setTimeout(release, (total + 2) * 1000);                    // safety net
     }
     function onWheel(e) { if (!done) { e.preventDefault(); if (e.deltaY > 0) start(); } }
     function onKey(e) { if (!done && /^(ArrowDown|PageDown|Space| )$/.test(e.key)) { e.preventDefault(); start(); } }
