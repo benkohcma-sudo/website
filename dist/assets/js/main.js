@@ -286,25 +286,57 @@
     if (!video) return;
     var hero = video.closest('.globe-hero');
     var stats = hero ? hero.querySelectorAll('.globe-stats--reveal .stat') : [];
-    if (staticOnly || win.matchMedia('(max-width: 960px)').matches) {
-      video.loop = true; video.autoplay = true; video.play().catch(function () {});
+    var hint = hero ? hero.querySelector('.globe-hint') : null;
+    function showStatsNow() {
       stats.forEach(function (st) { st.style.opacity = 1; st.style.transform = 'none'; var n = st.querySelector('[data-count]'); if (n) n.textContent = parseFloat(n.dataset.count).toLocaleString(); });
-      return;
+    }
+    if (staticOnly || win.matchMedia('(max-width: 960px)').matches || win.scrollY > 40 || location.hash) {
+      video.loop = true; video.autoplay = true; video.play().catch(function () {}); showStatsNow(); return;
     }
     doc.documentElement.classList.add('js-motion');
-    var state = { t: 0 }, dur = 0;
-    function seek() { if (dur) video.currentTime = Math.min(dur - 0.05, state.t * dur); }
-    function ready() { dur = video.duration || 6; seek(); }
-    if (video.readyState >= 1) ready(); else video.addEventListener('loadedmetadata', ready);
-    video.load();
-    // One pinned scroll: the globe turns, and the four counters rise and count up one after another.
-    var tl = gsap.timeline({ scrollTrigger: { trigger: hero, start: 'top top', end: '+=160%', scrub: 0.6, pin: true, anticipatePin: 1 } });
-    tl.to(state, { t: 1, ease: 'none', duration: 10, onUpdate: seek }, 0);
-    stats.forEach(function (st, i) {
+    // The page is held still. The first scroll gesture plays the globe to the end;
+    // the counters rise in while it turns; then the page is released.
+    var html = doc.documentElement, started = false, done = false;
+    html.classList.add('is-locked');
+    win.scrollTo(0, 0);
+    var shown = 0, dur = 6;
+    video.addEventListener('loadedmetadata', function () { dur = video.duration || 6; });
+    function revealStat(i) {
+      var st = stats[i]; if (!st) return;
       var num = st.querySelector('[data-count]'); var target = num ? parseFloat(num.dataset.count) : 0; var obj = { v: 0 };
-      tl.to(st, { opacity: 1, y: 0, duration: 1.2, ease: 'power2.out' }, 2.2 + i * 1.6);
-      if (num) tl.to(obj, { v: target, duration: 1.6, ease: 'power1.out', onUpdate: function () { num.textContent = Math.round(obj.v).toLocaleString(); } }, 2.2 + i * 1.6);
-    });
+      gsap.to(st, { opacity: 1, y: 0, duration: .8, ease: 'power3.out' });
+      if (num) gsap.to(obj, { v: target, duration: 1.4, ease: 'power2.out', onUpdate: function () { num.textContent = Math.round(obj.v).toLocaleString(); } });
+    }
+    function tick() {
+      var p = video.currentTime / dur;               // reveal the four counters between 25% and 85% of the spin
+      while (shown < stats.length && p > 0.25 + shown * 0.2) revealStat(shown++);
+    }
+    function release() {
+      if (done) return; done = true;
+      while (shown < stats.length) revealStat(shown++);
+      html.classList.remove('is-locked');
+      if (hint) hint.classList.add('is-done');
+      ScrollTrigger.refresh();
+    }
+    function start() {
+      if (started) return; started = true;
+      if (hint) hint.classList.add('is-playing');
+      video.currentTime = 0;
+      var p = video.play(); if (p && p.catch) p.catch(release);
+      video.addEventListener('timeupdate', tick);
+      video.addEventListener('ended', release);
+      setTimeout(release, (dur + 1.5) * 1000);   // safety net
+    }
+    function onWheel(e) { if (!done) { e.preventDefault(); if (e.deltaY > 0) start(); } }
+    function onKey(e) { if (!done && /^(ArrowDown|PageDown|Space| )$/.test(e.key)) { e.preventDefault(); start(); } }
+    var touchY = null;
+    function onTouchStart(e) { touchY = e.touches[0].clientY; }
+    function onTouchMove(e) { if (!done) { e.preventDefault(); if (touchY !== null && touchY - e.touches[0].clientY > 8) start(); } }
+    win.addEventListener('wheel', onWheel, { passive: false });
+    win.addEventListener('keydown', onKey);
+    win.addEventListener('touchstart', onTouchStart, { passive: true });
+    win.addEventListener('touchmove', onTouchMove, { passive: false });
+    video.load();
   }
 
   /* ============================================================

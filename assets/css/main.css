@@ -521,6 +521,9 @@ p { margin: 0 0 1.1em; }
 
 /* ---------- about hero video (scroll-scrubbed globe) ---------- */
 .globe-hero--video { min-height: 100svh; padding: 0; display: block; background: #F1EAE3; }
+html.is-locked, html.is-locked body { overflow: hidden; height: 100%; overscroll-behavior: none; }
+.globe-hint.is-playing span { opacity: 0; transition: opacity .3s; }
+.globe-hint.is-done { opacity: 0; transition: opacity .5s; }
 .globe-hero--video .globe-video__el {
   position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; object-position: 100% 50%;
   mix-blend-mode: normal; pointer-events: none;
