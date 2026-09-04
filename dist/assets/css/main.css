@@ -520,14 +520,14 @@ p { margin: 0 0 1.1em; }
 @media (max-width: 960px) { .globe-hero__grid { grid-template-columns: 1fr; } .globe-hero { min-height: 0; } .globe-stats { grid-template-columns: repeat(2, 1fr); } }
 
 /* ---------- about hero video (scroll-scrubbed globe) ---------- */
-.globe-hero--video { min-height: 100svh; padding: 0; display: block; background: #FBF8F3; }
+.globe-hero--video { min-height: 100svh; padding: 0; display: block; background: #F1EAE3; }
 .globe-hero--video .globe-video__el {
   position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; object-position: 100% 50%;
-  mix-blend-mode: multiply; pointer-events: none;
+  mix-blend-mode: normal; pointer-events: none;
 }
 .globe-hero--video::after {
   content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
-  background: linear-gradient(90deg, #FBF8F3 0%, rgba(251,248,243,.92) 30%, rgba(251,248,243,0) 52%);
+  background: linear-gradient(90deg, #F1EAE3 0%, rgba(241,234,227,.9) 30%, rgba(241,234,227,0) 52%);
 }
 .globe-hero__inner { position: relative; z-index: 1; min-height: 100svh; padding: 96px 0 64px; display: grid; grid-template-rows: 1fr auto; gap: 24px; align-content: space-between; }
 .globe-hero__copy { max-width: min(520px, 42vw); }
