@@ -583,12 +583,11 @@ html.is-locked, html.is-locked body { overflow: hidden; height: 100%; overscroll
 
 /* ---------- awards band (Transformative Edge banner) ---------- */
 .awards { background: #fff; border-block: 1px solid var(--line); }
-.awards__head { text-align: left; margin-bottom: clamp(28px, 3.5vw, 44px); }
+.awards__head { text-align: center; margin-bottom: clamp(28px, 3.5vw, 44px); }
 .awards__head h2 { font-weight: 600; letter-spacing: -0.03em; line-height: 1.05; font-size: clamp(28px, 3.6vw, 52px); margin: 0 0 12px; }
 .awards__head h2 span { display: block; white-space: nowrap; }
 @media (max-width: 640px) { .awards__head h2 span { white-space: normal; } }
 .awards__l1 { color: var(--ink); }
-.awards__l1 sup { font-size: .32em; font-weight: 600; letter-spacing: 0; vertical-align: super; margin-left: .15em; }
 .awards__l2 { color: var(--orange); }
 .awards__sub { font-family: var(--font-head); font-size: clamp(15px, 1.3vw, 19px); color: var(--ink); margin: 0; }
 .awards__row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
