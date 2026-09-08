@@ -256,15 +256,14 @@ def about(page):
     <div class="globe-hero__stage">
       <div class="globe-hero__copy">
         <h1 data-split>Inspiring Positive Change Through mastery of coaching.</h1>
-        <p class="lead" data-reveal>At Coach Masters Academy, we take great pride in our unwavering dedication to enhancing professional coaching standards and empowering coaches and leaders to drive transformative change and deliver impactful results.</p>
-      </div>
-      <div class="globe-hero__figures">
-        <p class="globe-stats__head" aria-hidden="true">Inspiring Positive Change Through mastery of coaching.</p>
-        <div class="globe-stats globe-stats--reveal" aria-live="polite">
-        <div class="stat"><div class="stat__num" data-count="5">0</div><div class="stat__label">Continents Actively Present</div></div>
-        <div class="stat"><div class="stat__num" data-count="10">0</div><div class="stat__label">Regional Offices</div></div>
-        <div class="stat"><div class="stat__num" data-count="58">0</div><div class="stat__label">Faculty Members</div></div>
-          <div class="stat"><div class="stat__num" data-count="6200">0</div><div class="stat__label">Graduates across the globe</div></div>
+        <div class="globe-hero__swap">
+          <p class="lead globe-hero__lead">At Coach Masters Academy, we take great pride in our unwavering dedication to enhancing professional coaching standards and empowering coaches and leaders to drive transformative change and deliver impactful results.</p>
+          <div class="globe-stats globe-stats--reveal" aria-live="polite">
+            <div class="stat"><div class="stat__num" data-count="5">0</div><div class="stat__label">Continents Actively Present</div></div>
+            <div class="stat"><div class="stat__num" data-count="10">0</div><div class="stat__label">Regional Offices</div></div>
+            <div class="stat"><div class="stat__num" data-count="58">0</div><div class="stat__label">Faculty Members</div></div>
+            <div class="stat"><div class="stat__num" data-count="6200">0</div><div class="stat__label">Graduates across the globe</div></div>
+          </div>
         </div>
       </div>
     </div>

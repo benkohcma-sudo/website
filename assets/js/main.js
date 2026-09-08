@@ -126,7 +126,7 @@
   initHeroVideo();
   win.addEventListener('load', function () { ScrollTrigger.refresh(); });
   // safety net: anything still hidden 4s after load is shown (e.g. if ScrollTrigger never fires)
-  setTimeout(function () { doc.querySelectorAll('[data-reveal]').forEach(function (el) { if (getComputedStyle(el).opacity === '0' && el.getBoundingClientRect().top < win.innerHeight) gsap.to(el, { opacity: 1, x: 0, y: 0, scale: 1, duration: .6 }); }); }, 4000);
+  setTimeout(function () { doc.querySelectorAll('[data-reveal]').forEach(function (el) { if (el.closest('.globe-hero')) return; if (getComputedStyle(el).opacity === '0' && el.getBoundingClientRect().top < win.innerHeight) gsap.to(el, { opacity: 1, x: 0, y: 0, scale: 1, duration: .6 }); }); }, 4000);
 
   /* ============================================================
      Step-by-step form: groups the existing fields into panels.
@@ -433,12 +433,10 @@
     var video = doc.querySelector('.globe-video__el');
     if (!video) return;
     var hero = video.closest('.globe-hero');
-    var copy = hero.querySelector('.globe-hero__copy');
-    var head = hero.querySelector('.globe-stats__head');
+    var lead = hero.querySelector('.globe-hero__lead');
     var stats = hero.querySelectorAll('.globe-stats--reveal .stat');
     var hint = hero.querySelector('.globe-hint');
     function showStatsNow() {
-      if (head) { head.style.opacity = 1; head.style.transform = 'none'; }
       stats.forEach(function (st) { st.style.opacity = 1; st.style.transform = 'none'; var n = st.querySelector('[data-count]'); if (n) n.textContent = parseFloat(n.dataset.count).toLocaleString(); });
     }
     if (staticOnly || win.matchMedia('(max-width: 960px)').matches || win.scrollY > 40 || location.hash) {
@@ -461,9 +459,7 @@
 
     var tl = gsap.timeline({ paused: true, onComplete: release, onReverseComplete: relock });
     tl.to(vs, { t: 1, duration: TOTAL, ease: 'none', onUpdate: seek }, 0)
-      .to(copy.querySelectorAll('.split-word > span'), { yPercent: -110, duration: .5, ease: 'power3.in', stagger: .02 }, 0)
-      .to(copy.querySelector('.lead'), { opacity: 0, y: -16, duration: .35, ease: 'power2.in' }, 0);
-    if (head) tl.to(head, { opacity: 1, y: 0, duration: .5, ease: 'power3.out' }, .5);
+      .to(lead, { opacity: 0, y: -16, duration: .4, ease: 'power2.in' }, 0);
     stats.forEach(function (st, i) {
       var num = st.querySelector('[data-count]'); var target = num ? parseFloat(num.dataset.count) : 0; var obj = { v: 0 };
       var at = 0.7 + i * ((TOTAL - 0.7 - 0.8) / stats.length);
