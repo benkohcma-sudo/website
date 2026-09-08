@@ -583,13 +583,14 @@ html.is-locked, html.is-locked body { overflow: hidden; height: 100%; overscroll
 
 /* ---------- awards band (Transformative Edge banner) ---------- */
 .awards { background: #fff; border-block: 1px solid var(--line); }
-.awards__head { text-align: left; margin-bottom: clamp(32px, 4vw, 56px); }
-.awards__head h2 { font-weight: 600; letter-spacing: -0.03em; line-height: 1.02; font-size: clamp(36px, 6vw, 84px); margin: 0 0 16px; }
-.awards__head h2 span { display: block; }
+.awards__head { text-align: left; margin-bottom: clamp(28px, 3.5vw, 44px); }
+.awards__head h2 { font-weight: 600; letter-spacing: -0.03em; line-height: 1.05; font-size: clamp(28px, 3.6vw, 52px); margin: 0 0 12px; }
+.awards__head h2 span { display: block; white-space: nowrap; }
+@media (max-width: 640px) { .awards__head h2 span { white-space: normal; } }
 .awards__l1 { color: var(--ink); }
 .awards__l1 sup { font-size: .32em; font-weight: 600; letter-spacing: 0; vertical-align: super; margin-left: .15em; }
 .awards__l2 { color: var(--orange); }
-.awards__sub { font-family: var(--font-head); font-size: clamp(17px, 1.7vw, 24px); color: var(--ink); margin: 0; }
+.awards__sub { font-family: var(--font-head); font-size: clamp(15px, 1.3vw, 19px); color: var(--ink); margin: 0; }
 .awards__row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 .award { display: grid; grid-template-columns: 78px 1fr 78px; align-items: center; text-align: center; padding: 22px 8px; color: var(--orange); border-right: 1px solid var(--line); }
 .award:last-child { border-right: 0; }
@@ -715,3 +716,30 @@ html.is-locked, html.is-locked body { overflow: hidden; height: 100%; overscroll
 .stepper__nav .btn[hidden] { display: none; }
 .stepper__error { color: var(--orange-deep); font-size: 14px; margin: 0; flex: 1; }
 @media (max-width: 640px) { .field__options, .stepper__grid { grid-template-columns: 1fr; } }
+
+/* ---------- accreditation badges (transparent artwork) ---------- */
+.badges { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; margin: 8px 0 12px; }
+.badge {
+  position: relative; display: grid; place-items: center; aspect-ratio: 1; padding: 18px;
+  background: #fff; border: 1px solid var(--line); border-radius: 18px;
+  transition: transform .45s var(--ease), box-shadow .45s var(--ease), border-color .3s;
+}
+.badge::before { content: ""; position: absolute; inset: 12%; border-radius: 50%; background: radial-gradient(circle, rgba(235,100,34,.10), transparent 70%); opacity: 0; transition: opacity .4s; }
+.badge img { position: relative; width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 6px 14px rgba(23,56,14,.10)); transition: transform .5s var(--ease); }
+.badge:hover { transform: translateY(-4px); box-shadow: var(--shadow); border-color: transparent; }
+.badge:hover::before { opacity: 1; }
+.badge:hover img { transform: scale(1.06); }
+.badge--wide { grid-column: span 1; }
+@media (max-width: 900px) { .badges { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 480px) { .badges { grid-template-columns: repeat(2, 1fr); } }
+
+/* a track's credential pair: the ICF badge and the CMA certificate side by side */
+.badge-pair {
+  position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: center;
+  padding: clamp(18px, 3vw, 34px); background: var(--surface); border-radius: var(--radius); overflow: hidden; aspect-ratio: 5 / 4;
+}
+.badge-pair::before { content: ""; position: absolute; inset: -20% -10%; background: radial-gradient(circle at 30% 40%, rgba(235,100,34,.14), transparent 55%), radial-gradient(circle at 75% 65%, rgba(23,56,14,.10), transparent 55%); }
+.badge-pair img { position: relative; width: 100%; height: auto; max-height: 100%; object-fit: contain; filter: drop-shadow(0 12px 24px rgba(23,56,14,.14)); }
+.badge-pair img:first-child { transform: translateY(-6%); }
+.badge-pair img:last-child { transform: translateY(6%) scale(.92); }
+.badge-pair figcaption { position: absolute; left: 0; right: 0; bottom: 14px; text-align: center; font-family: var(--font-head); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
