@@ -629,11 +629,8 @@ def blog_post(page):
     {f'<div class="page-hero__banner" data-reveal="scale"><img src="{esc(hero_img)}" alt="" data-parallax="30"></div>' if hero_img else ''}
   </div>
 </section>
-<section class="section section--tight">
-  <div class="container article">
-    <div class="prose" data-auto-reveal>{content}</div>
-    {aside(page)}
-  </div>
+<section class="section section--tight landing">
+  <div class="container"><div class="prose prose--wide" data-auto-reveal>{content}</div></div>
 </section>'''
     return layout(page, body)
 
@@ -733,3 +730,131 @@ PREFIX_RENDERERS.extend([
     ('/events/calendar/', lambda p: wide_page(p)),
     ('/event/', lambda p: wide_page(p)),
 ])
+
+
+# ====================================================================== smart layout for flat CMS pages
+"""The CMS hands us a flat list: headings, paragraphs, runs of images, numbers with
+labels. These helpers read that list back into sections (logo rows, stat cards,
+icon cards, chips) and only fall back to plain prose for ordinary text."""
+
+def _txt(n): return re.sub(r'\s+', ' ', n.get_text(' ', strip=True)) if hasattr(n, 'get_text') else str(n).strip()
+def _is_num(n): return getattr(n, 'name', None) == 'h2' and re.fullmatch(r'[\d,.+]+', _txt(n) or 'x') is not None
+def _short(n, words=7): return len(_txt(n).split()) <= words
+def _img(n): return getattr(n, 'name', None) == 'img'
+def _imgsrc(n): return (n.get('src') or '') if _img(n) else ''
+
+def parse_blocks(content):
+    nodes = [n for n in top_nodes(content) if getattr(n, 'name', None) or str(n).strip()]
+    blocks = []; i = 0; N = len(nodes)
+    name = lambda k: getattr(nodes[k], 'name', None) if k < N else None
+    while i < N:
+        n = nodes[i]
+        # --- stats: optional h3 title + (numeric h2, h3 label)+
+        j = i
+        title = None
+        if name(j) == 'h3' and j + 1 < N and _is_num(nodes[j + 1]): title = nodes[j]; j += 1
+        stats = []
+        while j + 1 < N and _is_num(nodes[j]) and name(j + 1) == 'h3': stats.append((_txt(nodes[j]), _txt(nodes[j + 1]))); j += 2
+        if stats:
+            blocks.append({'t': 'stats', 'title': _txt(title) if title is not None else '', 'items': stats}); i = j; continue
+        # --- logo / badge run: 3+ images in a row
+        j = i
+        while j < N and _img(nodes[j]): j += 1
+        if j - i >= 3:
+            blocks.append({'t': 'logos', 'items': [(_imgsrc(x), x.get('alt', '')) for x in nodes[i:j]]}); i = j; continue
+        # --- icon cards: (img, h2|h3, p)+  or feature cards: (h2|h3, p, img)+
+        def triplet(k, order):
+            if k + 2 >= N: return None
+            a, b, c = nodes[k], nodes[k + 1], nodes[k + 2]
+            if order == 'ihp' and _img(a) and name(k + 1) in ('h2', 'h3') and name(k + 2) == 'p': return {'img': _imgsrc(a), 'title': _txt(b), 'body': b.decode_contents() if False else c.decode_contents()}
+            if order == 'hpi' and name(k) in ('h2', 'h3') and name(k + 1) == 'p' and _img(c): return {'img': _imgsrc(c), 'title': _txt(a), 'body': b.decode_contents()}
+            return None
+        for order in ('ihp', 'hpi'):
+            j = i; items = []
+            while True:
+                t = triplet(j, order)
+                if not t: break
+                items.append(t); j += 3
+            if len(items) >= 2:
+                if order == 'hpi' and j + 1 < N and name(j) in ('h2', 'h3') and name(j + 1) == 'p':
+                    items.append({'img': '', 'title': _txt(nodes[j]), 'body': nodes[j + 1].decode_contents()}); j += 2
+                blocks.append({'t': 'cards', 'items': items}); i = j; break
+        else:
+            # --- chips: (img, short p)+ x3
+            j = i; items = []
+            while j + 1 < N and _img(nodes[j]) and name(j + 1) == 'p' and _short(nodes[j + 1], 5): items.append((_imgsrc(nodes[j]), _txt(nodes[j + 1]))); j += 2
+            if len(items) >= 3:
+                blocks.append({'t': 'chips', 'items': items}); i = j; continue
+            # --- section head: short h3 then h2
+            if name(i) == 'h3' and _short(n, 6) and name(i + 1) == 'h2':
+                blocks.append({'t': 'head', 'eyebrow': _txt(n), 'h2': nodes[i + 1].decode_contents()}); i += 2; continue
+            # --- a lone image between text: media
+            if _img(n):
+                blocks.append({'t': 'media', 'src': _imgsrc(n), 'alt': n.get('alt', '')}); i += 1; continue
+            # --- prose: everything else, merged
+            if blocks and blocks[-1]['t'] == 'prose': blocks[-1]['html'] += '\n' + str(n)
+            else: blocks.append({'t': 'prose', 'html': str(n)})
+            i += 1
+            continue
+        continue
+    return blocks
+
+def merge_stat_rows(blocks):
+    out = []
+    for b in blocks:
+        if b['t'] == 'stats' and out and out[-1]['t'] == 'statrow': out[-1]['groups'].append(b)
+        elif b['t'] == 'stats': out.append({'t': 'statrow', 'groups': [b]})
+        else: out.append(b)
+    return out
+
+def render_blocks(blocks):
+    blocks = merge_stat_rows(blocks)
+    out = []
+    for b in blocks:
+        t = b['t']
+        if t == 'prose':
+            out.append(f'<div class="prose prose--wide" data-auto-reveal>{b["html"]}</div>')
+        elif t == 'head':
+            out.append(f'<div class="section-head" style="margin-top:24px"><p class="eyebrow" data-reveal>{esc(b["eyebrow"])}</p><h2 data-reveal>{b["h2"]}</h2></div>')
+        elif t == 'statrow':
+            groups = ''
+            for g in b['groups']:
+                cards = ''.join(f'<div class="stat" data-reveal><div class="stat__num" data-count="{re.sub(r"[^0-9.]", "", v) or 0}">0</div><div class="stat__label">{esc(l)}</div></div>' for v, l in g['items'])
+                title = f'<h3 data-reveal>{esc(g["title"])}</h3>' if g['title'] else ''
+                groups += f'<div class="stats-group">{title}<div class="stats" style="grid-template-columns:repeat({min(4, len(g["items"]))},1fr)">{cards}</div></div>'
+            out.append(f'<div class="stats-row" style="grid-template-columns:repeat({min(3, len(b["groups"]))},1fr)">{groups}</div>')
+        elif t == 'stats':
+            cards = ''.join(f'<div class="stat" data-reveal><div class="stat__num" data-count="{re.sub(r"[^0-9.]", "", v) or 0}">0</div><div class="stat__label">{esc(l)}</div></div>' for v, l in b['items'])
+            title = f'<h3 data-reveal>{esc(b["title"])}</h3>' if b['title'] else ''
+            out.append(f'<div class="stats-group">{title}<div class="stats" style="grid-template-columns:repeat({min(4, len(b["items"]))},1fr)">{cards}</div></div>')
+        elif t == 'logos':
+            tiles = ''.join(f'<div class="logo-cell" data-reveal><img src="{esc(s)}" alt="{esc(a)}" loading="lazy"></div>' for s, a in b['items'])
+            out.append(f'<div class="logo-grid">{tiles}</div>')
+        elif t == 'cards':
+            cards = ''
+            for c in b['items']:
+                icon = f'<div class="icon-card__img"><img src="{esc(c["img"])}" alt="" loading="lazy"></div>' if c['img'] else ''
+                cards += f'<article class="card icon-card" data-reveal>{icon}<h3>{esc(c["title"])}</h3><p>{c["body"]}</p></article>'
+            out.append(f'<div class="grid grid-3">{cards}</div>')
+        elif t == 'chips':
+            chips = ''.join(f'<span class="chip-tile"><img src="{esc(s)}" alt="">{esc(l)}</span>' for s, l in b['items'])
+            out.append(f'<div class="chips" data-reveal>{chips}</div>')
+        elif t == 'media':
+            out.append(f'<div class="media media--wide" data-reveal="scale" style="max-width:820px"><img src="{esc(b["src"])}" alt="{esc(b["alt"])}" loading="lazy" data-parallax="24"></div>')
+    return '\n'.join(f'<div class="lp-block lp-block--{b["t"]}">{h}</div>' for b, h in zip(blocks, out))
+
+def smart_page(page):
+    """Generic pages: plain text keeps the article + aside; anything with image
+    runs, stat numbers or card patterns gets the landing layout."""
+    from build import strip_duplicate_heading
+    content = strip_duplicate_heading(page['content'], page.get('h1'))
+    content = re.sub(r'^\s*<h1>.*?</h1>', '', content, count=1, flags=re.S)
+    blocks = parse_blocks(content)
+    if all(b['t'] in ('prose', 'media', 'head') for b in blocks) and sum(1 for b in blocks if b['t'] == 'media') <= 1:
+        return generic_page(page)
+    body = subnav(page) + page_hero(page) + f'''
+<section class="section section--tight landing">
+  <div class="container">{render_blocks(blocks)}</div>
+</section>
+{cta_band()}'''
+    return layout(page, body)

@@ -257,11 +257,8 @@ def generic_page(page):
     content = strip_duplicate_heading(page['content'], page.get('h1'))
     content = re.sub(r'<details>', '<details open>', content, count=1)
     body = subnav(page) + page_hero(page) + f'''
-<section class="section section--tight">
-  <div class="container article">
-    <div class="prose" data-auto-reveal>{content}</div>
-    {aside(page)}
-  </div>
+<section class="section section--tight landing">
+  <div class="container"><div class="prose prose--wide" data-auto-reveal>{content}</div></div>
 </section>'''
     return layout(page, body)
 
@@ -293,7 +290,7 @@ def build():
     n = 0
     for page in CONTENT:
         url = page['url']
-        fn = custom.get(url) or next((f for k, f in pages_custom.PREFIX_RENDERERS if url.startswith(k)), None) or generic_page
+        fn = custom.get(url) or next((f for k, f in pages_custom.PREFIX_RENDERERS if url.startswith(k)), None) or pages_custom.smart_page
         try:
             html_text = fn(page)
         except Exception as e:

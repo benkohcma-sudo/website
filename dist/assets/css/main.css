@@ -743,3 +743,25 @@ html.is-locked, html.is-locked body { overflow: hidden; height: 100%; overscroll
 .badge-pair img:first-child { transform: translateY(-6%); }
 .badge-pair img:last-child { transform: translateY(6%) scale(.92); }
 .badge-pair figcaption { position: absolute; left: 0; right: 0; bottom: 14px; text-align: center; font-family: var(--font-head); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+
+/* ---------- landing layout for flat CMS pages ---------- */
+.landing .lp-block + .lp-block { margin-top: clamp(36px, 5vw, 64px); }
+.landing .lp-block--head + .lp-block { margin-top: 28px; }
+.landing .lp-block--prose + .lp-block--prose { margin-top: 24px; }
+.landing .prose--wide { max-width: 860px; }
+.landing.section--tight { padding-top: 0; }
+.page-hero { padding-bottom: clamp(28px, 4vw, 48px); }
+.stats-group h3 { font-size: 18px; margin-bottom: 14px; }
+.stats-row { display: grid; gap: 20px; }
+.stats-row .stats { gap: 12px; }
+.stats-row .stat { padding: 22px 20px; }
+@media (max-width: 900px) { .stats-row { grid-template-columns: 1fr !important; } }
+.lp-block--stats + .lp-block--stats { margin-top: 28px; }
+.logo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
+.logo-cell { display: grid; place-items: center; aspect-ratio: 4 / 3; padding: 18px; background: #fff; border: 1px solid var(--line); border-radius: 16px; transition: transform .4s var(--ease), box-shadow .4s var(--ease); }
+.logo-cell img { max-height: 100%; max-width: 100%; object-fit: contain; filter: grayscale(1); opacity: .75; transition: filter .3s, opacity .3s; }
+.logo-cell:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+.logo-cell:hover img { filter: none; opacity: 1; }
+.icon-card__img { width: 64px; height: 64px; border-radius: 16px; background: var(--orange-soft); display: grid; place-items: center; margin-bottom: 20px; overflow: hidden; }
+.icon-card__img img { width: 40px; height: 40px; object-fit: contain; }
+.icon-card h3 { font-size: 20px; }
