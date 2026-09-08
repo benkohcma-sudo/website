@@ -242,7 +242,7 @@
           { y: 0, opacity: 1, scale: 1, rotate: 0, ease: 'none',
             scrollTrigger: { trigger: strip, start: 'top bottom', end: 'center 60%', scrub: 0.6 } });
       });
-      gsap.fromTo(strip, { x: 40 }, { x: -40, ease: 'none', scrollTrigger: { trigger: strip, start: 'top bottom', end: 'bottom top', scrub: true } });
+      gsap.fromTo(strip.children, { x: 22 }, { x: -22, ease: 'none', scrollTrigger: { trigger: strip, start: 'top bottom', end: 'bottom top', scrub: true } });
     });
   }
 

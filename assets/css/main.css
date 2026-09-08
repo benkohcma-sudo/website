@@ -767,7 +767,7 @@ html.is-locked, html.is-locked body { overflow: hidden; height: 100%; overscroll
 .icon-card h3 { font-size: 20px; }
 
 /* ---------- badge strip: transparent badges that fly into line on scroll (BetterUp-style) ---------- */
-.badge-strip { display: flex; justify-content: space-between; align-items: center; gap: clamp(12px, 2vw, 28px); padding: clamp(56px, 7vw, 96px) 4px; margin: 0; overflow: hidden; }
+.badge-strip { display: flex; justify-content: space-between; align-items: center; gap: clamp(12px, 2vw, 28px); padding: clamp(56px, 7vw, 96px) 36px; margin: 0 -36px; overflow: hidden; }
 .badge-strip img { width: clamp(84px, 11vw, 150px); height: auto; flex: 0 1 auto; filter: drop-shadow(0 14px 26px rgba(23,56,14,.16)); will-change: transform; }
 .badge-strip img:hover { filter: drop-shadow(0 18px 32px rgba(235,100,34,.28)); }
 .no-js .badge-strip img, .reduce-motion .badge-strip img { transform: none !important; opacity: 1 !important; }
