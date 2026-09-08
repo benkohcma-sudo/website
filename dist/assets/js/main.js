@@ -124,6 +124,7 @@
   initGlobe(false);
   initJourney();
   initHeroVideo();
+  initStrips();
   win.addEventListener('load', function () { ScrollTrigger.refresh(); });
   // safety net: anything still hidden 4s after load is shown (e.g. if ScrollTrigger never fires)
   setTimeout(function () { doc.querySelectorAll('[data-reveal]').forEach(function (el) { if (el.closest('.globe-hero')) return; if (getComputedStyle(el).opacity === '0' && el.getBoundingClientRect().top < win.innerHeight) gsap.to(el, { opacity: 1, x: 0, y: 0, scale: 1, duration: .6 }); }); }, 4000);
@@ -224,6 +225,24 @@
       form.addEventListener('submit', function (e) { if (!valid(panels[at])) e.preventDefault(); });
       form.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA' && at < panels.length - 1) { e.preventDefault(); next.click(); } });
       show(0, 0);
+    });
+  }
+
+  /* ============================================================
+     Badge strip: items start far above and below the row, alternating,
+     and slide into line as the strip scrolls up the screen; then the
+     whole row drifts sideways a little as you keep scrolling.
+     ============================================================ */
+  function initStrips() {
+    doc.querySelectorAll('[data-strip]').forEach(function (strip) {
+      var items = Array.prototype.slice.call(strip.children);
+      var offsets = [-190, 210, -150, 190, -220, 170, -170, 200];
+      items.forEach(function (el, i) {
+        gsap.fromTo(el, { y: offsets[i % offsets.length], opacity: 0, scale: .82, rotate: (i % 2 ? 4 : -4) },
+          { y: 0, opacity: 1, scale: 1, rotate: 0, ease: 'none',
+            scrollTrigger: { trigger: strip, start: 'top bottom', end: 'center 60%', scrub: 0.6 } });
+      });
+      gsap.fromTo(strip, { x: 40 }, { x: -40, ease: 'none', scrollTrigger: { trigger: strip, start: 'top bottom', end: 'bottom top', scrub: true } });
     });
   }
 

@@ -667,7 +667,7 @@ def certification(page):
     BADGES = [('icf-level-1', 'ICF Level 1 accredited coaching education'), ('icf-level-2', 'ICF Level 2 accredited coaching education'),
               ('icf-level-3', 'ICF Level 3 accredited coaching education'), ('icf-aatc', 'ICF Advanced Accreditation in Team Coaching'),
               ('icf-cce', 'ICF Continuing Coach Education'), ('coaching-impact-award', 'ICF Coaching Impact Award')]
-    grid = '<div class="badges">' + ''.join(f'<div class="badge" data-reveal="scale"><img src="/assets/img/badges/{f}.png" alt="{a}" loading="lazy"></div>' for f, a in BADGES) + '</div>'
+    grid = '<div class="badge-strip" data-strip>' + ''.join(f'<img src="/assets/img/badges/{f}.png" alt="{a}" loading="lazy">' for f, a in BADGES) + '</div>'
     c = re.sub(r'<img[^>]*src="data:image/jpeg[^"]*"[^>]*>', grid, c, count=1)
     # 3. track cards (icon, h3, p, p, picture) -> feature rows
     tracks = re.findall(r'<img[^>]*entry-level-icon1\.png"[^>]*>\s*<h3>(.*?)</h3>\s*<p>(.*?)</p>\s*(<p>.*?</p>)\s*(?:<img[^>]*src="([^"]+)"[^>]*>)?', c, re.S)
