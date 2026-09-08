@@ -260,9 +260,10 @@
     var endItems = endBlock ? Array.prototype.slice.call(endBlock.querySelectorAll('.hv__end-inner > *')) : [];
     var html = doc.documentElement;
     var RATE = 2;                                                    // the climb runs at double speed
-    var seen = false;
-    try { seen = sessionStorage.getItem('cma-hero-seen') === '1'; } catch (e) {}
     var mobile = win.matchMedia('(max-width: 760px)').matches;
+    // every arrival at the home page starts at the foot of the stairs, refresh included,
+    // so the browser must not drop us back at a remembered scroll position
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 
     function landInstantly() {                                       // already been through the door: classroom + welcome
       var toEnd = function () { try { video.currentTime = Math.max(0, (video.duration || 6) - 0.05); } catch (e) {} };
@@ -273,13 +274,12 @@
       if (endBlock) { endBlock.style.opacity = 1; endBlock.classList.add('is-on'); }
       endItems.forEach(function (el) { el.style.opacity = 1; });
     }
-    if (staticOnly || seen || win.scrollY > 40 || location.hash) { landInstantly(); return; }
+    if (staticOnly || location.hash) { landInstantly(); return; }
     html.classList.add('js-motion');
 
     var started = false;
     function release() {
       html.classList.remove('hv-locked');
-      try { sessionStorage.setItem('cma-hero-seen', '1'); } catch (e) {}
       ScrollTrigger.refresh();
     }
     function land() {                                                // the welcome rises in over the classroom
