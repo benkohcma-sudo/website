@@ -49,6 +49,9 @@
   });
   doc.querySelectorAll('.prose[data-auto-reveal] > *').forEach(function (el) { if (!el.hasAttribute('data-reveal')) el.setAttribute('data-reveal', ''); });
 
+  /* ---------- step-by-step forms ---------- */
+  initSteps();
+
   /* ---------- marquee: duplicate track content for seamless loop ---------- */
   doc.querySelectorAll('.marquee__track').forEach(function (t) { t.innerHTML += t.innerHTML; });
 
@@ -124,6 +127,105 @@
   win.addEventListener('load', function () { ScrollTrigger.refresh(); });
   // safety net: anything still hidden 4s after load is shown (e.g. if ScrollTrigger never fires)
   setTimeout(function () { doc.querySelectorAll('[data-reveal]').forEach(function (el) { if (getComputedStyle(el).opacity === '0' && el.getBoundingClientRect().top < win.innerHeight) gsap.to(el, { opacity: 1, x: 0, y: 0, scale: 1, duration: .6 }); }); }, 4000);
+
+  /* ============================================================
+     Step-by-step form: groups the existing fields into panels.
+     Nothing is renamed, removed or reworded; data-steps="2,2,5,3"
+     says how many questions go on each step.
+     ============================================================ */
+  function initSteps() {
+    doc.querySelectorAll('form.js-steps').forEach(function (form) {
+      var counts = (form.dataset.steps || '').split(',').map(Number).filter(Boolean);
+      var nodes = Array.prototype.slice.call(form.children);
+      var head = [], hidden = [], fields = [], cur = null;
+      nodes.forEach(function (n) {
+        var tag = n.tagName.toLowerCase();
+        if (tag === 'input' && n.type === 'hidden') { hidden.push(n); return; }
+        if ((tag === 'h4' || tag === 'p') && !fields.length) { head.push(n); return; }
+        if (tag === 'label' && !n.querySelector('input,select,textarea')) { cur = { title: n, items: [] }; fields.push(cur); return; }
+        if (cur) cur.items.push(n); else { cur = { title: null, items: [n] }; fields.push(cur); }
+      });
+      if (fields.length < 2) return;
+      var steps = [], i = 0;
+      counts.forEach(function (n) { if (i < fields.length) { steps.push(fields.slice(i, i + n)); i += n; } });
+      if (i < fields.length) steps.push(fields.slice(i));
+
+      form.innerHTML = '';
+      head.forEach(function (h) { form.appendChild(h); });
+      hidden.forEach(function (h) { form.appendChild(h); });
+
+      var progress = doc.createElement('div'); progress.className = 'stepper__progress';
+      progress.innerHTML = '<span class="stepper__count"></span><div class="stepper__bar"><i></i></div>';
+      form.appendChild(progress);
+      var count = progress.querySelector('.stepper__count'), bar = progress.querySelector('.stepper__bar i');
+
+      var panels = steps.map(function (fs) {
+        var panel = doc.createElement('div'); panel.className = 'stepper__panel';
+        var isText = fs.some(function (f) { return f.items.length === 1 && !f.items[0].querySelector('input[type=checkbox],input[type=radio]'); });
+        var host = panel;
+        if (isText) { host = doc.createElement('div'); host.className = 'stepper__grid'; panel.appendChild(host); }
+        fs.forEach(function (f) {
+          var field = doc.createElement('div'); field.className = 'field';
+          if (f.title) { f.title.classList.add('field__title'); field.appendChild(f.title); }
+          var options = f.items.filter(function (el) { return el.tagName === 'LABEL' && el.querySelector('input[type=checkbox],input[type=radio]'); });
+          if (options.length) {
+            var grid = doc.createElement('div'); grid.className = 'field__options';
+            var long = options.some(function (o) { return o.textContent.trim().length > 60; });
+            if (long) grid.classList.add('field__options--wide');
+            options.forEach(function (o) { o.classList.add('choice'); grid.appendChild(o); });
+            field.appendChild(grid);
+            if (isText) field.classList.add('field--full');
+          }
+          f.items.forEach(function (el) {
+            if (options.indexOf(el) >= 0) return;
+            var box = doc.createElement('div'); box.className = 'field__input'; box.appendChild(el); field.appendChild(box);
+            if (el.tagName === 'TEXTAREA') field.classList.add('field--full');
+          });
+          host.appendChild(field);
+        });
+        form.appendChild(panel);
+        return panel;
+      });
+
+      var nav = doc.createElement('div'); nav.className = 'stepper__nav';
+      nav.innerHTML = '<button type="button" class="btn btn--ghost" data-back>Back</button><p class="stepper__error" aria-live="polite"></p>' +
+        '<button type="button" class="btn" data-next>Next</button><button type="submit" class="btn" data-submit hidden>Submit</button>';
+      form.appendChild(nav);
+      var back = nav.querySelector('[data-back]'), next = nav.querySelector('[data-next]'), submit = nav.querySelector('[data-submit]'), err = nav.querySelector('.stepper__error');
+      var at = 0;
+
+      function valid(panel) {
+        var ok = true;
+        panel.querySelectorAll('input,select,textarea').forEach(function (el) {
+          if (el.type === 'checkbox' || el.type === 'radio') {
+            if (!el.required) return;
+            var same = panel.querySelectorAll('[name="' + el.name.replace(/"/g, '\\"') + '"]');
+            var any = Array.prototype.some.call(same, function (x) { return x.checked; });
+            if (!any) ok = false;
+          } else if (el.required && !el.checkValidity()) { if (ok) el.reportValidity(); ok = false; }
+        });
+        err.textContent = ok ? '' : 'Please answer the required questions marked * before continuing.';
+        return ok;
+      }
+      function show(n, dir) {
+        at = Math.max(0, Math.min(panels.length - 1, n));
+        panels.forEach(function (p, j) { p.hidden = j !== at; });
+        count.textContent = 'Step ' + (at + 1) + ' of ' + panels.length;
+        bar.style.width = ((at + 1) / panels.length * 100) + '%';
+        back.hidden = at === 0;
+        next.hidden = at === panels.length - 1;
+        submit.hidden = at !== panels.length - 1;
+        err.textContent = '';
+        if (hasGsap && !reduce && dir) gsap.from(panels[at], { opacity: 0, x: 24 * dir, duration: .45, ease: 'power3.out', clearProps: 'all' });
+        if (dir) { var top = form.getBoundingClientRect().top + win.scrollY - 120; if (win.scrollY > top) win.scrollTo({ top: top, behavior: 'smooth' }); }
+      }
+      back.addEventListener('click', function () { show(at - 1, -1); });
+      next.addEventListener('click', function () { if (valid(panels[at])) show(at + 1, 1); });
+      form.addEventListener('submit', function (e) { if (!valid(panels[at])) e.preventDefault(); });
+      form.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA' && at < panels.length - 1) { e.preventDefault(); next.click(); } });
+      show(0, 0);
+    });
+  }
 
   /* ============================================================
      Faculty carousel — tabs + horizontal snap track + counter

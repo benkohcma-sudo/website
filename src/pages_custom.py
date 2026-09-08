@@ -685,6 +685,12 @@ def certification(page):
         if part == '@@JOURNEY@@': out += f'</div></div></section><section class="section section--surface"><div class="container">{journey}</div></section><section class="section"><div class="container"><div class="prose prose--wide" data-auto-reveal>'
         elif part == '@@TRACKS@@': out += f'</div>{rows}<div class="prose prose--wide" data-auto-reveal>'
         else: out += part
+    # the interest form at the end becomes a step-by-step form (same fields, same wording)
+    k = out.rfind('<form')
+    if k >= 0:
+        end_tag = out.index('>', k)
+        attrs = out[k+5:end_tag]
+        out = out[:k] + '<form' + attrs + ' class="js-steps" data-steps="2,2,5,3">' + out[end_tag+1:]
     body = subnav(page) + page_hero(page) + awards_band() + f'''
 <section class="section section--tight">
   <div class="container"><div class="prose prose--wide" data-auto-reveal style="max-width:820px">{out}</div></div>

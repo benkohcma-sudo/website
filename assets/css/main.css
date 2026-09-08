@@ -688,3 +688,36 @@ html.is-locked, html.is-locked body { overflow: hidden; height: 100%; overscroll
   .marquee__track { animation: none; }
   * { scroll-behavior: auto !important; }
 }
+
+/* ---------- step-by-step form (fields untouched, only grouped) ---------- */
+.prose form.js-steps { display: block; padding: clamp(24px, 3.5vw, 44px); }
+.js-steps h4 { font-size: clamp(22px, 2.2vw, 30px); margin: 0 0 6px; }
+.js-steps > p { margin: 0 0 28px; color: var(--muted); }
+.stepper__progress { display: flex; align-items: center; gap: 18px; margin-bottom: 28px; }
+.stepper__count { font-family: var(--font-head); font-weight: 600; font-size: 13px; letter-spacing: .1em; text-transform: uppercase; color: var(--orange); white-space: nowrap; }
+.stepper__bar { flex: 1; height: 3px; background: var(--line); border-radius: 3px; overflow: hidden; }
+.stepper__bar i { display: block; height: 100%; width: 0; background: var(--orange); border-radius: 3px; transition: width .5s var(--ease); }
+.stepper__panel { display: grid; gap: 26px; }
+.stepper__panel[hidden] { display: none; }
+.field__title { display: block; font-family: var(--font-head); font-weight: 600; font-size: 17px; color: var(--ink); margin: 0 0 12px; }
+.field__options { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.field__options--wide { grid-template-columns: 1fr; }
+.choice {
+  display: flex; gap: 12px; align-items: flex-start; padding: 13px 16px; border: 1px solid var(--line); border-radius: 12px;
+  background: #fff; cursor: pointer; font-size: 15px; color: var(--body); line-height: 1.45;
+  transition: border-color .2s, box-shadow .2s, background .2s;
+}
+.choice:hover { border-color: rgba(235, 100, 34, .5); }
+.choice:has(:checked) { border-color: var(--orange); background: var(--orange-soft); color: var(--ink); box-shadow: 0 0 0 1px var(--orange); }
+.choice input { flex: none; width: 18px; height: 18px; margin: 2px 0 0; accent-color: var(--orange); }
+.field__input input, .field__input select, .field__input textarea {
+  width: 100%; padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; background: #fff; font: inherit; font-size: 15px; color: var(--ink);
+}
+.field__input input:focus, .field__input select:focus { outline: 0; border-color: var(--orange); box-shadow: 0 0 0 4px rgba(235, 100, 34, .12); }
+.stepper__grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px 20px; }
+.stepper__grid .field--full { grid-column: 1 / -1; }
+.stepper__nav { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 32px; padding-top: 22px; border-top: 1px solid var(--line); }
+.stepper__nav .btn { border: 0; }
+.stepper__nav .btn[hidden] { display: none; }
+.stepper__error { color: var(--orange-deep); font-size: 14px; margin: 0; flex: 1; }
+@media (max-width: 640px) { .field__options, .stepper__grid { grid-template-columns: 1fr; } }
