@@ -797,3 +797,19 @@ html.hv-locked, html.hv-locked body { overflow: hidden; height: 100%; overscroll
   .hv__title { font-size: clamp(34px, 9vw, 48px); max-width: 15ch; }
   .hv__scrim { background: linear-gradient(180deg, rgba(251,248,243,.92) 0%, rgba(251,248,243,.75) 55%, rgba(251,248,243,.2) 100%); }
 }
+
+/* the landing scene at the top of the stairs: the welcome, centred over the classroom */
+.hv__scrim--end { opacity: 0; background: radial-gradient(ellipse 70% 80% at 50% 50%, rgba(251,248,243,.92) 0%, rgba(251,248,243,.78) 45%, rgba(251,248,243,.42) 100%); }
+.hv__end { position: absolute; inset: 0; z-index: 2; display: grid; place-items: center; padding: 96px var(--gutter) 48px; text-align: center; opacity: 0; pointer-events: none; }
+.hv__end.is-on { pointer-events: auto; }
+.hv__end-inner { max-width: 840px; }
+.hv__end h2 { font-size: clamp(34px, 4.4vw, 60px); font-weight: 500; letter-spacing: -.03em; line-height: 1.06; margin: 0 0 14px; }
+.hv__end h3 { font-size: clamp(18px, 1.7vw, 24px); font-weight: 500; color: var(--green); margin: 0 0 18px; }
+.hv__end p { font-size: clamp(15px, 1.2vw, 18px); line-height: 1.6; color: var(--body); margin: 0 auto 30px; max-width: 64ch; }
+.hv__end-actions { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+.js-motion .hv__end-inner > * { opacity: 0; }
+.no-js .hv__end, .reduce-motion .hv__end { opacity: 1; pointer-events: auto; }
+.no-js .hv__end-inner > *, .reduce-motion .hv__end-inner > * { opacity: 1; }
+.no-js .hv__scrim--end, .reduce-motion .hv__scrim--end { opacity: 1; }
+.no-js .hv__copy, .reduce-motion .hv__copy { display: none; }
+@media (max-width: 760px) { .hv__end { padding: 80px 20px 32px; } .hv__end p { font-size: 15px; } }

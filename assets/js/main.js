@@ -255,35 +255,55 @@
   function initHomeHero(staticOnly) {
     var hero = doc.querySelector('[data-home-hero]');
     if (!hero) return;
-    var video = hero.querySelector('.hv__video'), scrim = hero.querySelector('.hv__scrim');
-    var copy = hero.querySelector('.hv__copy');
+    var video = hero.querySelector('.hv__video'), scrim = hero.querySelector('.hv__scrim:not(.hv__scrim--end)'), endScrim = hero.querySelector('.hv__scrim--end');
+    var copy = hero.querySelector('.hv__copy'), endBlock = hero.querySelector('[data-hero-end]');
+    var endItems = endBlock ? Array.prototype.slice.call(endBlock.querySelectorAll('.hv__end-inner > *')) : [];
     var html = doc.documentElement;
     var RATE = 2;                                                    // the climb runs at double speed
     var seen = false;
     try { seen = sessionStorage.getItem('cma-hero-seen') === '1'; } catch (e) {}
     var mobile = win.matchMedia('(max-width: 760px)').matches;
-    if (staticOnly || seen || win.scrollY > 40 || location.hash || mobile) return;   // plain hero: words over the staircase, page free
 
-    // hold the page on the staircase with the words up; one scroll climbs the stairs into the site
-    html.classList.add('hv-locked'); win.scrollTo(0, 0);
+    function landInstantly() {                                       // already been through the door: classroom + welcome
+      var toEnd = function () { try { video.currentTime = Math.max(0, (video.duration || 6) - 0.05); } catch (e) {} };
+      if (video.readyState >= 1) toEnd(); else video.addEventListener('loadedmetadata', toEnd);
+      if (copy) copy.style.display = 'none';
+      if (scrim) scrim.style.opacity = 0;
+      if (endScrim) endScrim.style.opacity = 1;
+      if (endBlock) { endBlock.style.opacity = 1; endBlock.classList.add('is-on'); }
+      endItems.forEach(function (el) { el.style.opacity = 1; });
+    }
+    if (staticOnly || seen || win.scrollY > 40 || location.hash) { landInstantly(); return; }
+    html.classList.add('js-motion');
+
     var started = false;
     function release() {
       html.classList.remove('hv-locked');
       try { sessionStorage.setItem('cma-hero-seen', '1'); } catch (e) {}
       ScrollTrigger.refresh();
     }
+    function land() {                                                // the welcome rises in over the classroom
+      if (endBlock) endBlock.classList.add('is-on');
+      var tl = gsap.timeline({ defaults: { ease: 'power3.out' }, onComplete: release });
+      tl.to(endScrim, { opacity: 1, duration: 1.0 }, 0)
+        .to(endBlock, { opacity: 1, duration: .3 }, 0)
+        .fromTo(endItems, { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: .8, stagger: .12 }, .15);
+    }
     function start() {
       if (started) return; started = true;
       video.playbackRate = RATE;
       video.currentTime = 0;
-      var p = video.play(); if (p && p.catch) p.catch(release);
+      var p = video.play(); if (p && p.catch) p.catch(land);
       gsap.to(copy.children, { opacity: 0, y: -28, duration: .55, ease: 'power2.in', stagger: .05 });   // the words step aside as we climb
       gsap.to(scrim, { opacity: 0, duration: 1.2, ease: 'power2.inOut' });
       var done = false;
-      var finish = function () { if (done) return; done = true; release(); };
+      var finish = function () { if (done) return; done = true; if (copy) copy.style.display = 'none'; land(); };
+      video.addEventListener('timeupdate', function () { if (!done && video.duration && video.currentTime > video.duration - 0.35) finish(); });
       video.addEventListener('ended', finish);
       setTimeout(finish, ((video.duration || 6) / RATE + 1.5) * 1000);   // safety net
     }
+    if (mobile) { start(); return; }                                 // phones: climb on arrival, no lock
+    html.classList.add('hv-locked'); win.scrollTo(0, 0);
     function onWheel(e) { if (html.classList.contains('hv-locked')) { e.preventDefault(); if (e.deltaY > 0) start(); } }
     function onKey(e) { if (html.classList.contains('hv-locked') && /^(ArrowDown|PageDown|Space| )$/.test(e.key)) { e.preventDefault(); start(); } }
     var touchY = null;

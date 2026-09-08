@@ -20,6 +20,7 @@ def home(page):
     <source src="/assets/video/home-stairs-720.mp4" type="video/mp4">
   </video>
   <div class="hv__scrim"></div>
+  <div class="hv__scrim hv__scrim--end"></div>
   <div class="container hv__inner">
     <div class="hv__copy">
       <h1 class="hv__title">Your next chapter starts here.</h1>
@@ -27,21 +28,19 @@ def home(page):
       <a class="hv__btn" href="/icf-coaching-training-program">Explore Programmes <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></a>
     </div>
   </div>
-</section>
-
-<section class="section">
-  <div class="container">
-    <div class="section-head" style="max-width:860px">
-      <h2 data-reveal>Welcome to Coach Masters Academy.</h2>
-      <h3 data-reveal style="font-size:clamp(20px,1.9vw,26px);margin-bottom:14px">Prepare our coaches to achieve Sustainable result for their clients</h3>
-      <p class="lead" data-reveal>Coach Masters Academy develops coaches and leaders who coach with discipline, presence, and measurable impact. Through rigorous coaching education programs and deliberate practice, you build conceptual precision and applied capability to support meaningful, lasting change—across leadership practice, organisational performance, and the underlying patterns that shape professional and personal life.</p>
-      <div class="hero__actions" data-reveal>
+  <div class="hv__end" data-hero-end>
+    <div class="hv__end-inner">
+      <h2>Welcome to Coach Masters Academy.</h2>
+      <h3>Prepare our coaches to achieve Sustainable result for their clients</h3>
+      <p>Coach Masters Academy develops coaches and leaders who coach with discipline, presence, and measurable impact. Through rigorous coaching education programs and deliberate practice, you build conceptual precision and applied capability to support meaningful, lasting change—across leadership practice, organisational performance, and the underlying patterns that shape professional and personal life.</p>
+      <div class="hv__end-actions">
         {btn('Coaching Certification', '/icf-coaching-training-program')}
         {btn('Registration', '/registration', 'btn--ghost')}
       </div>
     </div>
   </div>
 </section>
+
 {awards_band()}
 
 <section class="section">
