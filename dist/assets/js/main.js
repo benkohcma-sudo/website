@@ -58,11 +58,11 @@
   if (reduce || !hasGsap) {
     doc.querySelectorAll('[data-reveal]').forEach(function (el) { el.style.opacity = 1; el.style.transform = 'none'; });
     doc.querySelectorAll('[data-count]').forEach(function (el) { el.textContent = parseFloat(el.dataset.count).toLocaleString() + (el.dataset.suffix || ''); });
-    initFaculty(); initGlobe(true); initJourney(true); initHeroVideo(true); return;
+    initFaculty(); initGlobe(true); initJourney(true); initHeroVideo(true); initHomeHero(true); return;
   }
 
   /* ---------- split headline into rising words ---------- */
-  doc.querySelectorAll('[data-split]').forEach(function (el) {
+  doc.querySelectorAll('[data-split], .hv__title').forEach(function (el) {
     var nodes = Array.prototype.slice.call(el.childNodes), out = '';
     nodes.forEach(function (n) {
       if (n.nodeType === 3) {
@@ -76,7 +76,7 @@
       }
     });
     el.innerHTML = out;
-    gsap.from(el.querySelectorAll('.split-word > span'), { yPercent: 115, duration: 1.1, ease: 'power4.out', stagger: 0.045, delay: 0.1 });
+    if (!el.classList.contains('hv__title')) gsap.from(el.querySelectorAll('.split-word > span'), { yPercent: 115, duration: 1.1, ease: 'power4.out', stagger: 0.045, delay: 0.1 });
   });
 
   /* ---------- scroll reveals ---------- */
@@ -124,6 +124,7 @@
   initGlobe(false);
   initJourney();
   initHeroVideo();
+  initHomeHero(false);
   initStrips();
   win.addEventListener('load', function () { ScrollTrigger.refresh(); });
   // safety net: anything still hidden 4s after load is shown (e.g. if ScrollTrigger never fires)
@@ -244,6 +245,78 @@
       });
       gsap.fromTo(strip.children, { x: 22 }, { x: -22, ease: 'none', scrollTrigger: { trigger: strip, start: 'top bottom', end: 'bottom top', scrub: true } });
     });
+  }
+
+  /* ============================================================
+     Home hero: the first frame waits with a "scroll to begin" hint.
+     One scroll plays the staircase video through; as it arrives the
+     header slides down and the words rise into place.
+     ============================================================ */
+  function initHomeHero(staticOnly) {
+    var hero = doc.querySelector('[data-home-hero]');
+    if (!hero) return;
+    var video = hero.querySelector('.hv__video'), scrim = hero.querySelector('.hv__scrim'), hint = hero.querySelector('.hv__hint');
+    var copy = Array.prototype.slice.call(hero.querySelectorAll('.hv__copy > *'));
+    var html = doc.documentElement;
+    var seen = false;
+    try { seen = sessionStorage.getItem('cma-hero-seen') === '1'; } catch (e) {}
+    function finish() {
+      html.classList.remove('hv-pending', 'hv-locked');
+      if (scrim) scrim.style.opacity = 1;
+      copy.forEach(function (el) { el.style.opacity = 1; el.style.transform = 'none'; });
+      if (hint) { hint.classList.remove('is-playing'); hint.classList.add('is-done'); }
+      try { sessionStorage.setItem('cma-hero-seen', '1'); } catch (e) {}
+    }
+    var mobile = win.matchMedia('(max-width: 760px)').matches;
+    if (staticOnly || seen || win.scrollY > 40 || location.hash) {
+      // already been through the door this session: land on the last frame
+      var toEnd = function () { try { video.currentTime = Math.max(0, (video.duration || 6) - 0.05); } catch (e) {} };
+      if (video.readyState >= 1) toEnd(); else video.addEventListener('loadedmetadata', toEnd);
+      finish(); return;
+    }
+    html.classList.add('js-motion', 'hv-pending');
+    var title = hero.querySelector('.hv__title');
+    var words = title ? title.querySelectorAll('.split-word > span') : [];
+    if (words.length) gsap.set(words, { yPercent: 110 });
+
+    function arrive() {
+      html.classList.remove('hv-locked');
+      var header = doc.querySelector('.site-header');
+      var tl = gsap.timeline({ defaults: { ease: 'power3.out' }, onComplete: function () { finish(); if (header) header.style.transform = ''; } });
+      tl.to(scrim, { opacity: 1, duration: 1.1 }, 0);
+      if (header) { html.classList.remove('hv-pending'); tl.fromTo(header, { y: '-110%' }, { y: '0%', duration: .9 }, .15); }
+      var eyebrow = hero.querySelector('.hv__eyebrow'), sub = hero.querySelector('.hv__sub'), btn = hero.querySelector('.hv__btn');
+      if (eyebrow) tl.fromTo(eyebrow, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: .6 }, .35);
+      if (title) tl.set(title, { opacity: 1 }, .45);
+      if (words.length) tl.to(words, { yPercent: 0, duration: 1.0, ease: 'power4.out', stagger: .05 }, .45);
+      if (sub) tl.fromTo(sub, { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: .7 }, .95);
+      if (btn) tl.fromTo(btn, { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: .7 }, 1.1);
+      if (hint) tl.add(function () { hint.classList.remove('is-playing'); hint.classList.add('is-done'); }, 1.2);
+    }
+    var started = false;
+    function start() {
+      if (started) return; started = true;
+      if (hint) hint.classList.add('is-playing');
+      video.currentTime = 0;
+      var p = video.play(); if (p && p.catch) p.catch(arrive);
+      var armed = false;
+      video.addEventListener('timeupdate', function () {            // begin the landing just before the last frame
+        if (!armed && video.duration && video.currentTime > video.duration - 0.45) { armed = true; arrive(); }
+      });
+      video.addEventListener('ended', function () { if (!armed) { armed = true; arrive(); } });
+      setTimeout(function () { if (!armed) { armed = true; arrive(); } }, 9000);   // safety net
+    }
+    if (mobile) { win.scrollTo(0, 0); start(); return; }               // phones: play on arrival, no lock
+    html.classList.add('hv-locked'); win.scrollTo(0, 0);
+    function onWheel(e) { if (html.classList.contains('hv-locked')) { e.preventDefault(); if (e.deltaY > 0) start(); } }
+    function onKey(e) { if (html.classList.contains('hv-locked') && /^(ArrowDown|PageDown|Space| )$/.test(e.key)) { e.preventDefault(); start(); } }
+    var touchY = null;
+    win.addEventListener('wheel', onWheel, { passive: false });
+    win.addEventListener('keydown', onKey);
+    win.addEventListener('touchstart', function (e) { touchY = e.touches[0].clientY; }, { passive: true });
+    win.addEventListener('touchmove', function (e) { if (html.classList.contains('hv-locked')) { e.preventDefault(); if (touchY !== null && touchY - e.touches[0].clientY > 8) start(); } }, { passive: false });
+    hero.addEventListener('click', function () { if (html.classList.contains('hv-locked')) start(); });
+    video.load();
   }
 
   /* ============================================================

@@ -771,3 +771,40 @@ html.is-locked, html.is-locked body { overflow: hidden; height: 100%; overscroll
 .badge-strip img:hover { filter: drop-shadow(0 18px 32px rgba(235,100,34,.28)); }
 .no-js .badge-strip img, .reduce-motion .badge-strip img { transform: none !important; opacity: 1 !important; }
 @media (max-width: 640px) { .badge-strip { flex-wrap: wrap; justify-content: center; } .badge-strip img { width: 27%; } }
+
+/* ---------- home hero: the staircase video is the door into the site ---------- */
+.is-home .topbar { display: none; }
+.is-home .site-header { position: fixed; left: 0; right: 0; top: 0; }
+.is-home .site-header:not(.is-scrolled) { background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; border-color: transparent; }
+html.hv-pending .is-home .site-header { transform: translateY(-110%); transition: none; }
+.hv { position: relative; height: 100svh; min-height: 560px; overflow: hidden; background: #E9E3DA; }
+.hv__video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 50%; }
+.hv__scrim { position: absolute; inset: 0; pointer-events: none; opacity: 0;
+  background: linear-gradient(90deg, rgba(251,248,243,.94) 0%, rgba(251,248,243,.82) 26%, rgba(251,248,243,.35) 48%, rgba(251,248,243,0) 64%); }
+.hv__inner { position: relative; z-index: 1; height: 100%; display: flex; align-items: center; }
+.hv__copy { max-width: 620px; }
+.hv__eyebrow { font-family: var(--font-head); font-size: 12px; font-weight: 600; letter-spacing: .32em; text-transform: uppercase; color: var(--ink); margin: 0 0 22px; }
+.hv__title { font-family: var(--font-head); font-weight: 400; font-size: clamp(52px, 7.6vw, 116px); line-height: .98; letter-spacing: -.035em; color: var(--ink); margin: 0 0 26px; max-width: 8.5ch; }
+.hv__title .split-word { padding-bottom: .1em; margin-bottom: -.1em; }
+.hv__sub { font-family: var(--font-body); font-size: clamp(18px, 1.7vw, 26px); line-height: 1.35; color: #5F6A5A; margin: 0 0 34px; max-width: 22ch; }
+.hv__btn { display: inline-flex; align-items: center; gap: 14px; padding: 16px 26px; background: var(--orange); color: #fff; border-radius: 8px;
+  font-family: var(--font-head); font-weight: 500; font-size: 17px; transition: background .25s, transform .3s var(--ease); }
+.hv__btn svg { width: 20px; height: 20px; transition: transform .3s var(--ease); }
+.hv__btn:hover { background: var(--orange-deep); transform: translateY(-2px); }
+.hv__btn:hover svg { transform: translateX(4px); }
+.hv__hint { position: absolute; left: var(--gutter); bottom: 34px; z-index: 1; display: flex; align-items: center; gap: 12px;
+  font-family: var(--font-head); font-size: 11px; letter-spacing: .3em; text-transform: uppercase; color: var(--ink); }
+.hv__hint svg { width: 18px; height: 18px; animation: hvHint 1.8s ease-in-out infinite; }
+@keyframes hvHint { 0%, 100% { transform: translateY(-3px); opacity: .5 } 50% { transform: translateY(3px); opacity: 1 } }
+.hv__hint.is-playing { opacity: 0; transition: opacity .3s; }
+.hv__hint.is-done span { opacity: 1; }
+/* before the video has played, the words wait off stage */
+.js-motion .hv__copy > * { opacity: 0; }
+.no-js .hv__copy > *, .reduce-motion .hv__copy > * { opacity: 1 !important; }
+.reduce-motion .hv__scrim, .no-js .hv__scrim { opacity: 1; }
+html.hv-locked, html.hv-locked body { overflow: hidden; height: 100%; overscroll-behavior: none; }
+@media (max-width: 760px) {
+  .hv { min-height: 100svh; }
+  .hv__title { font-size: clamp(42px, 12vw, 64px); max-width: 9ch; }
+  .hv__scrim { background: linear-gradient(180deg, rgba(251,248,243,.92) 0%, rgba(251,248,243,.75) 55%, rgba(251,248,243,.2) 100%); }
+}

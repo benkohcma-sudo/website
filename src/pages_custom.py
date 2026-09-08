@@ -14,23 +14,33 @@ def globe_scripts():
 # ====================================================================== HOME
 def home(page):
     body = f'''
-<section class="hero">
-  <div class="hero__bg"></div>
-  <div class="container hero__grid">
-    <div>
-      <h1 data-split>Welcome to Coach Masters Academy.</h1>
-      <h2 class="lead" data-reveal style="font-family:var(--font-head);font-weight:500;color:var(--ink);font-size:clamp(20px,1.9vw,26px);margin-bottom:18px">Prepare our coaches to achieve Sustainable result for their clients</h2>
+<section class="hv" data-home-hero>
+  <video class="hv__video" muted playsinline preload="auto" poster="/assets/video/home-stairs-poster.jpg" aria-label="Walking up the staircase into a Coach Masters Academy classroom">
+    <source src="/assets/video/home-stairs.mp4" type="video/mp4" media="(min-width: 900px)">
+    <source src="/assets/video/home-stairs-720.mp4" type="video/mp4">
+  </video>
+  <div class="hv__scrim"></div>
+  <div class="container hv__inner">
+    <div class="hv__copy">
+      <p class="hv__eyebrow">Coach Masters Academy</p>
+      <h1 class="hv__title">Your next chapter starts here.</h1>
+      <p class="hv__sub">Move forward with clarity, confidence and purpose.</p>
+      <a class="hv__btn" href="/icf-coaching-training-program">Explore Programmes <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></a>
+    </div>
+  </div>
+  <div class="hv__hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16m-6-6 6 6 6-6"/></svg><span>Scroll to begin</span></div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head" style="max-width:860px">
+      <h2 data-reveal>Welcome to Coach Masters Academy.</h2>
+      <h3 data-reveal style="font-size:clamp(20px,1.9vw,26px);margin-bottom:14px">Prepare our coaches to achieve Sustainable result for their clients</h3>
       <p class="lead" data-reveal>Coach Masters Academy develops coaches and leaders who coach with discipline, presence, and measurable impact. Through rigorous coaching education programs and deliberate practice, you build conceptual precision and applied capability to support meaningful, lasting change—across leadership practice, organisational performance, and the underlying patterns that shape professional and personal life.</p>
       <div class="hero__actions" data-reveal>
         {btn('Coaching Certification', '/icf-coaching-training-program')}
         {btn('Registration', '/registration', 'btn--ghost')}
       </div>
-    </div>
-    <div class="hero__gallery" aria-hidden="true">
-      <div class="media g1"><img src="{IMG}featured_image1/1/about-us-img-1.jpg" alt=""></div>
-      <div class="media g2"><img src="{IMG}image_item/services-2.jpg_1749723874" alt=""></div>
-      <div class="media g3"><img src="{IMG}image_item/services-3.jpg_1749723934" alt=""></div>
-      <div class="chip"><i></i>Live Coaching Discovery Sessions</div>
     </div>
   </div>
 </section>
