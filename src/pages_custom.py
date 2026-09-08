@@ -22,7 +22,6 @@ def home(page):
   <div class="hv__scrim"></div>
   <div class="container hv__inner">
     <div class="hv__copy">
-      <p class="hv__eyebrow">Coach Masters Academy</p>
       <h1 class="hv__title">Your next chapter starts here.</h1>
       <p class="hv__sub">Move forward with clarity, confidence and purpose.</p>
       <a class="hv__btn" href="/icf-coaching-training-program">Explore Programmes <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></a>
