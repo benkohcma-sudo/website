@@ -858,3 +858,69 @@ def smart_page(page):
 </section>
 {cta_band()}'''
     return layout(page, body)
+
+
+# ====================================================================== OUR FOUNDER
+def parse_testimonials(nodes):
+    """(photo img, quote-icon img, p quote, h3 name, p role) groups -> list of dicts."""
+    out = []; i = 0
+    while i < len(nodes):
+        n = nodes[i]
+        if _img(n) and i + 4 < len(nodes) and _img(nodes[i + 1]) and getattr(nodes[i + 2], 'name', None) == 'p' \
+           and getattr(nodes[i + 3], 'name', None) == 'h3' and getattr(nodes[i + 4], 'name', None) == 'p':
+            out.append({'img': _imgsrc(n), 'text': nodes[i + 2].decode_contents().strip(), 'name': _txt(nodes[i + 3]), 'role': _txt(nodes[i + 4])}); i += 5
+        else: i += 1
+    return out
+
+def founder(page):
+    nodes = [n for n in top_nodes(page['content']) if getattr(n, 'name', None) or str(n).strip()]
+    # split at the testimonials heading
+    cut = next((k for k, n in enumerate(nodes) if getattr(n, 'name', None) == 'h3' and 'client says' in _txt(n).lower()), len(nodes))
+    body_nodes = [n for n in nodes[:cut] if not _img(n)]                       # drop the 2016 banner graphic
+    quotes = parse_testimonials(nodes[cut:])
+    t_eyebrow = _txt(nodes[cut]) if cut < len(nodes) else ''
+    t_h2 = next((n.decode_contents() for n in nodes[cut:cut + 3] if getattr(n, 'name', None) == 'h2'), '')
+    # first eyebrow + h2 + two paragraphs sit beside the portrait; the rest flows as prose
+    eyebrow = ''; h2 = ''; intro = []; rest = []
+    for n in body_nodes:
+        nm = getattr(n, 'name', None)
+        if nm == 'h3' and not eyebrow and not h2: eyebrow = _txt(n)
+        elif nm == 'h2' and not h2: h2 = n.decode_contents()
+        elif nm == 'p' and h2 and not rest and len(intro) < 2: intro.append(str(n))
+        else: rest.append(str(n))
+    PORTRAIT = SITE + '/siteimages/ourfaculty/1/19660094231651223065_1_Ben Professional 2.png'
+    body = subnav(page) + f'''
+<section class="page-hero" style="padding-bottom:0">
+  <div class="container">{crumbs(page)}<h1 data-split>{esc(page['h1'])}</h1></div>
+</section>
+<section class="section section--tight">
+  <div class="container split split--wide">
+    <div class="media-stack" data-reveal="scale">
+      <div class="media media--tall media--blob"><img src="{esc(PORTRAIT)}" alt="Ben Koh, Master Certified Coach" data-parallax="24"></div>
+      <div class="badge-float" style="left:auto;right:-6%;top:auto;bottom:10%"><img src="/assets/img/badges/icf-mcc.png" alt="" width="54" height="54"><div><b>MCC</b><span>Master Certified Coach</span></div></div>
+    </div>
+    <div>
+      {f'<p class="eyebrow" data-reveal>{esc(eyebrow)}</p>' if eyebrow else ''}
+      <h2 data-reveal>{h2}</h2>
+      <div class="prose" data-auto-reveal>{''.join(intro)}</div>
+    </div>
+  </div>
+</section>
+<section class="section section--tight">
+  <div class="container"><div class="prose prose--wide" data-auto-reveal style="max-width:860px">{''.join(rest)}</div></div>
+</section>
+<section class="section section--surface">
+  <div class="container">
+    <div class="section-head">
+      {f'<p class="eyebrow" data-reveal>{esc(t_eyebrow)}</p>' if t_eyebrow else ''}
+      {f'<h2 data-reveal>{t_h2}</h2>' if t_h2 else ''}
+    </div>
+  </div>
+  <div class="marquee" data-reveal="none">
+    <div class="marquee__track" style="animation-duration:70s">{''.join(quote(q['text'], q['name'], q['role'], q['img']) for q in quotes)}</div>
+  </div>
+</section>
+{cta_band()}'''
+    return layout(page, body)
+
+RENDERERS['/icf-master-certified-coach-mcc'] = founder
