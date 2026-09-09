@@ -223,12 +223,12 @@ def page_hero(page, label=None, lead=''):
     banner = f'<div class="page-hero__banner" data-reveal="scale"><img src="{esc(page["banner"])}" alt="" data-parallax="30"></div>' if page.get('banner') else ''
     return f'''
 <section class="page-hero{' page-hero--banner' if banner else ''}">
-  <div class="container">
+  <div class="container"><div class="page-hero__narrow">
     {crumbs(page, h)}
     <h1 data-split>{esc(h)}</h1>
     {f'<p class="lead" data-reveal style="margin-top:22px">{lead}</p>' if lead else ''}
     {banner}
-  </div>
+  </div></div>
 </section>'''
 
 def aside(page):

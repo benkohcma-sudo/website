@@ -89,6 +89,14 @@
     }
   });
 
+  /* ---------- drawn lines: [data-draw="x"|"y"] grow in as they scroll into view ---------- */
+  doc.documentElement.classList.add('js-motion');
+  doc.querySelectorAll('[data-draw]').forEach(function (el) {
+    var axis = el.dataset.draw === 'y' ? 'scaleY' : 'scaleX';
+    var from = {}; from[axis] = 0;
+    gsap.fromTo(el, from, { scaleX: 1, scaleY: 1, duration: 1.1, ease: 'power3.inOut', scrollTrigger: { trigger: el, start: 'top 85%', once: true } });
+  });
+
   /* ---------- counters ---------- */
   doc.querySelectorAll('[data-count]').forEach(function (el) {
     if (el.closest('.globe-stats--reveal')) return;

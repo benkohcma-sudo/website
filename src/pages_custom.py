@@ -386,15 +386,16 @@ def story(page):
     return layout(page, body)
 
 def cta_band():
+    """Full-width registration band that runs straight into the footer."""
     return f'''
-<section class="section section--tight">
-  <div class="container">
-    <div class="cta-band" data-reveal="scale">
-      <p class="eyebrow" style="color:#F3A77F">Registration</p>
-      <h2>Your journey towards mastering coaching begins with us.</h2>
-      <p>You can call our Global Office at +65-8299-8170 to explore which entry point and advanced structure best fit your experience, goals, and context.</p>
-      <div style="display:flex;gap:12px;flex-wrap:wrap">{btn('Registration', '/registration')}{btn('Schedule a Call', 'https://calendly.com/coachmastersacademyglobaloffice/30min-phone-call-appointment', 'btn--white')}</div>
+<section class="cta-full">
+  <div class="container cta-full__inner">
+    <div>
+      <p class="eyebrow" data-reveal style="color:#F3A77F">Registration</p>
+      <h2 data-reveal>Your journey towards mastering coaching begins with us.</h2>
+      <p data-reveal>You can call our Global Office at +65-8299-8170 to explore which entry point and advanced structure best fit your experience, goals, and context.</p>
     </div>
+    <div class="cta-full__actions" data-reveal>{btn('Registration', '/registration', 'btn--white')}{btn('Schedule a Call', 'https://calendly.com/coachmastersacademyglobaloffice/30min-phone-call-appointment', 'btn--ghost btn--ghost-light')}</div>
   </div>
 </section>'''
 
@@ -669,11 +670,12 @@ def certification(page):
     m = re.search(r'<h2>(Proven Success[^<]*)</h2>\s*<p>(\d+)</p>\s*<p>([^<]+)</p>\s*<p>(\d+)</p>\s*<p>([^<]+)</p>', c)
     stats = ''
     if m:
-        stats = (f'<section class="section section--green section--tight"><div class="container">'
-                 f'<h2 data-reveal style="max-width:20ch">{m.group(1)}</h2>'
-                 f'<div class="stats" style="grid-template-columns:repeat(2,1fr);max-width:720px">'
-                 f'<div class="stat" data-reveal><div class="stat__num" data-count="{m.group(2)}">0</div><div class="stat__label">{m.group(3)}</div></div>'
-                 f'<div class="stat" data-reveal><div class="stat__num" data-count="{m.group(4)}">0</div><div class="stat__label">{m.group(5)}</div></div>'
+        stats = (f'<section class="section proof"><div class="container">'
+                 f'<h2 class="proof__title" data-reveal>{m.group(1)}</h2>'
+                 f'<div class="proof__row">'
+                 f'<div class="proof__item" data-reveal><div class="proof__num" data-count="{m.group(2)}">0</div><i class="proof__tick" data-draw="x"></i><div class="proof__label">{m.group(3)}</div></div>'
+                 f'<i class="proof__divider" data-draw="y"></i>'
+                 f'<div class="proof__item" data-reveal><div class="proof__num" data-count="{m.group(4)}">0</div><i class="proof__tick" data-draw="x"></i><div class="proof__label">{m.group(5)}</div></div>'
                  f'</div></div></section>')
         c = c.replace(m.group(0), '')
     # 2. the accreditation strip (a flattened jpeg on the live site) -> the transparent badges
@@ -689,7 +691,8 @@ def certification(page):
     i_details = c.find('<details>')
     i_tracks_head = c.find('<h2>Explore Your Coaching Pathway')
     i_track_items = c.find('<img', i_tracks_head)
-    track_re = re.compile(r'<img[^>]*entry-level-icon1\.png"[^>]*>\s*<h3>(.*?)</h3>\s*<p>(.*?)</p>\s*(<p>.*?</p>)\s*(?:<img[^>]*src="([^"]+)"[^>]*>)?', re.S)
+    # icon, title, subtitle, one or more paragraphs, then the live site's flattened picture (dropped)
+    track_re = re.compile(r'<img[^>]*entry-level-icon1\.png"[^>]*>\s*<h3>(.*?)</h3>\s*<p>(.*?)</p>\s*((?:<p>.*?</p>\s*)+?)(?:<img[^>]*src="([^"]+)"[^>]*>)?(?=\s*(?:<img[^>]*entry-level-icon1|<p>You can call|<h2>|<form|$))', re.S)
     tracks = list(track_re.finditer(c, i_track_items))
     i_tail = tracks[-1].end() if tracks else len(c)
 
@@ -721,12 +724,20 @@ def certification(page):
         end_tag = tail.index('>', k)
         tail = tail[:k] + '<form' + tail[k+5:end_tag] + ' class="js-steps" data-steps="2,2,5,3">' + tail[end_tag+1:]
 
+    call = ''
+    mc = re.match(r'\s*<p>(You can call our Global Office.*?)</p>\s*<a href="([^"]+)"[^>]*>(Schedule a Call)</a>', tail, re.S)
+    if mc:
+        call = (f'<section class="section section--tight"><div class="container center">'
+                f'<p class="lead" data-reveal style="margin:0 auto 22px">{mc.group(1)}</p>'
+                f'{btn(mc.group(3), mc.group(2))}</div></section>')
+        tail = tail[mc.end():]
     body = (subnav(page) + page_hero(page) + awards_band()
-            + f'<section class="section section--tight"><div class="container"><div class="prose prose--wide" data-auto-reveal style="max-width:820px">{intro}</div></div></section>'
+            + f'<section class="section section--tight"><div class="container"><div class="prose prose--wide" data-auto-reveal>{intro}</div></div></section>'
             + stats
             + split_section(paths_left, acc_cards(adv_cards), surface=True)
             + split_section(tracks_left, acc_cards(track_cards))
-            + f'<section class="section section--tight"><div class="container"><div class="prose prose--wide" data-auto-reveal style="max-width:820px">{tail}</div></div></section>'
+            + call
+            + f'<section class="section section--tight"><div class="container"><div class="prose prose--wide" data-auto-reveal>{tail}</div></div></section>'
             + cta_band())
     return layout(page, body)
 
