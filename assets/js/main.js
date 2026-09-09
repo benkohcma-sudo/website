@@ -49,8 +49,9 @@
   });
   doc.querySelectorAll('.prose[data-auto-reveal] > *').forEach(function (el) { if (!el.hasAttribute('data-reveal')) el.setAttribute('data-reveal', ''); });
 
-  /* ---------- step-by-step forms ---------- */
+  /* ---------- step-by-step forms, open/close cards ---------- */
   initSteps();
+  initAccordions();
 
   /* ---------- marquee: duplicate track content for seamless loop ---------- */
   doc.querySelectorAll('.marquee__track').forEach(function (t) { t.innerHTML += t.innerHTML; });
@@ -312,6 +313,25 @@
     win.addEventListener('touchstart', function (e) { touchY = e.touches[0].clientY; }, { passive: true });
     win.addEventListener('touchmove', function (e) { if (html.classList.contains('hv-locked')) { e.preventDefault(); if (touchY !== null && touchY - e.touches[0].clientY > 8) start(); } }, { passive: false });
     video.load();
+  }
+
+  /* ============================================================
+     Open/close cards: one open at a time, height animates via CSS grid
+     ============================================================ */
+  function initAccordions() {
+    doc.querySelectorAll('[data-accordion]').forEach(function (group) {
+      var cards = Array.prototype.slice.call(group.querySelectorAll('.acc-card'));
+      cards.forEach(function (card) {
+        var head = card.querySelector('.acc-card__head');
+        if (!head) return;
+        head.addEventListener('click', function () {
+          var open = card.classList.contains('is-open');
+          cards.forEach(function (c) { c.classList.remove('is-open'); var h = c.querySelector('.acc-card__head'); if (h) h.setAttribute('aria-expanded', 'false'); });
+          if (!open) { card.classList.add('is-open'); head.setAttribute('aria-expanded', 'true'); }
+          if (win.ScrollTrigger) setTimeout(function () { ScrollTrigger.refresh(); }, 600);
+        });
+      });
+    });
   }
 
   /* ============================================================

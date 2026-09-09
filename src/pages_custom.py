@@ -196,13 +196,11 @@ def home(page):
     <h2 data-reveal>Trusted Partnerships with Leading Coaching Experts &amp; Organizations</h2>
     <p class="lead" data-reveal>Coach Masters Academy collaborates with ICF-aligned bodies and respected coaching organizations to uphold training quality, support global recognition, and extend professional networks.</p>
   </div>
-  <div class="marquee" style="margin-top:40px" data-reveal="none">
-    <div class="marquee__track">
+  <div class="container partner-row" data-reveal>
       <div class="logo-tile"><img src="{IMG}image_item/partner-1.png_1749732353" alt=""></div>
       <div class="logo-tile"><img src="{IMG}image_item/partner-2.png_1749732381" alt=""></div>
       <div class="logo-tile"><img src="{IMG}image_item/partner-3.png_1749732426" alt=""></div>
       <div class="logo-tile"><img src="{IMG}image_item/partner-4.png_1749732477" alt=""></div>
-    </div>
   </div>
 </section>
 
@@ -642,79 +640,96 @@ def blog_post(page):
     return layout(page, body)
 
 # ====================================================================== COACHING CERTIFICATION (pathway journey)
+def acc_cards(cards, open_first=True):
+    """Compact open/close cards. cards: list of dicts {num, title, sub, body, badges:[(file, alt)]}."""
+    out = []
+    for i, c in enumerate(cards):
+        is_open = ' is-open' if (open_first and i == 0) else ''
+        badges = ''.join(f'<img src="/assets/img/badges/{f}.png" alt="{esc(a)}" loading="lazy">' for f, a in c.get('badges', []) if f)
+        sub = f'<p class="acc-card__sub">{c["sub"]}</p>' if c.get('sub') else ''
+        bd = f'<div class="acc-card__badges">{badges}</div>' if badges else ''
+        out.append(
+            f'<article class="acc-card{is_open}" data-reveal>'
+            f'<button class="acc-card__head" type="button" aria-expanded="{"true" if is_open else "false"}">'
+            f'<span class="acc-card__num">{c["num"]}</span><span class="acc-card__title">{c["title"]}</span><span class="acc-card__chev" aria-hidden="true"></span></button>'
+            f'<div class="acc-card__body"><div class="acc-card__inner">{sub}<div class="prose">{c["body"]}</div>{bd}</div></div>'
+            f'</article>')
+    return f'<div class="acc-cards" data-accordion>{"".join(out)}</div>'
+
+def split_section(left_html, right_html, surface=False):
+    cls = ' section--surface' if surface else ''
+    return (f'<section class="section{cls}"><div class="container split-sticky">'
+            f'<div class="split-sticky__left"><div class="prose prose--wide" data-auto-reveal>{left_html}</div></div>'
+            f'<div class="split-sticky__right">{right_html}</div></div></section>')
+
 def certification(page):
+    import os
     c = page['content']
     # 1. stats block
     m = re.search(r'<h2>(Proven Success[^<]*)</h2>\s*<p>(\d+)</p>\s*<p>([^<]+)</p>\s*<p>(\d+)</p>\s*<p>([^<]+)</p>', c)
     stats = ''
     if m:
-        stats = f'''
-<section class="section section--green section--tight">
-  <div class="container">
-    <h2 data-reveal style="max-width:20ch">{m.group(1)}</h2>
-    <div class="stats" style="grid-template-columns:repeat(2,1fr);max-width:720px">
-      <div class="stat" data-reveal><div class="stat__num" data-count="{m.group(2)}">0</div><div class="stat__label">{m.group(3)}</div></div>
-      <div class="stat" data-reveal><div class="stat__num" data-count="{m.group(4)}">0</div><div class="stat__label">{m.group(5)}</div></div>
-    </div>
-  </div>
-</section>'''
+        stats = (f'<section class="section section--green section--tight"><div class="container">'
+                 f'<h2 data-reveal style="max-width:20ch">{m.group(1)}</h2>'
+                 f'<div class="stats" style="grid-template-columns:repeat(2,1fr);max-width:720px">'
+                 f'<div class="stat" data-reveal><div class="stat__num" data-count="{m.group(2)}">0</div><div class="stat__label">{m.group(3)}</div></div>'
+                 f'<div class="stat" data-reveal><div class="stat__num" data-count="{m.group(4)}">0</div><div class="stat__label">{m.group(5)}</div></div>'
+                 f'</div></div></section>')
         c = c.replace(m.group(0), '')
-    # 2. the four Advantages (accordion) -> curved journey
-    details = re.findall(r'<details>\s*<summary>(.*?)</summary>(.*?)</details>', c, re.S)
-    journey = ''
-    if details:
-        items = ''.join(f'<li class="milestone"><div class="milestone__card"><div class="milestone__year">Advantage {i+1:02d}</div><h3>{t.strip()}</h3><p>{re.sub(r"</?p>", "", b).strip()}</p></div></li>' for i, (t, b) in enumerate(details))
-        journey = f'''
-<div class="journey" style="margin-top:56px">
-  <svg class="journey__svg" aria-hidden="true"><path class="track" d=""/><path class="draw" d=""/><circle class="halo" r="14"/><circle class="dot" r="6"/></svg>
-  <ol class="journey__list">{items}</ol>
-</div>'''
-        c = re.sub(r'(<details>.*?</details>\s*)+', '@@JOURNEY@@', c, count=1, flags=re.S)
-    # 2b. the accreditation strip (a flattened jpeg on the live site) -> the transparent badges
+    # 2. the accreditation strip (a flattened jpeg on the live site) -> the transparent badges
     BADGES = [('icf-level-1', 'ICF Level 1 accredited coaching education'), ('icf-level-2', 'ICF Level 2 accredited coaching education'),
               ('icf-level-3', 'ICF Level 3 accredited coaching education'), ('icf-aatc', 'ICF Advanced Accreditation in Team Coaching'),
               ('icf-cce', 'ICF Continuing Coach Education'), ('coaching-impact-award', 'ICF Coaching Impact Award')]
     grid = '<div class="badge-strip" data-strip>' + ''.join(f'<img src="/assets/img/badges/{f}.png" alt="{a}" loading="lazy">' for f, a in BADGES) + '</div>'
     c = re.sub(r'<img[^>]*src="data:image/jpeg[^"]*"[^>]*>', grid, c, count=1)
-    # 3. track cards (icon, h3, p, p, picture) -> feature rows
-    tracks = re.findall(r'<img[^>]*entry-level-icon1\.png"[^>]*>\s*<h3>(.*?)</h3>\s*<p>(.*?)</p>\s*(<p>.*?</p>)\s*(?:<img[^>]*src="([^"]+)"[^>]*>)?', c, re.S)
-    rows = ''
-    if tracks:
-        PAIRS = [('icf-acc', 'ICF Associate Certified Coach', 'cma-certified-professional-coach', 'Certified Professional Coach'),
-                 ('icf-pcc', 'ICF Professional Certified Coach', 'cma-advanced-practitioner-cpc', 'Advanced Practitioner Certified Professional Coach'),
-                 ('icf-mcc', 'ICF Master Certified Coach', 'cma-advanced-practitioner-cpc', 'Advanced Practitioner Certified Professional Coach'),
-                 ('icf-team-coaching', 'ICF Team Coaching Advanced Certification', 'cma-certified-team-coach', 'Certified Team Coach')]
-        for i, (t, sub, desc, pic) in enumerate(tracks):
-            a, aa, b, ba = PAIRS[i % len(PAIRS)]
-            rows += f'''
-<div class="feature-row">
-  <figure class="feature-row__media badge-pair" data-reveal="scale"><img src="/assets/img/badges/{a}.png" alt="{aa}" loading="lazy"><img src="/assets/img/badges/{b}.png" alt="{ba}" loading="lazy"></figure>
-  <div data-reveal><span class="pill" style="margin-bottom:14px">{re.sub(r"<[^>]+>", "", sub).strip()}</span><h3>{re.sub(r"</?strong>", "", t)}</h3><div class="prose">{desc}</div></div>
-</div>'''
-        c = re.sub(r'(<img[^>]*entry-level-icon1\.png"[^>]*>\s*<h3>.*?</h3>\s*<p>.*?</p>\s*<p>.*?</p>\s*(?:<img[^>]*>)?\s*)+', '@@TRACKS@@', c, count=1, flags=re.S)
-    # 4. split remaining prose around the placeholders
-    parts = re.split(r'(@@JOURNEY@@|@@TRACKS@@)', c)
-    out = ''
-    for part in parts:
-        if part == '@@JOURNEY@@': out += f'</div></div></section><section class="section section--surface"><div class="container">{journey}</div></section><section class="section"><div class="container"><div class="prose prose--wide" data-auto-reveal>'
-        elif part == '@@TRACKS@@': out += f'</div>{rows}<div class="prose prose--wide" data-auto-reveal>'
-        else: out += part
+
+    # 3. slice the page: intro | credential paths + 4 Advantages | pathway + 4 tracks | tail (call + form)
+    i_paths = c.find('<h3> Your Pathway to ICF Certification')
+    if i_paths < 0: i_paths = c.find('<h2>ICF Credential Paths')
+    i_details = c.find('<details>')
+    i_tracks_head = c.find('<h2>Explore Your Coaching Pathway')
+    i_track_items = c.find('<img', i_tracks_head)
+    track_re = re.compile(r'<img[^>]*entry-level-icon1\.png"[^>]*>\s*<h3>(.*?)</h3>\s*<p>(.*?)</p>\s*(<p>.*?</p>)\s*(?:<img[^>]*src="([^"]+)"[^>]*>)?', re.S)
+    tracks = list(track_re.finditer(c, i_track_items))
+    i_tail = tracks[-1].end() if tracks else len(c)
+
+    intro = c[:i_paths]
+    paths_left = c[i_paths:i_details]
+    details = re.findall(r'<details>\s*<summary>(.*?)</summary>(.*?)</details>', c[i_details:i_tracks_head], re.S)
+    tracks_left = c[i_tracks_head:i_track_items]
+    tail = c[i_tail:]
+
+    adv_cards = [{'num': f'{i+1:02d}', 'title': t.strip(), 'body': b.strip()} for i, (t, b) in enumerate(details)]
+    # each track: its ICF level badge, the ICF credential and the CMA seal, as on the live site's own pictures
+    TRACK_BADGES = [
+        [('icf-level-1', 'ICF Level 1'), ('icf-acc', 'ICF Associate Certified Coach'), ('cma-certified-professional-coach', 'CMA Certified Professional Coach')],
+        [('icf-level-2', 'ICF Level 2'), ('icf-pcc', 'ICF Professional Certified Coach'), ('cma-advanced-practitioner-cpc', 'CMA Advanced Practitioner Certified Professional Coach')],
+        [('icf-level-3', 'ICF Level 3'), ('icf-mcc', 'ICF Master Certified Coach'), ('cma-certified-master-coach', 'CMA Certified Master Coach')],
+        [('icf-aatc', 'ICF Advanced Accreditation in Team Coaching'), ('icf-team-coaching', 'ICF Team Coaching Advanced Certification'), ('cma-certified-team-coach', 'CMA Certified Team Coach')],
+    ]
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    def have(f): return os.path.exists(os.path.join(root, 'assets', 'img', 'badges', f + '.png'))
+    track_cards = []
+    for i, mt in enumerate(tracks):
+        t, sub, desc, _pic = mt.groups()
+        track_cards.append({'num': f'{i+1:02d}', 'title': re.sub(r'</?strong>', '', t).strip(), 'sub': re.sub(r'<[^>]+>', '', sub).strip(),
+                            'body': desc, 'badges': [(f, a) for f, a in TRACK_BADGES[i % 4] if have(f)]})
+
     # the interest form at the end becomes a step-by-step form (same fields, same wording)
-    k = out.rfind('<form')
+    k = tail.rfind('<form')
     if k >= 0:
-        end_tag = out.index('>', k)
-        attrs = out[k+5:end_tag]
-        out = out[:k] + '<form' + attrs + ' class="js-steps" data-steps="2,2,5,3">' + out[end_tag+1:]
-    body = subnav(page) + page_hero(page) + awards_band() + f'''
-<section class="section section--tight">
-  <div class="container"><div class="prose prose--wide" data-auto-reveal style="max-width:820px">{out}</div></div>
-</section>
-{stats}
-{cta_band()}'''
-    # stats belong right after the intro: move them before the first split section
-    body = body.replace(stats, '', 1)
-    body = body.replace('</div></div></section><section class="section section--surface">', f'</div></div></section>{stats}<section class="section section--surface">', 1)
+        end_tag = tail.index('>', k)
+        tail = tail[:k] + '<form' + tail[k+5:end_tag] + ' class="js-steps" data-steps="2,2,5,3">' + tail[end_tag+1:]
+
+    body = (subnav(page) + page_hero(page) + awards_band()
+            + f'<section class="section section--tight"><div class="container"><div class="prose prose--wide" data-auto-reveal style="max-width:820px">{intro}</div></div></section>'
+            + stats
+            + split_section(paths_left, acc_cards(adv_cards), surface=True)
+            + split_section(tracks_left, acc_cards(track_cards))
+            + f'<section class="section section--tight"><div class="container"><div class="prose prose--wide" data-auto-reveal style="max-width:820px">{tail}</div></div></section>'
+            + cta_band())
     return layout(page, body)
+
 
 RENDERERS.update({
     '/icf-coaching-training-program': certification,
