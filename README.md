@@ -35,8 +35,7 @@ assets/                   source of dist/assets
 
 * **Copy is verbatim.** Nothing was rewritten, added or removed. Run
   `python3 src/verify.py` after any change; it must report `0 with missing copy`
-  (the one accepted exception is `/our-faculty`, where "Name I Credential" is
-  laid out on two lines).
+  (the site's " I " separators are treated as line breaks by the check).
 * **Images and files** point at the live site (`https://www.coachmastersacademy.com/...`)
   so nothing needs re-uploading. Swap the prefix when moving assets.
 * **Colours**: `#eb6422` orange, `#17380E` deep green, `#E55C00` dark orange (see `:root` in main.css).

@@ -285,6 +285,7 @@ def build():
     if os.path.exists(DIST): shutil.rmtree(DIST)
     os.makedirs(DIST)
     shutil.copytree(os.path.join(ROOT, 'assets'), os.path.join(DIST, 'assets'))
+    shutil.copy(os.path.join(ROOT, 'src', 'HANDOFF.md'), os.path.join(DIST, 'HANDOFF.md'))
     import pages_custom
     custom = pages_custom.RENDERERS
     n = 0
