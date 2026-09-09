@@ -1,0 +1,379 @@
+[
+ {
+  "id": "americas",
+  "label": "Americas",
+  "offices": [
+   {
+    "country": "North America",
+    "rows": [
+     {
+      "label": "Office",
+      "value": "222 E. McDowell Rd Unit 2033, Phoenix, Arizona 85004",
+      "href": null
+     },
+     {
+      "label": "Phone",
+      "value": "+1 (312) 714-7597",
+      "href": null
+     },
+     {
+      "label": "Email",
+      "value": "cma.northamerica@coachmastersacademy.com",
+      "href": "mailto:cma.northamerica@coachmastersacademy.com"
+     }
+    ]
+   },
+   {
+    "country": "South America",
+    "rows": [
+     {
+      "label": "Email",
+      "value": "cma.southamerica@coachmastersacademy.com",
+      "href": "mailto:cma.southamerica@coachmastersacademy.com"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "europe",
+  "label": "Europe",
+  "offices": [
+   {
+    "country": "United Kingdom",
+    "rows": [
+     {
+      "label": "Email",
+      "value": "cma.uk@coachmastersacademy.com",
+      "href": "mailto:cma.uk@coachmastersacademy.com"
+     },
+     {
+      "label": "Website",
+      "value": "View Details",
+      "href": "https://www.coachmastersacademy.com/events/news/icf-approved-coach-training-certification-course-and-program-in-united-kingdom-london"
+     }
+    ]
+   },
+   {
+    "country": "Eastern Europe",
+    "rows": [
+     {
+      "label": "Phone",
+      "value": "+40-761-680-689",
+      "href": null
+     },
+     {
+      "label": "Email",
+      "value": "cma.easterneurope@coachmastersacademy.com",
+      "href": "mailto:cma.easterneurope@coachmastersacademy.com"
+     },
+     {
+      "label": "Website",
+      "value": "View Details",
+      "href": "https://www.coachmastersacademy.com/events/news/icf-approved-coaching-certificate-training-program-in-romania-bucharest-iasi-cluj"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "middle-east",
+  "label": "Middle East & Gulf",
+  "offices": [
+   {
+    "country": "UAE",
+    "rows": [
+     {
+      "label": "Phone",
+      "value": "+971-556-686-100",
+      "href": null
+     },
+     {
+      "label": "Email",
+      "value": "cma.uae@coachmastersacademy.com",
+      "href": "mailto:cma.uae@coachmastersacademy.com"
+     },
+     {
+      "label": "Website",
+      "value": "View Details",
+      "href": "https://www.coachmastersacademy.com/events/news/icf-approved-coaching-certificate-training-course-and-program-in-uae-abu-dhabi"
+     }
+    ]
+   },
+   {
+    "country": "Lebanon",
+    "rows": [
+     {
+      "label": "Office",
+      "value": "Koraytem - Bader Demashkieh Street - Beirut",
+      "href": null
+     },
+     {
+      "label": "Phone",
+      "value": "+961-386-4445",
+      "href": null
+     },
+     {
+      "label": "Email",
+      "value": "cma.lebanon@coachmastersacademy.com",
+      "href": "mailto:cma.lebanon@coachmastersacademy.com"
+     },
+     {
+      "label": "Website",
+      "value": "View Details",
+      "href": "https://www.coachmastersacademy.com/events/news/icf-approved-coaching-certificate-training-program-in-lebanon-beirut"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "africa",
+  "label": "Africa",
+  "offices": [
+   {
+    "country": "West Africa",
+    "rows": [
+     {
+      "label": "Office",
+      "value": "77 Awolowo Road, 3rd Floor YMCA building, Ikoyi, Lagos, Nigeria",
+      "href": null
+     },
+     {
+      "label": "Phone",
+      "value": "+234-703-418-0641",
+      "href": null
+     },
+     {
+      "label": "Email",
+      "value": "cma.westafrica@coachmastersacademy.com",
+      "href": "mailto:cma.westafrica@coachmastersacademy.com"
+     },
+     {
+      "label": "Website",
+      "value": "View Details",
+      "href": "https://www.coachmastersacademy.com/events/news/icf-approved-coaching-certificate-training-course-in-nigeria-lagos"
+     }
+    ]
+   },
+   {
+    "country": "East Africa",
+    "rows": [
+     {
+      "label": "Email",
+      "value": "cma.eastafrica@coachmastersacademy.com",
+      "href": "mailto:cma.eastafrica@coachmastersacademy.com"
+     },
+     {
+      "label": "Kenya",
+      "value": "View Details",
+      "href": "https://www.coachmastersacademy.com/events/news/icf-approved-coaching-certification-training-program-in-kenya-nairobi"
+     },
+     {
+      "label": "Uganda",
+      "value": "View Details",
+      "href": "https://www.coachmastersacademy.com/events/news/icf-approved-coaching-certificate-training-in-uganda-kampala"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "south-asia",
+  "label": "South Asia",
+  "offices": [
+   {
+    "country": "India",
+    "rows": [
+     {
+      "label": "Phone",
+      "value": "+91-998-777-1199",
+      "href": null
+     },
+     {
+      "label": "Email",
+      "value": "cma.india@coachmastersacademy.com",
+      "href": "mailto:cma.india@coachmastersacademy.com"
+     }
+    ]
+   },
+   {
+    "country": "Sri Lanka",
+    "rows": [
+     {
+      "label": "Email",
+      "value": "cma.srilanka@coachmastersacademy.com",
+      "href": "mailto:cma.srilanka@coachmastersacademy.com"
+     },
+     {
+      "label": "Website",
+      "value": "View Details",
+      "href": "https://www.coachmastersacademy.com/events/news/icf-approved-coach-training-in-colombo"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "asia",
+  "label": "Asia",
+  "offices": [
+   {
+    "country": "Singapore",
+    "rows": [
+     {
+      "label": "Office",
+      "value": "1 Raffles Place, Tower 2, Level 19 & 20, Singapore 048616",
+      "href": null
+     },
+     {
+      "label": "Phone",
+      "value": "+65-8299-8170",
+      "href": null
+     },
+     {
+      "label": "Email",
+      "value": "cma.singapore@coachmastersacademy.com",
+      "href": "mailto:cma.singapore@coachmastersacademy.com"
+     },
+     {
+      "label": "Website",
+      "value": "View Details",
+      "href": "https://www.coachmastersacademy.com/events/news/icf-approved-coaching-certificate-training-in-singapore"
+     }
+    ]
+   },
+   {
+    "country": "Greater China & Hong Kong",
+    "rows": [
+     {
+      "label": "Phone",
+      "value": "+86 135 3003 0732 +852-91-958-398",
+      "href": null
+     },
+     {
+      "label": "Email",
+      "value": "cma.hongkong@coachmastersacademy.com",
+      "href": "mailto:cma.hongkong@coachmastersacademy.com"
+     },
+     {
+      "label": "Website",
+      "value": "View Details",
+      "href": "https://www.coachmastersacademy.com/events/news/icf-approved-coaching-certificate-training-in-hong-kong"
+     }
+    ]
+   },
+   {
+    "country": "Vietnam",
+    "rows": [
+     {
+      "label": "Phone",
+      "value": "+84-908-663-994",
+      "href": null
+     },
+     {
+      "label": "Email",
+      "value": "cma.vietnam@coachmastersacademy.com",
+      "href": "mailto:cma.vietnam@coachmastersacademy.com"
+     },
+     {
+      "label": "Website",
+      "value": "View Details",
+      "href": "https://www.coachmastersacademy.com/events/news/icf-approved-coaching-certificate-training-program-in-hanoi"
+     }
+    ]
+   },
+   {
+    "country": "Philippines",
+    "rows": [
+     {
+      "label": "Email",
+      "value": "cma.philippines@coachmastersacademy.com",
+      "href": "mailto:cma.philippines@coachmastersacademy.com"
+     }
+    ]
+   },
+   {
+    "country": "Malaysia",
+    "rows": [
+     {
+      "label": "Email",
+      "value": "cma.malaysia@coachmastersacademy.com",
+      "href": "mailto:cma.malaysia@coachmastersacademy.com"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "oceania",
+  "label": "Oceania Pacific",
+  "offices": [
+   {
+    "country": "Japan",
+    "rows": [
+     {
+      "label": "Office",
+      "value": "3-20-1, 5F (BrainMaid), Minami Azabu, Minato ku, Tokyo, Japan, 106-0047",
+      "href": null
+     },
+     {
+      "label": "Phone",
+      "value": "+81-908-347-8821",
+      "href": null
+     },
+     {
+      "label": "Email",
+      "value": "cma.japan@coachmastersacademy.com",
+      "href": "mailto:cma.japan@coachmastersacademy.com"
+     },
+     {
+      "label": "Website",
+      "value": "View Details",
+      "href": "https://www.coachmastersacademy.com/events/news/icf-approved-coaching-certificate-training-course-and-program-in-japan-tokyo"
+     }
+    ]
+   },
+   {
+    "country": "Australia",
+    "rows": [
+     {
+      "label": "Email",
+      "value": "cma.australia@coachmastersacademy.com",
+      "href": "mailto:cma.australia@coachmastersacademy.com"
+     },
+     {
+      "label": "Website",
+      "value": "View Details",
+      "href": "https://www.coachmastersacademy.com/events/news/icf-approved-coaching-certificate-training-program-in-australia-melbourne"
+     }
+    ]
+   },
+   {
+    "country": "New Zealand",
+    "rows": [
+     {
+      "label": "Office",
+      "value": "PO Box 91020, 9349 Wakatipu, New Zealand",
+      "href": null
+     },
+     {
+      "label": "Phone",
+      "value": "+64212030880",
+      "href": null
+     },
+     {
+      "label": "Email",
+      "value": "cma.newzealand@coachmastersacademy.com",
+      "href": "mailto:cma.newzealand@coachmastersacademy.com"
+     },
+     {
+      "label": "Website",
+      "value": "View Details",
+      "href": "https://www.coachmastersacademy.com/events/news/icf-approved-coaching-certificate-training-in-new-zealand"
+     }
+    ]
+   }
+  ]
+ }
+]

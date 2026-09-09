@@ -52,6 +52,7 @@
   /* ---------- step-by-step forms, open/close cards ---------- */
   initSteps();
   initAccordions();
+  initOffices();
 
   /* ---------- marquee: duplicate track content for seamless loop ---------- */
   doc.querySelectorAll('.marquee__track').forEach(function (t) { t.innerHTML += t.innerHTML; });
@@ -339,6 +340,33 @@
           if (win.ScrollTrigger) setTimeout(function () { ScrollTrigger.refresh(); }, 600);
         });
       });
+    });
+  }
+
+  /* ============================================================
+     Regional offices: region tabs switch the list; picking an office
+     moves the map to it.
+     ============================================================ */
+  function initOffices() {
+    doc.querySelectorAll('[data-offices]').forEach(function (root) {
+      var tabs = root.querySelectorAll('.offices__tabs button');
+      var panels = root.querySelectorAll('.offices__panel');
+      var frame = root.querySelector('.offices__map iframe');
+      function go(q) { if (frame && q) frame.src = 'https://maps.google.com/maps?q=' + q + '&z=13&output=embed'; }
+      function pick(card) {
+        root.querySelectorAll('.office').forEach(function (o) { o.classList.remove('is-active'); });
+        card.classList.add('is-active'); go(card.dataset.q);
+      }
+      tabs.forEach(function (b) {
+        b.addEventListener('click', function () {
+          tabs.forEach(function (x) { x.classList.toggle('is-active', x === b); });
+          panels.forEach(function (p) { p.hidden = p.dataset.region !== b.dataset.region; });
+          var first = root.querySelector('.offices__panel:not([hidden]) .office');
+          if (first) pick(first);
+          if (hasGsap && !reduce) { var p = root.querySelector('.offices__panel:not([hidden])'); gsap.from(p.children, { opacity: 0, y: 16, duration: .5, stagger: .06, ease: 'power3.out', clearProps: 'all' }); }
+        });
+      });
+      root.querySelectorAll('.office').forEach(function (card) { card.addEventListener('click', function () { pick(card); }); });
     });
   }
 

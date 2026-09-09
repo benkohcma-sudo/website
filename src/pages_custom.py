@@ -890,19 +890,21 @@ def render_blocks(blocks):
             out.append(f'<div class="media media--wide" data-reveal="scale" style="max-width:820px"><img src="{esc(b["src"])}" alt="{esc(b["alt"])}" loading="lazy" data-parallax="24"></div>')
     return '\n'.join(f'<div class="lp-block lp-block--{b["t"]}">{h}</div>' for b, h in zip(blocks, out))
 
-def smart_page(page):
+def smart_page(page, extra=''):
     """Generic pages: plain text keeps the article + aside; anything with image
-    runs, stat numbers or card patterns gets the landing layout."""
+    runs, stat numbers or card patterns gets the landing layout. `extra` is a
+    hand-built section slotted in before the registration band."""
     from build import strip_duplicate_heading
     content = strip_duplicate_heading(page['content'], page.get('h1'))
     content = re.sub(r'^\s*<h1>.*?</h1>', '', content, count=1, flags=re.S)
     blocks = parse_blocks(content)
-    if all(b['t'] in ('prose', 'media', 'head') for b in blocks) and sum(1 for b in blocks if b['t'] == 'media') <= 1:
+    if not extra and all(b['t'] in ('prose', 'media', 'head') for b in blocks) and sum(1 for b in blocks if b['t'] == 'media') <= 1:
         return generic_page(page)
     body = subnav(page) + page_hero(page) + f'''
 <section class="section section--tight landing">
   <div class="container">{render_blocks(blocks)}</div>
 </section>
+{extra}
 {cta_band()}'''
     return layout(page, body)
 
@@ -971,3 +973,46 @@ def founder(page):
     return layout(page, body)
 
 RENDERERS['/icf-master-certified-coach-mcc'] = founder
+
+
+# ====================================================================== regional offices (Coaching Education)
+def offices_section():
+    """Region tabs, office cards and a map that follows the selected office.
+    Data: src/content/offices.json, taken verbatim from the live page's tab block."""
+    import json, os, urllib.parse
+    data = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'content', 'offices.json')))
+    def query(office):
+        addr = next((r['value'] for r in office['rows'] if r['label'] == 'Office'), '')
+        return urllib.parse.quote(addr or office['country'] + ' Coach Masters Academy')
+    tabs = ''.join(f'<button type="button" role="tab"{" class=is-active" if i == 0 else ""} data-region="{r["id"]}">{esc(r["label"])}</button>' for i, r in enumerate(data))
+    panels = ''
+    for i, r in enumerate(data):
+        cards = ''
+        for j, o in enumerate(r['offices']):
+            rows = ''
+            for row in o['rows']:
+                ext = ' target="_blank" rel="noopener"' if (row['href'] or '').startswith('http') else ''
+                val = f'<a href="{esc(row["href"])}"{ext}>{esc(row["value"])}</a>' if row['href'] else esc(row['value'])
+                rows += f'<div class="office__row"><span>{esc(row["label"])}</span><span>{val}</span></div>'
+            cards += (f'<button type="button" class="office{" is-active" if j == 0 else ""}" data-q="{query(o)}">'
+                      f'<span class="office__name">{PIN}{esc(o["country"])}</span>{rows}</button>')
+        panels += f'<div class="offices__panel"{"" if i == 0 else " hidden"} data-region="{r["id"]}">{cards}</div>'
+    first = query(data[0]['offices'][0])
+    return f'''
+<section class="section offices" data-offices>
+  <div class="container">
+    <div class="tabs offices__tabs" role="tablist" data-reveal="none">{tabs}</div>
+    <div class="offices__grid">
+      <div class="offices__list">{panels}</div>
+      <div class="offices__map" data-reveal="scale">
+        <iframe title="Office location map" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen
+          src="https://maps.google.com/maps?q={first}&z=13&output=embed"></iframe>
+      </div>
+    </div>
+  </div>
+</section>'''
+
+def coaching_education(page):
+    return smart_page(page, extra=offices_section())
+
+RENDERERS['/pages/coaching-education'] = coaching_education

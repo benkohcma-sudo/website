@@ -67,6 +67,7 @@ def convert_widgets(root):
         content = nav.find_next_sibling(class_='tab-content') or (nav.parent.select_one('.tab-content') if nav.parent else None)
         if not content: continue
         panes = content.select('.tab-pane')
+        if not panes: continue                      # not a Bootstrap tab set; keep the markup as it is
         wrap = T('div')
         for i, pane in enumerate(panes):
             d = T('details'); 
