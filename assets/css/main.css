@@ -744,9 +744,12 @@ html.is-locked, html.is-locked body { overflow: hidden; height: 100%; overscroll
 .badge-pair figcaption { position: absolute; left: 0; right: 0; bottom: 14px; text-align: center; font-family: var(--font-head); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
 
 /* ---------- landing layout for flat CMS pages ---------- */
-.landing .lp-block + .lp-block { margin-top: clamp(36px, 5vw, 64px); }
-.landing .lp-block--head + .lp-block { margin-top: 28px; }
-.landing .lp-block--prose + .lp-block--prose { margin-top: 24px; }
+.landing .lp-block + .lp-block { margin-top: clamp(28px, 3.5vw, 44px); }
+.landing .lp-block--head + .lp-block { margin-top: 14px; }
+.landing .section-head { margin-bottom: 0; }
+.landing .section-head h2 { margin-bottom: 10px; }
+.landing .lp-block--prose + .lp-block--prose { margin-top: 20px; }
+.landing .lp-block:first-child .prose > :first-child, .landing .prose--wide > :first-child { margin-top: 0; }
 .landing .prose--wide { max-width: 860px; }
 .landing.section--tight { padding-top: 0; }
 .page-hero { padding-bottom: clamp(28px, 4vw, 48px); }
@@ -756,11 +759,18 @@ html.is-locked, html.is-locked body { overflow: hidden; height: 100%; overscroll
 .stats-row .stat { padding: 22px 20px; }
 @media (max-width: 900px) { .stats-row { grid-template-columns: 1fr !important; } }
 .lp-block--stats + .lp-block--stats { margin-top: 28px; }
-.logo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
-.logo-cell { display: grid; place-items: center; aspect-ratio: 4 / 3; padding: 18px; background: #fff; border: 1px solid var(--line); border-radius: 16px; transition: transform .4s var(--ease), box-shadow .4s var(--ease); }
-.logo-cell img { max-height: 100%; max-width: 100%; object-fit: contain; opacity: .9; transition: opacity .3s, transform .4s var(--ease); }
-.logo-cell:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
-.logo-cell:hover img { opacity: 1; transform: scale(1.04); }
+/* a short run of badges: one transparent row that fills the column */
+.logo-row { display: flex; justify-content: space-between; align-items: center; gap: clamp(14px, 2.4vw, 32px); padding: 18px 0 8px; overflow: hidden; max-width: 860px; }
+.logo-cell { flex: 1 1 0; min-width: 0; max-width: 150px; display: grid; place-items: center; aspect-ratio: 1; }
+.logo-cell img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 8px 18px rgba(23,56,14,.10)); transition: transform .4s var(--ease); }
+.logo-cell:hover img { transform: translateY(-3px) scale(1.04); }
+@media (max-width: 640px) { .logo-row { flex-wrap: wrap; justify-content: center; } .logo-cell { flex: 0 0 28%; } }
+/* many client logos: two endless lanes drifting opposite ways, no tiles */
+.logo-lanes { display: grid; gap: 28px; margin-top: 8px; }
+.logo-lanes .marquee__track { gap: clamp(48px, 5vw, 88px); align-items: center; }
+.logo-tile--client { height: 72px; width: 170px; padding: 0; opacity: 1; filter: none; }
+.logo-tile--client img { max-height: 64px; max-width: 100%; width: auto; object-fit: contain; }
+@media (max-width: 640px) { .logo-tile--client { height: 56px; width: 130px; } .logo-tile--client img { max-height: 48px; } }
 .icon-card__img { width: 64px; height: 64px; border-radius: 16px; background: var(--orange-soft); display: grid; place-items: center; margin-bottom: 20px; overflow: hidden; }
 .icon-card__img img { width: 40px; height: 40px; object-fit: contain; }
 .icon-card h3 { font-size: 20px; }

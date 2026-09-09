@@ -835,8 +835,22 @@ def render_blocks(blocks):
             title = f'<h3 data-reveal>{esc(b["title"])}</h3>' if b['title'] else ''
             out.append(f'<div class="stats-group">{title}<div class="stats" style="grid-template-columns:repeat({min(4, len(b["items"]))},1fr)">{cards}</div></div>')
         elif t == 'logos':
-            tiles = ''.join(f'<div class="logo-cell" data-reveal><img src="{esc(s)}" alt="{esc(a)}" loading="lazy"></div>' for s, a in b['items'])
-            out.append(f'<div class="logo-grid">{tiles}</div>')
+            SWAP = {'level-1.png': 'icf-level-1', 'level-2.png': 'icf-level-2', 'level-3.png': 'icf-level-3', 'cce.png': 'icf-cce'}
+            def swap(src):
+                name = src.rsplit('/', 1)[-1]
+                return f'/assets/img/badges/{SWAP[name]}.png' if name in SWAP else src
+            items = [(swap(src), alt) for src, alt in b['items']]
+            if len(items) >= 8:
+                # two endless lanes drifting opposite ways; the JS doubles each track for a seamless loop
+                half = (len(items) + 1) // 2
+                lane = lambda its: ''.join(f'<div class="logo-tile logo-tile--client"><img src="{esc(s)}" alt="{esc(a)}" loading="lazy"></div>' for s, a in its)
+                out.append(f'<div class="logo-lanes" data-reveal="none">'
+                           f'<div class="marquee"><div class="marquee__track" style="animation-duration:48s">{lane(items[:half])}</div></div>'
+                           f'<div class="marquee marquee--reverse"><div class="marquee__track" style="animation-duration:56s">{lane(items[half:])}</div></div>'
+                           f'</div>')
+            else:
+                tiles = ''.join(f'<div class="logo-cell"><img src="{esc(s)}" alt="{esc(a)}" loading="lazy"></div>' for s, a in items)
+                out.append(f'<div class="logo-row" data-strip>{tiles}</div>')
         elif t == 'cards':
             cards = ''
             for c in b['items']:
