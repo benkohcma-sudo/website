@@ -219,8 +219,22 @@ def emphasize(main_html):
     main_html = re.sub(r'<(p|h5)(?:\s[^>]*)?>\s*((?:“|&ldquo;|"|&quot;)[^<]{40,}?(?:”|&rdquo;|"|&quot;))([^<]{0,90})</\1>', lambda m: quote(m) + '</div>', main_html)
     return main_html
 
+# links that are dead on the live site itself (WordPress tag pages returning 404): shown as plain text
+DEAD_LINKS = {'/blog/blog/coaching-articles/' + t for t in (
+    'agency', 'choice', 'coaching-approach', 'coaching-education', 'coaching-mindset', 'coaching-training',
+    'leadership-development', 'personal-agency', 'professional-coaching', 'self-help', 'transformational-approach', 'transformative-coaching',
+    'self-coaching', 'transformative-edge')}
+
+def fix_links(body_html):
+    # uploaded files (audio, PDFs) live on the client's server, not in this build
+    body_html = re.sub(r'href="(/blog/wp-content/[^"]+)"', lambda m: f'href="{SITE}{m.group(1)}" target="_blank" rel="noopener"', body_html)
+    def unwrap(m):
+        href = m.group(1).split('#')[0].rstrip('/')
+        return m.group(2) if href in DEAD_LINKS else m.group(0)
+    return re.sub(r'<a href="([^"]+)"[^>]*>(.*?)</a>', unwrap, body_html, flags=re.S)
+
 def layout(page, body, extra_head='', extra_js='', body_class=''):
-    body = emphasize(body)
+    body = fix_links(emphasize(body))
     title = page.get('title') or 'Coach Masters Academy'
     desc = page.get('description', '')
     return f'''<!doctype html>

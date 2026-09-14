@@ -592,7 +592,7 @@ def listing_page(page, heading=None, kind='cards'):
 
 def blog_listing(page): return listing_page(page, page.get('h1') or 'Resource')
 def news_listing(page): return listing_page(page, 'News')
-def gallery_listing(page): return listing_page(page, 'Gallery', kind='gallery')
+def gallery_listing(page): return listing_page(dict(page, banner=''), 'Gallery', kind='gallery')
 def workshops_listing(page): return listing_page(page, 'Workshops')
 
 def wide_page(page, heading=None):
@@ -834,15 +834,29 @@ def merge_stat_rows(blocks):
     return out
 
 def attach_logo_intros(blocks):
-    """A heading (+ short paragraph) right before a logo run becomes the logo section's own centred intro."""
+    """The heading (+ up to two short paragraphs) right before a logo run moves inside the logo band,
+    so heading, text and logos read as one centred section."""
     out = []
     for b in blocks:
         if b['t'] == 'logos' and out and out[-1]['t'] in ('prose', 'head'):
             prev = out[-1]
-            html_ = prev['html'] if prev['t'] == 'prose' else f'<p class="eyebrow">{esc(prev["eyebrow"])}</p><h2>{prev["h2"]}</h2>'
-            tags = re.findall(r'<(h2|h3|p|ul|ol|img|div)', html_)
-            if prev['t'] == 'head' or (tags and tags[0] in ('h2', 'h3') and len(tags) <= 3 and 'ul' not in tags and 'img' not in tags):
-                out.pop(); b = dict(b, intro=html_)
+            if prev['t'] == 'head':
+                out.pop(); b = dict(b, intro=f'<p class="eyebrow">{esc(prev["eyebrow"])}</p><h2>{prev["h2"]}</h2>')
+            else:
+                soup = BeautifulSoup(prev['html'], 'lxml'); root = soup.body or soup
+                nodes = [n for n in root.children if getattr(n, 'name', None) or str(n).strip()]
+                hi = max((k for k, n in enumerate(nodes) if getattr(n, 'name', None) in ('h2', 'h3')), default=-1)
+                tail = nodes[hi:] if hi >= 0 else []
+                if tail and len(tail) <= 4 and all(getattr(n, 'name', None) in ('h2', 'h3', 'p') for n in tail) \
+                   and sum(len(_txt(n).split()) for n in tail[1:]) <= 80:
+                    # a short line right above the heading (an eyebrow) comes along too
+                    if hi >= 1 and getattr(nodes[hi - 1], 'name', None) in ('h3', 'p') and len(_txt(nodes[hi - 1]).split()) <= 8:
+                        hi -= 1; tail = nodes[hi:]
+                    intro = ''.join(str(n) for n in tail)
+                    rest = ''.join(str(n) for n in nodes[:hi])
+                    if rest.strip(): out[-1] = dict(prev, html=rest)
+                    else: out.pop()
+                    b = dict(b, intro=intro)
         out.append(b)
     return out
 
@@ -1255,7 +1269,8 @@ def sectionize(blocks):
 
 _orig_render_blocks = render_blocks
 def render_blocks(blocks):
-    blocks = sectionize(lift_actions(pair_media(blocks)))
+    # whole-list passes first (they look at neighbouring blocks), then the layout passes
+    blocks = sectionize(lift_actions(pair_media(attach_logo_intros(merge_stat_rows(blocks)))))
     out = []
     for b in blocks:
         if b['t'] == 'feature':

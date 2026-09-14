@@ -1015,3 +1015,11 @@ main > section:last-child:not(.cta-full) { padding-bottom: clamp(72px, 9vw, 140p
 .split-sticky__left .prose--wide h2 { font-size: clamp(26px, 2.8vw, 36px); }
 .split-sticky__left .prose--wide > p { color: var(--body); }
 @media (max-width: 900px) { .feature-row--flip .feature-row__media { order: 0; } }
+
+/* ---------- section heads over full-width content sit centred, so no empty right-hand gap ---------- */
+.section > .container > .section-head:not(.section-head--row) { margin-left: auto; margin-right: auto; text-align: center; max-width: 880px; }
+.section > .container > .section-head:not(.section-head--row) p,
+.section > .container > .section-head:not(.section-head--row) .lead { margin-left: auto; margin-right: auto; }
+.logo-section__intro .eyebrow, .logo-section__intro > h3:first-child { display: block; font-family: var(--font-head); font-size: 12.5px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--orange); margin: 0 0 12px; }
+.logo-section__intro h2 { font-size: clamp(28px, 3.4vw, 44px); }
+.logo-section { margin-top: clamp(28px, 4vw, 48px); }
