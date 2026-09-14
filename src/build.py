@@ -218,8 +218,34 @@ def page_heading(page):
     slug = page['url'].rstrip('/').split('/')[-1].split('?')[0]
     return html.unescape(slug).replace('%20', ' ').replace('-', ' ').strip().title() or 'Coach Masters Academy'
 
+# full-width photo heroes for the main section pages (photo on the right, title on the left)
+HERO_IMAGES = {
+    '/events/calendar': 'schedule',
+    '/executive-leadership-coaching-service-for-managers-and-leaders': 'coaching-service',
+    '/mentor-coaching': 'mentoring', '/pages/mentor-coaching': 'mentoring',
+    '/icf-coaching-training-program': 'certification',
+    '/coaching-skill-training-course-and-workshop': 'workshop',
+    '/pages/coaching-education': 'coaching-education',
+    '/registration': 'registration',
+}
+
 def page_hero(page, label=None, lead=''):
     h = label or page_heading(page)
+    img = HERO_IMAGES.get(page['url'])
+    if img:
+        return f'''
+<section class="page-hero page-hero--image">
+  <img class="page-hero__photo" src="/assets/img/hero/{img}.jpg" alt="" data-parallax="26">
+  <div class="page-hero__scrim"></div>
+  <div class="container"><div class="page-hero__narrow">
+    {crumbs(page, h)}
+    <h1 data-split>{esc(h)}</h1>
+    {f'<p class="lead" data-reveal style="margin-top:22px">{lead}</p>' if lead else ''}
+  </div></div>
+</section>'''
+    return _page_hero_plain(page, h, lead)
+
+def _page_hero_plain(page, h, lead=''):
     banner = f'<div class="page-hero__banner" data-reveal="scale"><img src="{esc(page["banner"])}" alt="" data-parallax="30"></div>' if page.get('banner') else ''
     return f'''
 <section class="page-hero{' page-hero--banner' if banner else ''}">
