@@ -1002,3 +1002,16 @@ main > section:last-child:not(.cta-full) { padding-bottom: clamp(72px, 9vw, 140p
 }
 .logo-section--flush { margin-top: 40px; }
 .page-hero--image .lead--more { margin-top: 12px; }
+
+/* ---------- layout pass: image + text pairs, button rows, two-column sections ---------- */
+.lp-block--feature { max-width: none; }
+.feature-row--flip .feature-row__media { order: 2; }
+.feature-row .prose h2, .feature-row .prose h3 { margin-top: 0; }
+.feature-row .prose { max-width: none; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.lp-block--actions { max-width: var(--measure); margin-inline: auto; }
+.lp-block--section2 { max-width: none; }
+.lp-block--section2 + .lp-block--section2 { margin-top: clamp(40px, 6vw, 80px); padding-top: clamp(32px, 5vw, 64px); border-top: 1px solid var(--line); }
+.split-sticky__left .prose--wide h2 { font-size: clamp(26px, 2.8vw, 36px); }
+.split-sticky__left .prose--wide > p { color: var(--body); }
+@media (max-width: 900px) { .feature-row--flip .feature-row__media { order: 0; } }

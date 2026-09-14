@@ -1157,3 +1157,133 @@ def webinar_detail(page):
     return layout(page, body)
 
 PREFIX_RENDERERS.insert(0, ('/webinar/', webinar_detail))
+
+
+# ====================================================================== layout pass: pairs, buttons, sectioned text
+ACTION_RE = re.compile(r'read more|register|download|click here|schedule|apply|enquir|view (all|details|more)|learn more|book|contact', re.I)
+
+def _split_prose_for_feature(html_, max_words=150):
+    """Take a heading (h2/h3) and the paragraphs/lists that follow it, up to ~max_words, off the front of a prose block."""
+    soup = BeautifulSoup(html_, 'lxml'); root = soup.body or soup
+    nodes = [n for n in root.children if getattr(n, 'name', None) or str(n).strip()]
+    if not nodes: return '', html_
+    take, words, i = [], 0, 0
+    if getattr(nodes[0], 'name', None) in ('h2', 'h3', 'h4'): take.append(str(nodes[0])); i = 1
+    while i < len(nodes):
+        n = nodes[i]; nm = getattr(n, 'name', None)
+        if nm in ('h2', 'h3', 'h4', 'img', 'form', 'table', 'details'): break
+        w = len(_txt(n).split())
+        if words and words + w > max_words: break
+        take.append(str(n)); words += w; i += 1
+    if not take: return '', html_
+    return ''.join(take), ''.join(str(n) for n in nodes[i:])
+
+def pair_media(blocks):
+    """A lone image beside plain text becomes one side-by-side row (alternating sides)."""
+    out = []; i = 0; flip = False
+    while i < len(blocks):
+        b = blocks[i]
+        if b['t'] == 'media':
+            nxt = blocks[i + 1] if i + 1 < len(blocks) else None
+            prv = out[-1] if out else None
+            if nxt and nxt['t'] == 'prose':
+                text, rest = _split_prose_for_feature(nxt['html'])
+                if text:
+                    out.append({'t': 'feature', 'img': b['src'], 'alt': b['alt'], 'html': text, 'flip': flip}); flip = not flip
+                    if rest.strip(): blocks[i + 1] = dict(nxt, html=rest)
+                    else: i += 1
+                    i += 1; continue
+            if prv and prv['t'] == 'prose':
+                soup = BeautifulSoup(prv['html'], 'lxml'); root = soup.body or soup
+                nodes = [n for n in root.children if getattr(n, 'name', None) or str(n).strip()]
+                # last heading + what follows it becomes the pair's text
+                hi = max((k for k, n in enumerate(nodes) if getattr(n, 'name', None) in ('h2', 'h3', 'h4')), default=-1)
+                if hi >= 0 and len(nodes) - hi <= 6:
+                    text = ''.join(str(n) for n in nodes[hi:]); rest = ''.join(str(n) for n in nodes[:hi])
+                    if rest.strip(): out[-1] = dict(prv, html=rest)
+                    else: out.pop()
+                    out.append({'t': 'feature', 'img': b['src'], 'alt': b['alt'], 'html': text, 'flip': flip}); flip = not flip
+                    i += 1; continue
+        out.append(b); i += 1
+    return out
+
+def lift_actions(blocks):
+    """Standalone action links inside prose become a button row."""
+    out = []
+    for b in blocks:
+        if b['t'] != 'prose': out.append(b); continue
+        soup = BeautifulSoup(b['html'], 'lxml'); root = soup.body or soup
+        nodes = [n for n in root.children if getattr(n, 'name', None) or str(n).strip()]
+        buf = []; acts = []
+        def flush_prose():
+            if buf: out.append({'t': 'prose', 'html': ''.join(buf)}); buf.clear()
+        def flush_acts():
+            if acts: out.append({'t': 'actions', 'items': list(acts)}); acts.clear()
+        for n in nodes:
+            nm = getattr(n, 'name', None)
+            a = None
+            if nm == 'a' and n.get('href'): a = n
+            elif nm == 'p' and len([c for c in n.children if getattr(c, 'name', None) or str(c).strip()]) == 1 and n.find('a', href=True) and not n.find('img'):
+                a = n.find('a', href=True)
+            if a is not None and ACTION_RE.search(a.get_text()) and len(a.get_text().split()) <= 6:
+                flush_prose(); acts.append((a.get_text(' ', strip=True), a['href'])); continue
+            flush_acts(); buf.append(str(n))
+        flush_prose(); flush_acts()
+    return out
+
+def sectionize(blocks):
+    """Long text-only pages: each h2 opens a two-column section (heading + lead on the left, the rest on the right)."""
+    if any(b['t'] not in ('prose', 'head', 'actions') for b in blocks): return blocks
+    html_ = ''.join(b['html'] for b in blocks if b['t'] == 'prose')
+    if html_.count('<h2>') < 2 or '<details' in html_ or '<form' in html_ or len(re.sub(r'<[^>]+>', ' ', html_).split()) < 500: return blocks
+    out = []
+    for b in blocks:
+        if b['t'] != 'prose': out.append(b); continue
+        parts = re.split(r'(?=<h2>)', b['html'])
+        for part in parts:
+            if not part.strip(): continue
+            if not part.startswith('<h2>'): out.append({'t': 'prose', 'html': part}); continue
+            m = re.match(r'(<h2>.*?</h2>)\s*(<p>.*?</p>)?(.*)', part, re.S)
+            h2, first, rest = m.group(1), (m.group(2) or ''), (m.group(3) or '')
+            if not (first + rest).strip(): out.append({'t': 'prose', 'html': part}); continue
+            words = lambda h: len(re.sub(r'<[^>]+>', ' ', h).split())
+            # the opening paragraph only joins the heading on the left when plenty remains for the right column
+            if words(rest) >= 80 and words(first) <= 90: left, right = h2 + first, rest
+            else: left, right = h2, first + rest
+            out.append({'t': 'section2', 'left': left, 'right': right})
+    return out
+
+_orig_render_blocks = render_blocks
+def render_blocks(blocks):
+    blocks = sectionize(lift_actions(pair_media(blocks)))
+    out = []
+    for b in blocks:
+        if b['t'] == 'feature':
+            out.append(f'<div class="lp-block lp-block--feature"><div class="feature-row{" feature-row--flip" if b["flip"] else ""}">'
+                       f'<div class="feature-row__media media" data-reveal="scale"><img src="{esc(b["img"])}" alt="{esc(b["alt"])}" loading="lazy" data-parallax="18"></div>'
+                       f'<div class="prose" data-auto-reveal>{b["html"]}</div></div></div>')
+        elif b['t'] == 'actions':
+            btns = ''.join(btn(t, h, '' if k == 0 else 'btn--ghost') for k, (t, h) in enumerate(b['items']))
+            out.append(f'<div class="lp-block lp-block--actions"><div class="actions" data-reveal>{btns}</div></div>')
+        elif b['t'] == 'section2':
+            out.append(f'<div class="lp-block lp-block--section2"><div class="split-sticky"><div class="split-sticky__left"><div class="prose prose--wide" data-auto-reveal>{b["left"]}</div></div>'
+                       f'<div class="split-sticky__right"><div class="prose prose--wide" data-auto-reveal>{b["right"]}</div></div></div></div>')
+        else:
+            out.append(_orig_render_blocks([b]))
+    return '\n'.join(out)
+
+# text-only pages go through the same layout pass instead of the plain article template
+_orig_generic = generic_page
+def generic_page(page):
+    from build import strip_duplicate_heading, subnav as _sub, page_hero as _hero, layout as _layout, take_lead as _lead
+    content = strip_duplicate_heading(page['content'], page.get('h1'))
+    content = re.sub(r'^\s*<h1>.*?</h1>', '', content, count=1, flags=re.S)
+    lead, content = _lead(page, content)
+    blocks = sectionize(lift_actions(pair_media(parse_blocks(content))))
+    if all(b['t'] == 'prose' for b in blocks): return _orig_generic(page)
+    body = _sub(page) + _hero(page, lead=lead) + f'''
+<section class="section section--tight landing">
+  <div class="container">{render_blocks(blocks)}</div>
+</section>
+{cta_band()}'''
+    return _layout(page, body)
