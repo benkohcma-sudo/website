@@ -1016,3 +1016,137 @@ def coaching_education(page):
     return smart_page(page, extra=offices_section())
 
 RENDERERS['/pages/coaching-education'] = coaching_education
+
+
+# ====================================================================== blog (WordPress) — listings, posts, widgets
+def blog_widgets(content):
+    """Pull WordPress's sidebar widgets (pagination list, search form, Categories list)
+    out of the flat content. Returns (content_without_widgets, pagination_html, tools_html)."""
+    soup = BeautifulSoup(content, 'lxml'); root = soup.body or soup
+    pag = ''; search = ''; cats = ''
+    # pagination: a <ul> whose links point at /blog/page/N
+    for ul in root.find_all('ul'):
+        links = ul.find_all('a', href=True)
+        if links and all('/blog/page/' in a['href'] or a.get_text(strip=True) in ('…', '...') for a in links):
+            items = []
+            for li in ul.find_all('li'):
+                a = li.find('a'); t = li.get_text(strip=True)
+                if not t and not a: continue
+                if not t: continue                                   # WP's empty "next" arrow
+                if a and a.get('href'): items.append(f'<a href="{esc(a["href"])}">{esc(t)}</a>')
+                elif t in ('…', '...'): items.append('<span>…</span>')
+                else: items.append(f'<span class="is-active">{esc(t)}</span>')
+            pag = '<nav class="pagination" aria-label="Pages">' + ''.join(items) + '</nav>'
+            ul.decompose(); break
+    for cf in root.find_all('form'):                                   # WordPress comment form is chrome, not copy
+        if 'wp-comments-post' in (cf.get('action') or ''):
+            prev = cf.find_previous_sibling(['h2', 'h3'])
+            if prev is not None and 'Leave a Reply' in prev.get_text(): prev.decompose()
+            cf.decompose()
+    f = next((f for f in root.find_all('form') if f.find('input', attrs={'type': 'search'})), None)
+    if f is not None:
+        search = ('<form class="blog-search" action="/blog" method="get" role="search">'
+                  '<input name="s" type="search" placeholder="Search…" aria-label="Search the blog">'
+                  '<button type="submit" aria-label="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button></form>')
+        f.decompose()
+    h = next((h for h in root.find_all(['h2', 'h3']) if h.get_text(strip=True) == 'Categories'), None)
+    if h is not None:
+        ul = h.find_next_sibling('ul')
+        if ul is not None:
+            chips = ''.join(f'<a class="chip-link" href="{esc(a["href"])}">{esc(a.get_text(strip=True))}</a>' for a in ul.find_all('a', href=True))
+            cats = f'<div class="blog-cats"><span class="blog-cats__label">Categories</span>{chips}</div>'
+            ul.decompose()
+        h.decompose()
+    rest = ''.join(str(n) for n in root.children)
+    tools = f'<div class="blog-tools">{search}{cats}</div>' if (search or cats) else ''
+    return rest, pag, tools
+
+def blog_listing(page):
+    content, pag, tools = blog_widgets(page['content'])
+    groups = card_groups(content)
+    cards = ''
+    for g in groups:
+        if not g['title']: continue
+        href = g['href'] or '#'
+        cards += f'''<article class="card card--image" data-reveal>
+  <a class="card__media" href="{esc(href)}"><img src="{esc(g['img'])}" alt="{esc(g['alt'])}" loading="lazy"></a>
+  <div class="card__body">{f'<span class="pill" style="margin-bottom:12px">{esc(g["date"])}</span>' if g['date'] else ''}<h3><a href="{esc(href)}">{esc(g['title'])}</a></h3>{f'<p>{esc(g["excerpt"])}</p>' if g['excerpt'] else ''}{link('Read More', href)}</div>
+</article>'''
+    heading = page.get('h1') or 'Resource'
+    body = subnav(page) + page_hero(page, heading) + f'''
+<section class="section section--tight">
+  <div class="container">
+    {tools}
+    <div class="grid grid-3" style="margin-top:32px">{cards}</div>
+    {pag}
+  </div>
+</section>'''
+    return layout(page, body)
+
+def blog_post(page):
+    content, pag, tools = blog_widgets(page['content'])
+    content = re.sub(r'^\s*<h1>.*?</h1>', '', content, count=1, flags=re.S)
+    m = re.search(r'^\s*<img[^>]*src="([^"]+)"[^>]*>', content)
+    hero_img = ''
+    if m: hero_img = m.group(1); content = content[m.end():]
+    d = re.search(r'^\s*<h5>(.*?)</h5>', content, re.S); date = ''
+    if d: date = d.group(1).strip(); content = content[d.end():]
+    content = re.sub(r'^\s*<h3>\s*' + re.escape(html.escape(page['h1'], quote=False)) + r'\s*</h3>', '', content, count=1)
+    body = f'''
+<section class="page-hero">
+  <div class="container"><div class="page-hero__narrow">
+    {crumbs(page)}
+    {f'<span class="pill" style="margin-bottom:18px">{esc(date)}</span>' if date else ''}
+    <h1 data-split>{esc(page['h1'])}</h1>
+    {f'<div class="page-hero__banner" data-reveal="scale"><img src="{esc(hero_img)}" alt="" data-parallax="30"></div>' if hero_img else ''}
+  </div></div>
+</section>
+<section class="section section--tight landing">
+  <div class="container"><div class="prose prose--wide" data-auto-reveal>{content}</div></div>
+</section>
+{f'<section class="section section--tight section--surface"><div class="container">{tools}</div></section>' if tools else ''}'''
+    return layout(page, body)
+
+def blog_page(page):
+    """Any /blog URL: a listing if it holds several posts, otherwise a single post."""
+    return blog_listing(page) if len(re.findall(r'>Read More<', page['content'])) >= 2 else blog_post(page)
+
+RENDERERS['/blog/'] = blog_page
+RENDERERS['/blog/coaching'] = blog_listing
+PREFIX_RENDERERS[:] = [(k, (blog_page if k.startswith('/blog') else f)) for k, f in PREFIX_RENDERERS]
+PREFIX_RENDERERS.insert(0, ('/blog/', blog_page))
+
+
+# ====================================================================== webinar detail
+def webinar_detail(page):
+    c = page['content']
+    m = re.search(r'<h2>(.*?)</h2>', c, re.S)
+    title = date = reg_href = reg_text = ''
+    if m:
+        inner = m.group(1)
+        a = re.search(r'<a href="([^"]+)"[^>]*>(.*?)</a>', inner, re.S)
+        if a: reg_href, reg_text = a.group(1), re.sub(r'<[^>]+>', '', a.group(2)).strip(); inner = inner.replace(a.group(0), '')
+        text = re.sub(r'\s+', ' ', re.sub(r'<[^>]+>', '', inner)).strip()
+        d = re.search(r'(\d{1,2}\s+[A-Za-z]{3}\s*,.*)$', text)
+        if d or a:                                   # a programme title: "Name  11 Jan , 12:00 AM Singapore  Register Now"
+            if d: date = d.group(1).strip(); title = text[:d.start()].strip()
+            else: title = text
+            c = c.replace(m.group(0), '', 1)
+        else: reg_href = reg_text = ''               # an ordinary heading: leave it in the body
+    title = title or page_heading(page)
+    body = subnav(page) + f'''
+<section class="page-hero{' page-hero--banner' if page.get('banner') else ''}">
+  <div class="container"><div class="page-hero__narrow">
+    {crumbs(page, title)}
+    {f'<span class="pill" style="margin-bottom:18px">{esc(date)}</span>' if date else ''}
+    <h1 data-split>{esc(title)}</h1>
+    {f'<p data-reveal style="margin-top:24px">{btn(reg_text, reg_href)}</p>' if reg_href else ''}
+    {f'<div class="page-hero__banner" data-reveal="scale"><img src="{esc(page["banner"])}" alt="" data-parallax="30"></div>' if page.get('banner') else ''}
+  </div></div>
+</section>
+<section class="section section--tight landing">
+  <div class="container">{render_blocks(parse_blocks(c))}</div>
+</section>'''
+    return layout(page, body)
+
+PREFIX_RENDERERS.insert(0, ('/webinar/', webinar_detail))

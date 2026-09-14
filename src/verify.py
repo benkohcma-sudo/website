@@ -18,7 +18,8 @@ bad = 0; checked = 0
 for page in P:
     src = BeautifulSoup(page['content'], 'lxml').get_text('\n')
     dst = norm(BeautifulSoup(open(out_path(page['url']), encoding='utf-8').read(), 'lxml').get_text(' '))
-    missing = [s for s in set(sentences(src)) if s not in dst]
+    BOILER = ('Your email address will not be published', 'Required fields are marked', 'Leave a Reply', 'Cancel reply', 'Save my name, email, and website')
+    missing = [s for s in set(sentences(src)) if s not in dst and not any(b in s for b in BOILER)]
     missing += [norm(s) for s in [page.get('h1','')] if s and norm(s) not in dst]
     checked += 1
     if missing:

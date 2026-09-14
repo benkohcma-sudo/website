@@ -100,6 +100,8 @@ def clean(node):
     for t in list(node.find_all(True)):
         if t.parent is None: continue
         if t.name in DROP_TAGS: t.decompose()
+    for t in list(node.find_all(['input', 'select', 'textarea'])):
+        if t.parent is not None and not t.find_parent('form'): t.decompose()
     for t in list(node.find_all(True)):
         if t.parent is None: continue
         if t.name == 'i' and not t.get_text(strip=True): t.decompose(); continue
@@ -124,6 +126,8 @@ def clean(node):
     s = re.sub(r'\n{2,}', '\n', s)
     s = re.sub(r'(<br/?>\s*){3,}', '<br><br>', s)
     s = re.sub(r'<a href="#">\s*Accept\s*</a>', '', s)                 # cookie bar
+    s = re.sub(r'<a(?:\s[^>]*)?>\s*</a>', '', s)                      # empty links (share icons, image wrappers)
+    s = re.sub(r'<h1>(.*?)</h1>', r'<h2>\1</h2>', s, flags=re.S)            # any h1 left in the body is a section heading
     s = re.sub(r'<a href="javascript:[^"]*">\s*(<img[^>]*>)\s*</a>', r'\1', s)
     s = re.sub(r'<(h[1-6])>\s*<\1>(.*?)</\1>\s*</\1>', r'<\1>\2</\1>', s, flags=re.S)  # nested same heading
     return s.strip()

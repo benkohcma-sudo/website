@@ -910,3 +910,15 @@ main > section:last-child:not(.cta-full) { padding-bottom: clamp(72px, 9vw, 140p
 .offices__map { position: sticky; top: 110px; border-radius: 22px; overflow: hidden; border: 1px solid var(--line); background: var(--surface); aspect-ratio: 4 / 3.4; box-shadow: var(--shadow); }
 .offices__map iframe { width: 100%; height: 100%; border: 0; display: block; }
 @media (max-width: 900px) { .offices__grid { grid-template-columns: 1fr; } .offices__map { position: static; aspect-ratio: 16 / 10; order: -1; } }
+
+/* ---------- blog tools: search + categories (WordPress widgets, restyled) ---------- */
+.blog-tools { display: grid; gap: 18px; }
+.blog-search { display: flex; max-width: 460px; border: 1px solid var(--line); border-radius: 999px; background: #fff; overflow: hidden; }
+.blog-search input { flex: 1; border: 0; padding: 13px 18px; font: inherit; font-size: 15px; color: var(--ink); background: transparent; outline: 0; }
+.blog-search button { border: 0; background: var(--orange); color: #fff; width: 48px; display: grid; place-items: center; cursor: pointer; }
+.blog-search button svg { width: 18px; height: 18px; }
+.blog-cats { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.blog-cats__label { font-family: var(--font-head); font-size: 12px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-right: 6px; }
+.chip-link { display: inline-block; padding: 7px 14px; border-radius: 999px; border: 1px solid var(--line); background: #fff; font-size: 13.5px; color: var(--ink); transition: border-color .2s, color .2s, background .2s; }
+.chip-link:hover { border-color: var(--orange); color: var(--orange); }
+.pagination span:not(.is-active) { border: 0; }
