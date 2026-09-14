@@ -458,15 +458,14 @@ def faculty_section(page, compact=False, top=False):
     tabs = ''.join(f'<button type="button"{" class=is-active" if i == 0 else ""}>{esc(g["title"])}</button>' for i, g in enumerate(groups))
     tracks = ''.join('<div class="faculty__track"' + (' hidden' if i else '') + '>' + ''.join(person_card(p) for p in g['people']) + '</div>' for i, g in enumerate(groups))
     n0 = len(groups[0]['people']) if groups else 0
+    title = '<h1 data-split>Meet the minds behind <em class="hl">meaningful change.</em></h1>' if top else '<h2 data-reveal>Meet the minds behind meaningful change.</h2>'
+    head_html = '' if compact else ('<div><p class="eyebrow" data-reveal>Our Global Faculty</p>' + title +
+        '<p class="lead" data-reveal>World-class coaches, trainers and thought leaders united by a shared purpose: to elevate coaching, empower people and shape a better future together.</p></div>')
     return f'''
 <section class="section faculty">
   <div class="container">
     <div class="faculty__head{' faculty__head--bare' if compact else ''}">
-      {'' if compact else '''<div>
-        <p class="eyebrow" data-reveal>Our Global Faculty</p>
-        ''' + ('<h1 data-split>Meet the minds behind <em class="hl">meaningful change.</em></h1>' if top else '<h2 data-reveal>Meet the minds behind meaningful change.</h2>') + '''
-        <p class="lead" data-reveal>World-class coaches, trainers and thought leaders united by a shared purpose: to elevate coaching, empower people and shape a better future together.</p>
-      </div>'''}
+      {head_html}
       <div class="faculty__controls" data-reveal>
         <button class="arrow-btn" type="button" data-prev aria-label="Previous"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5m7-7-7 7 7 7"/></svg></button>
         <div><div class="counter">01 <span>/ {n0:02d}</span></div><div class="bar" style="margin-top:8px"><i></i></div></div>
