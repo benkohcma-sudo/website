@@ -55,7 +55,12 @@
   initOffices();
 
   /* ---------- marquee: duplicate track content for seamless loop ---------- */
-  doc.querySelectorAll('.marquee__track').forEach(function (t) { t.innerHTML += t.innerHTML; });
+  doc.querySelectorAll('.marquee__track').forEach(function (t) {
+    var once = t.innerHTML, box = t.parentElement ? t.parentElement.clientWidth : win.innerWidth, n = 0;
+    while (t.scrollWidth < box * 2 && n < 6) { t.innerHTML += once; n++; }   // enough copies for a seamless loop
+    if (n === 0) t.innerHTML += once;
+  });
+  initElastic();
 
   if (reduce || !hasGsap) {
     doc.querySelectorAll('[data-reveal]').forEach(function (el) { el.style.opacity = 1; el.style.transform = 'none'; });
@@ -367,6 +372,20 @@
         });
       });
       root.querySelectorAll('.office').forEach(function (card) { card.addEventListener('click', function () { pick(card); }); });
+    });
+  }
+
+  /* ============================================================
+     Elastic expanding gallery: the hovered or tapped panel springs open
+     ============================================================ */
+  function initElastic() {
+    doc.querySelectorAll('[data-elastic]').forEach(function (g) {
+      var panels = Array.prototype.slice.call(g.querySelectorAll('.elastic__panel'));
+      var activate = function (p) { panels.forEach(function (x) { x.classList.toggle('is-active', x === p); }); };
+      panels.forEach(function (p) {
+        p.addEventListener('click', function () { activate(p); });
+        if (win.matchMedia('(pointer:fine)').matches) p.addEventListener('mouseenter', function () { activate(p); });
+      });
     });
   }
 

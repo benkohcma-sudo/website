@@ -332,9 +332,13 @@ def take_lead(page, content):
     """For pages with a photo hero, the opening paragraph (if it comes before any heading)
     becomes the hero's subheading. Returns (lead_html, remaining_content)."""
     if page['url'] not in HERO_IMAGES: return '', content
-    m = re.match(r'\s*<p>(.*?)</p>', content, re.S)
-    if not m or '<img' in m.group(1): return '', content
-    return m.group(1).strip(), content[m.end():]
+    paras, pos = [], 0
+    while len(paras) < 3:                                   # every paragraph before the first heading
+        m = re.match(r'\s*<p>(.*?)</p>', content[pos:], re.S)
+        if not m or '<img' in m.group(1): break
+        paras.append(m.group(1).strip()); pos += m.end()
+    if not paras or sum(len(re.sub(r'<[^>]+>', ' ', x).split()) for x in paras) > 140: return '', content
+    return '</p><p class="lead lead--more" data-reveal>'.join(paras), content[pos:]
 
 def page_hero(page, label=None, lead=''):
     h = label or page_heading(page)
