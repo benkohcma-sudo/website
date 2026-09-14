@@ -124,7 +124,103 @@ def footer():
   </div>
 </footer>'''
 
+# key phrases that turn orange in section headings (copy unchanged, only colour)
+HEADING_HL = {
+    'Advancing Human Potential Through Global Coaching Certification': 'Global Coaching Certification',
+    'ICF-Accredited Coaching Certification with Industry-leading Standards': 'Industry-leading Standards',
+    'Coaching Methodology Grounded in Science for Sustainable Change': 'Sustainable Change',
+    'Why Choose Coach Masters Academy for Your Life Coach Certification': 'Life Coach Certification',
+    'Real-World Coaching Skills Developed with Industry Professionals': 'Industry Professionals',
+    'Join a Live Coaching Experience & Gain Practical Insight': 'Practical Insight',
+    'Download Full Program Brochure & Curriculum Guide': 'Curriculum Guide',
+    'Trusted Partnerships with Leading Coaching Experts & Organizations': 'Leading Coaching Experts',
+    'Hear what our clients shared about their learning experiences with us.': 'learning experiences',
+    'Latest News, Insights & Upcoming Events in Coaching': 'Upcoming Events',
+    'Inspiring Positive Change Through mastery of coaching.': 'mastery of coaching.',
+    'A Vision to Inspire Positive Change through Mastery of Coaching': 'Mastery of Coaching',
+    'Our Mission': 'Mission',
+    'Meet the minds behind meaningful change.': 'meaningful change.',
+    'Unassuming Beginning with a Noble Mission': 'Noble Mission',
+    'ICF Coaching Education that Starts Where Real Change Begins': 'Real Change Begins',
+    'Proven Success: Coaching Cohorts, Graduates, and More': 'Coaching Cohorts, Graduates, and More',
+    'ICF Credential Paths: From ACC to MCC': 'From ACC to MCC',
+    'Explore Your Coaching Pathway: Foundational to Mastery': 'Foundational to Mastery',
+    'Comprehensive Suite of ICF Accredited Coaching Education': 'ICF Accredited Coaching Education',
+    'Our Premium Services': 'Premium',
+    'Certified and experienced coaching professionals': 'coaching professionals',
+    'Shaping Tomorrow with Our Clients.': 'Our Clients.',
+    'Not All Coaching Programs are Created the Same': 'Created the Same',
+    'Get Real Results, Real Change with our Transformational Approach': 'Transformational Approach',
+    'Learn from Anywhere. Grow Beyond Boundaries.': 'Grow Beyond Boundaries.',
+    'Explore Our Monthly Training Calendar': 'Training Calendar',
+    'Your Success Matters to Us.': 'Matters to Us.',
+    'Welcome to Coach Masters Academy.': 'Coach Masters Academy.',
+    'Your journey towards mastering coaching begins with us.': 'mastering coaching',
+    'Unique Contribution:Making Good Leaders Great': 'Good Leaders Great',
+    'Thought-Leader in the field of transforming coaching': 'transforming coaching',
+    'Become an ICF-Certified Coach with Coach Masters Academy': 'Coach Masters Academy',
+    'Coaching Workshop for Leaders and Managers': 'Leaders and Managers',
+    'Executive Leadership Coaching Services for High‑Impact Leaders': 'High‑Impact Leaders',
+    'Coaching Education': 'Education',
+    'Mentor Coaching': 'Coaching',
+    'Schedule': 'Schedule',
+    'Registration': 'Registration',
+}
+STOP = {'us', 'more', 'you', 'the', 'and', 'of', 'to', 'in', 'for', 'a', 'with', 'our', 'your', 'is', 'it'}
+
+def _hl_phrase(text):
+    t = re.sub(r'\s+', ' ', text).strip()
+    if t in HEADING_HL: return HEADING_HL[t]
+    for key, v in HEADING_HL.items():
+        if re.sub(r'\s+', ' ', key) == t: return v
+    if ':' in t and len(t.split(':', 1)[1].split()) >= 2: return t.split(':', 1)[1].strip()
+    words = t.split()
+    if len(words) >= 5 and words[-1].strip('.,!?').lower() not in STOP and words[-2].strip('.,!?').lower() not in STOP:
+        return ' '.join(words[-2:])
+    return ''
+
+def emphasize(main_html):
+    """Section headings: heavier, with the key phrase in orange. Quoted sentences: pull-quote cards."""
+    def heading(m):
+        open_tag, inner, close = m.group(1), m.group(2), m.group(3)
+        if '<' in re.sub(r'<br\s*/?>', ' ', inner) or 'class="hv__' in open_tag or 'awards__' in inner: return m.group(0)
+        plain = html.unescape(re.sub(r'<br\s*/?>', ' ', inner))
+        phrase = _hl_phrase(plain)
+        if not phrase: return m.group(0)
+        esc_phrase = html.escape(phrase, quote=False)
+        idx = inner.rfind(esc_phrase)
+        if idx < 0: idx = inner.rfind(phrase); esc_phrase = phrase if idx >= 0 else esc_phrase
+        if idx < 0: return m.group(0)
+        before, after = inner[:idx], inner[idx + len(esc_phrase):]
+        # only wrap on word boundaries, so the text still reads identically when tags are stripped
+        if (before and not before[-1].isspace() and not before.endswith('>')) or (after and not after[0].isspace() and not after.startswith('<')): return m.group(0)
+        inner = before + '<em class="hl">' + esc_phrase + '</em>' + after
+        return open_tag + inner + close
+    main_html = re.sub(r'(<h2(?:\s[^>]*)?>)(.*?)(</h2>)', heading, main_html, flags=re.S)
+    def quote(m):
+        tag, inner, cite = m.group(1), m.group(2), (m.group(3) or '')
+        if cite and not cite[0].isspace(): inner, cite = inner + cite, ''   # ", according to X" belongs to the sentence
+        cite = cite.strip()
+        plain = re.sub(r'\s+', ' ', inner).strip()
+        if len(plain) < 50 or '<' in plain.replace('<br>', '').replace('<br/>', ''): return m.group(0)
+        cite_html = f'<span class="pull__cite">{cite}</span>' if cite else ''
+        parts = re.split(r'(?<=[.!?])\s+', plain, maxsplit=1)
+        if len(parts) == 2:
+            lead, rest = parts
+            w = rest.split(' ', 3)
+            head = ' '.join(w[:3]); tail = (' ' + w[3]) if len(w) > 3 else ''
+            body = f'<span class="pull__lead">{lead}</span><strong class="pull__stmt"><em class="hl">{head}</em>{tail}</strong>'
+        else:
+            w = plain.split(' ', 3)
+            body = f'<strong class="pull__stmt"><em class="hl">{" ".join(w[:3])}</em>{(" " + w[3]) if len(w) > 3 else ""}</strong>'
+        long_cls = ' pull--long' if len(plain) > 220 else ''
+        return f'<div class="pull{long_cls}" data-reveal><i class="pull__rule"></i><{tag} class="pull__text">{body}{cite_html}</{tag}>'
+    # a quoted sentence (optionally followed by a short attribution) standing as its own paragraph
+    main_html = re.sub(r'<(p|h5)(?:\s[^>]*)?>\s*((?:“|&ldquo;|"|&quot;)[^<]{40,}?(?:”|&rdquo;|"|&quot;))([^<]{0,90})</\1>', lambda m: quote(m) + '</div>', main_html)
+    return main_html
+
 def layout(page, body, extra_head='', extra_js='', body_class=''):
+    body = emphasize(body)
     title = page.get('title') or 'Coach Masters Academy'
     desc = page.get('description', '')
     return f'''<!doctype html>
@@ -233,13 +329,17 @@ def page_hero(page, label=None, lead=''):
     h = label or page_heading(page)
     img = HERO_IMAGES.get(page['url'])
     if img:
+        phrase = _hl_phrase(h)
+        h_html = esc(h)
+        if phrase and h.endswith(phrase) and (len(h) == len(phrase) or h[-len(phrase) - 1].isspace()):
+            h_html = esc(h[:-len(phrase)]) + '<em class="hl">' + esc(phrase) + '</em>'
         return f'''
 <section class="page-hero page-hero--image">
   <img class="page-hero__photo" src="/assets/img/hero/{img}.jpg" alt="" data-parallax="26">
   <div class="page-hero__scrim"></div>
   <div class="container"><div class="page-hero__narrow">
     {crumbs(page, h)}
-    <h1 data-split>{esc(h)}</h1>
+    <h1 data-split>{h_html}</h1>
     {f'<p class="lead" data-reveal style="margin-top:22px">{lead}</p>' if lead else ''}
   </div></div>
 </section>'''

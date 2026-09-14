@@ -284,7 +284,7 @@ def about(page):
       <div class="badge-float"><img src="{SITE}/public/twenty25/images/icon-company-experience.svg" alt="" width="40" height="40"><div><b>30+</b><span>years of experience</span></div></div>
     </div>
     <div>
-      <blockquote class="prose" data-reveal style="max-width:none">“ We have always been driven by a mission to create profound shifts in coaching conversations through meaningful dialogue, facilitating more transformational change. ”</blockquote>
+      <p data-reveal>“ We have always been driven by a mission to create profound shifts in coaching conversations through meaningful dialogue, facilitating more transformational change. ”</p>
       <ul class="list-check" data-reveal style="margin-top:28px">
         <li>goal setting and accountability</li>
         <li>mindset and confidence building</li>
