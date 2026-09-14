@@ -294,6 +294,9 @@ def subnav(page):
         f'<a href="{esc(s["href"])}">{esc(s["text"])}</a>' for s in page['subnav']) + '</div></nav>'
 
 def crumbs(page, label=None):
+    return ''   # breadcrumb trails removed from every hero (design decision; section sub-navigation remains)
+
+def _crumbs_unused(page, label=None):
     parts = ['<a href="/">Home</a>']
     u = page['url']
     if u.startswith('/events/news/') or u.startswith('/events/news?'): parts.append('<span><a href="/events/news">News</a></span>')

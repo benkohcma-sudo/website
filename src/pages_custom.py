@@ -452,7 +452,7 @@ def person_card(p):
   </span>
 </button>'''
 
-def faculty_section(page, compact=False):
+def faculty_section(page, compact=False, top=False):
     groups = parse_faculty(page)
     first = split_person(groups[0]['people'][0]) if groups and groups[0]['people'] else {'name': '', 'cred': '', 'role': '', 'loc': '', 'img': ''}
     tabs = ''.join(f'<button type="button"{" class=is-active" if i == 0 else ""}>{esc(g["title"])}</button>' for i, g in enumerate(groups))
@@ -464,7 +464,7 @@ def faculty_section(page, compact=False):
     <div class="faculty__head">
       <div>
         <p class="eyebrow" data-reveal>Our Global Faculty</p>
-        <h2 data-reveal>Meet the minds behind meaningful change.</h2>
+        {'<h1 data-split>Meet the minds behind <em class="hl">meaningful change.</em></h1>' if top else '<h2 data-reveal>Meet the minds behind meaningful change.</h2>'}
         <p class="lead" data-reveal>World-class coaches, trainers and thought leaders united by a shared purpose: to elevate coaching, empower people and shape a better future together.</p>
       </div>
       <div class="faculty__controls" data-reveal>
@@ -485,10 +485,7 @@ def faculty_section(page, compact=False):
 
 def faculty(page):
     body = subnav(page) + f'''
-<section class="page-hero" style="padding-bottom:0">
-  <div class="container">{crumbs(page)}<h1 data-split>Our Faculty</h1></div>
-</section>
-{faculty_section(page)}
+{faculty_section(page, top=True)}
 {cta_band()}'''
     return layout(page, body, extra_js=globe_scripts())
 
@@ -1151,9 +1148,8 @@ def webinar_detail(page):
     body = subnav(page) + f'''
 <section class="page-hero{' page-hero--banner' if page.get('banner') else ''}">
   <div class="container"><div class="page-hero__narrow">
-    {crumbs(page, title)}
-    {f'<span class="pill" style="margin-bottom:18px">{esc(date)}</span>' if date else ''}
     <h1 data-split>{esc(title)}</h1>
+    {f'<p class="lead" data-reveal style="margin-top:18px"><span class="pill">{esc(date)}</span></p>' if date else ''}
     {f'<p data-reveal style="margin-top:24px">{btn(reg_text, reg_href)}</p>' if reg_href else ''}
     {f'<div class="page-hero__banner" data-reveal="scale"><img src="{esc(page["banner"])}" alt="" data-parallax="30"></div>' if page.get('banner') else ''}
   </div></div>
