@@ -71,15 +71,15 @@ def home(page):
     </div>
     <div class="grid grid-3">
       <a class="service" href="/icf-coaching-training-program" data-reveal>
-        <img src="{IMG}image_item/services-1.jpg_1749723834" alt="">
+        <img src="/assets/img/pathway-1.jpg" alt="" loading="lazy">
         <div class="service__body"><h3>ICF COACHING CERTIFICATION PROGRAMS FOR ASPIRING COACHES</h3><p>Achieve personal mastery and a globally recognized professional coach certification.</p><span class="link">Read More{ARROW}</span></div>
       </a>
       <a class="service" href="/coaching-skill-training-course-and-workshop" data-reveal>
-        <img src="{IMG}image_item/services-2.jpg_1749723874" alt="">
+        <img src="/assets/img/pathway-2.jpg" alt="" loading="lazy">
         <div class="service__body"><h3>INTERACTIVE WORKSHOPS AND PRACTICAL LABS FOR COACHES</h3><p>Equip leaders to integrate coaching skills as part of their managerial role to improve work engagement.</p><span class="link">Read More{ARROW}</span></div>
       </a>
       <a class="service" href="/executive-leadership-coaching-service-for-managers-and-leaders" data-reveal>
-        <img src="{IMG}image_item/services-3.jpg_1749723934" alt="">
+        <img src="/assets/img/pathway-3.jpg" alt="" loading="lazy">
         <div class="service__body"><h3>EXECUTIVE COACHING CERTIFICATION IN LEADERSHIP DEVELOPMENT</h3><p>Accelerate your team and leaders’ effectiveness and efficiency for optimal performance with our leadership development program.</p><span class="link">Read More{ARROW}</span></div>
       </a>
     </div>
