@@ -328,6 +328,14 @@ HERO_IMAGES = {
     '/registration': 'registration',
 }
 
+def take_lead(page, content):
+    """For pages with a photo hero, the opening paragraph (if it comes before any heading)
+    becomes the hero's subheading. Returns (lead_html, remaining_content)."""
+    if page['url'] not in HERO_IMAGES: return '', content
+    m = re.match(r'\s*<p>(.*?)</p>', content, re.S)
+    if not m or '<img' in m.group(1): return '', content
+    return m.group(1).strip(), content[m.end():]
+
 def page_hero(page, label=None, lead=''):
     h = label or page_heading(page)
     img = HERO_IMAGES.get(page['url'])
@@ -385,7 +393,8 @@ def strip_duplicate_heading(content, h1):
 def generic_page(page):
     content = strip_duplicate_heading(page['content'], page.get('h1'))
     content = re.sub(r'<details>', '<details open>', content, count=1)
-    body = subnav(page) + page_hero(page) + f'''
+    lead, content = take_lead(page, content)
+    body = subnav(page) + page_hero(page, lead=lead) + f'''
 <section class="section section--tight landing">
   <div class="container"><div class="prose prose--wide" data-auto-reveal>{content}</div></div>
 </section>'''

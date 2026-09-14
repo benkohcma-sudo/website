@@ -4,7 +4,7 @@ that every sentence from the crawled page still appears in the generated one.
 """
 import re, html
 from bs4 import BeautifulSoup
-from build import (PAGES, layout, page_hero, subnav, crumbs, btn, link, aside, esc, ARROW, PIN, generic_page, SITE, PHONE, EMAIL, page_heading, awards_band)
+from build import (PAGES, layout, page_hero, subnav, crumbs, btn, link, aside, esc, ARROW, PIN, generic_page, SITE, PHONE, EMAIL, page_heading, awards_band, take_lead)
 
 IMG = SITE + '/public/storage/'
 
@@ -603,7 +603,8 @@ def workshops_listing(page): return listing_page(page, 'Workshops')
 def wide_page(page, heading=None):
     """Long-form pages that need the full width (tables, calendars, forms)."""
     content = re.sub(r'^\s*<h1>.*?</h1>', '', page['content'], count=1, flags=re.S)
-    body = subnav(page) + page_hero(page, heading) + f'''
+    lead, content = take_lead(page, content)
+    body = subnav(page) + page_hero(page, heading, lead=lead) + f'''
 <section class="section section--tight">
   <div class="container"><div class="prose prose--wide" data-auto-reveal>{content}</div></div>
 </section>'''
@@ -693,6 +694,7 @@ def certification(page):
     i_tail = tracks[-1].end() if tracks else len(c)
 
     intro = c[:i_paths]
+    lead, intro = take_lead(page, intro)
     paths_left = c[i_paths:i_details]
     details = re.findall(r'<details>\s*<summary>(.*?)</summary>(.*?)</details>', c[i_details:i_tracks_head], re.S)
     tracks_left = c[i_tracks_head:i_track_items]
@@ -727,7 +729,7 @@ def certification(page):
                 f'<p class="lead" data-reveal style="margin:0 auto 22px">{mc.group(1)}</p>'
                 f'{btn(mc.group(3), mc.group(2))}</div></section>')
         tail = tail[mc.end():]
-    body = (subnav(page) + page_hero(page) + awards_band()
+    body = (subnav(page) + page_hero(page, lead=lead) + awards_band()
             + f'<section class="section section--tight"><div class="container"><div class="prose prose--wide" data-auto-reveal>{intro}</div></div></section>'
             + stats
             + split_section(paths_left, acc_cards(adv_cards), surface=True)
@@ -910,7 +912,9 @@ def smart_page(page, extra=''):
     blocks = parse_blocks(content)
     if not extra and all(b['t'] in ('prose', 'media', 'head') for b in blocks) and sum(1 for b in blocks if b['t'] == 'media') <= 1:
         return generic_page(page)
-    body = subnav(page) + page_hero(page) + f'''
+    lead, content = take_lead(page, content)
+    blocks = parse_blocks(content)
+    body = subnav(page) + page_hero(page, lead=lead) + f'''
 <section class="section section--tight landing">
   <div class="container">{render_blocks(blocks)}</div>
 </section>
