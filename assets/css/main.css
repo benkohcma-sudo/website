@@ -969,3 +969,4 @@ main > section:last-child:not(.cta-full) { padding-bottom: clamp(72px, 9vw, 140p
 .faculty__head h2 { max-width: 24ch; }
 .faculty.section { padding-top: clamp(48px, 7vw, 96px); }
 .page-hero { padding-top: clamp(48px, 7vw, 96px); }
+.faculty__head--bare { grid-template-columns: 1fr; justify-items: end; margin-bottom: 12px; }
