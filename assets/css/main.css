@@ -936,3 +936,12 @@ main > section:last-child:not(.cta-full) { padding-bottom: clamp(72px, 9vw, 140p
   .page-hero--image { min-height: 0; }
   .page-hero__scrim { background: linear-gradient(180deg, rgba(251,248,243,.95) 0%, rgba(251,248,243,.85) 60%, rgba(251,248,243,.5) 100%); }
 }
+
+/* ---------- logo section: white band (so logos with white boxes read as transparent), centred bold heading ---------- */
+.logo-section { background: #fff; width: 100vw; margin-left: calc(50% - 50vw); padding: clamp(48px, 6vw, 80px) max(var(--gutter), calc(50vw - var(--max) / 2)); text-align: center; }
+.logo-section__intro { max-width: 860px; margin: 0 auto clamp(28px, 4vw, 44px); }
+.logo-section__intro h2, .logo-section__intro h3 { font-weight: 600; margin: 0 0 12px; }
+.logo-section__intro p { margin: 0 auto; max-width: 64ch; color: var(--body); }
+.logo-section .logo-row { margin-inline: auto; justify-content: center; gap: clamp(20px, 3vw, 48px); }
+.logo-section .logo-lanes { margin-top: 0; }
+.landing .lp-block--logos { max-width: none; }

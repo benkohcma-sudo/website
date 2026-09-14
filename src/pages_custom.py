@@ -840,8 +840,21 @@ def merge_stat_rows(blocks):
         else: out.append(b)
     return out
 
+def attach_logo_intros(blocks):
+    """A heading (+ short paragraph) right before a logo run becomes the logo section's own centred intro."""
+    out = []
+    for b in blocks:
+        if b['t'] == 'logos' and out and out[-1]['t'] in ('prose', 'head'):
+            prev = out[-1]
+            html_ = prev['html'] if prev['t'] == 'prose' else f'<p class="eyebrow">{esc(prev["eyebrow"])}</p><h2>{prev["h2"]}</h2>'
+            tags = re.findall(r'<(h2|h3|p|ul|ol|img|div)', html_)
+            if prev['t'] == 'head' or (tags and tags[0] in ('h2', 'h3') and len(tags) <= 3 and 'ul' not in tags and 'img' not in tags):
+                out.pop(); b = dict(b, intro=html_)
+        out.append(b)
+    return out
+
 def render_blocks(blocks):
-    blocks = merge_stat_rows(blocks)
+    blocks = attach_logo_intros(merge_stat_rows(blocks))
     out = []
     for b in blocks:
         t = b['t']
@@ -861,6 +874,7 @@ def render_blocks(blocks):
             title = f'<h3 data-reveal>{esc(b["title"])}</h3>' if b['title'] else ''
             out.append(f'<div class="stats-group">{title}<div class="stats" style="grid-template-columns:repeat({min(4, len(b["items"]))},1fr)">{cards}</div></div>')
         elif t == 'logos':
+            intro = f'<div class="logo-section__intro" data-reveal>{b["intro"]}</div>' if b.get('intro') else ''
             SWAP = {'level-1.png': 'icf-level-1', 'level-2.png': 'icf-level-2', 'level-3.png': 'icf-level-3', 'cce.png': 'icf-cce'}
             def swap(src):
                 name = src.rsplit('/', 1)[-1]
@@ -870,13 +884,13 @@ def render_blocks(blocks):
                 # two endless lanes drifting opposite ways; the JS doubles each track for a seamless loop
                 half = (len(items) + 1) // 2
                 lane = lambda its: ''.join(f'<div class="logo-tile logo-tile--client"><img src="{esc(s)}" alt="{esc(a)}" loading="lazy"></div>' for s, a in its)
-                out.append(f'<div class="logo-lanes" data-reveal="none">'
+                out.append(f'<div class="logo-section">{intro}<div class="logo-lanes" data-reveal="none">'
                            f'<div class="marquee"><div class="marquee__track" style="animation-duration:48s">{lane(items[:half])}</div></div>'
                            f'<div class="marquee marquee--reverse"><div class="marquee__track" style="animation-duration:56s">{lane(items[half:])}</div></div>'
-                           f'</div>')
+                           f'</div></div>')
             else:
                 tiles = ''.join(f'<div class="logo-cell"><img src="{esc(s)}" alt="{esc(a)}" loading="lazy"></div>' for s, a in items)
-                out.append(f'<div class="logo-row" data-strip>{tiles}</div>')
+                out.append(f'<div class="logo-section">{intro}<div class="logo-row" data-strip>{tiles}</div></div>')
         elif t == 'cards':
             cards = ''
             for c in b['items']:
