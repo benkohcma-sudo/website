@@ -151,19 +151,7 @@ def home(page):
   </div>
 </section>
 
-<section class="section section--tight">
-  <div class="container">
-    <div class="chips" data-reveal>
-      <span class="chip-tile"><img src="{IMG}image_item/4/expertise-image-1.jpg" alt="">communication coaching</span>
-      <span class="chip-tile"><img src="{IMG}image_item/5/expertise-image-2.jpg" alt="">Personal Coaching</span>
-      <span class="chip-tile"><img src="{IMG}image_item/6/expertise-image-3.jpg" alt="">Strategy</span>
-      <span class="chip-tile"><img src="{IMG}image_item/7/expertise-image-4.jpg" alt="">Productivity &amp; Efficiency Coaching</span>
-      <span class="chip-tile"><img src="{IMG}image_item/8/expertise-image-5.jpg" alt="">Education</span>
-      <span class="chip-tile"><img src="{IMG}image_item/9/expertise-image-6.jpg" alt="">Leadership</span>
-      <span class="chip-tile"><img src="{IMG}image_item/10/expertise-image-7.jpg" alt="">Coaching Certification</span>
-    </div>
-  </div>
-</section>
+
 
 <section class="section">
   <div class="container split split--wide">
@@ -903,8 +891,7 @@ def render_blocks(blocks):
                 cards += f'<article class="card icon-card" data-reveal>{icon}<h3>{esc(c["title"])}</h3><p>{c["body"]}</p></article>'
             out.append(f'<div class="grid grid-3">{cards}</div>')
         elif t == 'chips':
-            chips = ''.join(f'<span class="chip-tile"><img src="{esc(s)}" alt="">{esc(l)}</span>' for s, l in b['items'])
-            out.append(f'<div class="chips" data-reveal>{chips}</div>')
+            out.append('')   # the expertise chips were removed from the design (client request, Sep 2026)
         elif t == 'media':
             out.append(f'<div class="media media--wide" data-reveal="scale" style="max-width:820px"><img src="{esc(b["src"])}" alt="{esc(b["alt"])}" loading="lazy" data-parallax="24"></div>')
     return '\n'.join(f'<div class="lp-block lp-block--{b["t"]}">{h}</div>' for b, h in zip(blocks, out))
