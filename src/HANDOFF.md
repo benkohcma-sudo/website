@@ -71,6 +71,7 @@ GSAP 3 (cdnjs), ScrollTrigger and `main.js`.
 | Our Faculty | Featured large card driven by the small cards and arrows; tabs per group. |
 | Certification badges, Our Services badges | Badges fly into line from above and below as the row scrolls in (`[data-strip]`). |
 | Client logos | Two endless lanes drifting in opposite directions (`.logo-lanes`). |
+| Every page | Preloader: deep green screen with the white CMA logo and a thin orange line, then orange steps climb in left to right, fill the screen and lift away to open the page (about 3.5s). It runs on the first page of a visit only (sessionStorage key `cmaPre`), and never with `?nomotion` or reduced motion. Page entrances and scroll input wait until it opens. Markup is the `PRELOADER` block right after `<body>`; remove that block to switch it off. |
 | Everywhere | Section entrances on `[data-reveal]`: headings and short copy arrive word by word with a soft blur, cards land as a shell first and then fill in, images scale in, buttons come last; items entering together are sequenced in DOM order. Hero headlines use `[data-split]`. Counters (`[data-count]`), marquees (`.marquee`). Add `?nomotion` to any URL to see the page without animation. |
 
 Add `?nomotion` to any URL to see a page with all motion switched off. Users with

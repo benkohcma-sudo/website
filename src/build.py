@@ -246,6 +246,17 @@ def fix_links(body_html):
         return m.group(2) if href in DEAD_LINKS else m.group(0)
     return re.sub(r'<a href="([^"]+)"[^>]*>(.*?)</a>', unwrap, body_html, flags=re.S)
 
+# Green screen, white CMA logo, then orange steps climb in and lift away to open the page.
+# Shown on the first page of a visit (sessionStorage), skipped for ?nomotion and reduced motion.
+PRELOADER = (
+    '<script>(function(){var d=document.documentElement,s=0;try{s=sessionStorage.getItem("cmaPre")}catch(e){}'
+    'if(s||/nomotion/.test(location.search)||matchMedia("(prefers-reduced-motion: reduce)").matches)d.classList.add("pre-skip");'
+    'else d.classList.add("is-preloading")})()</script>'
+    '<div class="preloader" aria-hidden="true"><div class="preloader__bg"></div>'
+    '<div class="preloader__logo"><img src="/assets/img/logo.png" alt=""><i class="preloader__line"></i></div>'
+    '<div class="preloader__steps">' + '<i class="preloader__step"></i>' * 8 + '</div></div>'
+)
+
 def layout(page, body, extra_head='', extra_js='', body_class=''):
     body = fix_links(emphasize(body))
     title = page.get('title') or 'Coach Masters Academy'
@@ -264,6 +275,7 @@ def layout(page, body, extra_head='', extra_js='', body_class=''):
 {extra_head}
 </head>
 <body class="{body_class}">
+{PRELOADER}
 {header()}
 <main class="page-enter">
 {body}

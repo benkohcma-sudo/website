@@ -1085,3 +1085,18 @@ main > section:last-child:not(.cta-full) { padding-bottom: clamp(72px, 9vw, 140p
 .photo-card h3 { position: absolute; left: 26px; right: 26px; top: 24px; margin: 0; color: #fff; font-size: clamp(24px, 2.2vw, 34px); line-height: 1.08; letter-spacing: -.02em; }
 .photo-card p { position: absolute; left: 26px; right: 26px; bottom: 24px; margin: 0; color: rgba(255,255,255,.94); font-size: 15.5px; line-height: 1.5; }
 @media (max-width: 900px) { .photo-cards { grid-template-columns: 1fr; } .photo-card { aspect-ratio: 4 / 3; } }
+
+/* ---------- preloader: green, CMA logo, orange staircase opens the page ---------- */
+.preloader { position: fixed; inset: 0; z-index: 9999; display: grid; place-items: center; animation: preFail .01s 7s forwards; }
+.preloader__bg { position: absolute; inset: 0; background: #17380E; }
+.preloader__logo { position: relative; z-index: 1; display: grid; justify-items: center; gap: 22px; }
+.preloader__logo img { width: min(320px, 64vw); height: auto; filter: brightness(0) invert(1); }
+.preloader__line { display: block; width: min(180px, 40vw); height: 2px; background: #eb6422; transform: scaleX(0); transform-origin: left; }
+.preloader__steps { position: absolute; inset: 0; z-index: 2; display: flex; pointer-events: none; }
+.preloader__step { flex: 1 1 0; height: 100%; margin-right: -1px; background: #eb6422; transform: scaleY(0); transform-origin: bottom; will-change: transform; }
+.preloader__step:nth-child(even) { background: #E55C00; }
+html.is-preloading, html.is-preloading body { overflow: hidden; }
+.no-js .preloader, .pre-skip .preloader, .reduce-motion .preloader { display: none; }
+@keyframes preFail { to { visibility: hidden; opacity: 0; } }
+.stand__card { text-align: center; display: flex; flex-direction: column; align-items: center; }
+.stand__card p { max-width: 26ch; }

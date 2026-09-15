@@ -13,6 +13,38 @@
   if (hasGsap && win.ScrollTrigger) gsap.registerPlugin(ScrollTrigger);
   if (hasGsap && win.MotionPathPlugin) gsap.registerPlugin(MotionPathPlugin);
 
+  /* ---------- preloader: logo on green, then an orange staircase lifts away ---------- */
+  var pre = doc.querySelector('.preloader'), preDone = false, preQueue = [];
+  function afterPreloader(fn) { if (preDone) fn(); else preQueue.push(fn); }
+  function finishPreloader() {
+    if (preDone) return; preDone = true;
+    doc.documentElement.classList.remove('is-preloading');
+    if (pre && pre.parentNode) pre.parentNode.removeChild(pre);
+    try { sessionStorage.setItem('cmaPre', '1'); } catch (e) {}
+    preQueue.splice(0).forEach(function (fn) { fn(); });
+    if (win.ScrollTrigger) ScrollTrigger.refresh();
+  }
+  ['wheel', 'touchmove', 'keydown'].forEach(function (type) {   // nothing behind the curtain reacts until it opens
+    win.addEventListener(type, function (e) {
+      if (preDone) return;
+      if (type === 'keydown' && !/^(ArrowDown|ArrowUp|PageDown|PageUp|Space| |Home|End)$/.test(e.key)) return;
+      e.preventDefault(); e.stopImmediatePropagation();
+    }, { capture: true, passive: false });
+  });
+  function runPreloader() {
+    if (!pre || reduce || !hasGsap || !doc.documentElement.classList.contains('is-preloading')) { finishPreloader(); return; }
+    var logo = pre.querySelector('.preloader__logo'), line = pre.querySelector('.preloader__line');
+    var steps = pre.querySelectorAll('.preloader__step'), n = steps.length;
+    gsap.timeline({ onComplete: finishPreloader })
+      .from(logo, { opacity: 0, y: 18, scale: .97, duration: .7, ease: 'power3.out' })
+      .to(line, { scaleX: 1, duration: .8, ease: 'power2.inOut' }, '-=.35')
+      .fromTo(steps, { scaleY: 0 }, { scaleY: function (i) { return (i + 1) / n; }, duration: .5, ease: 'power3.out', stagger: .055 }, '+=.1')   // the staircase
+      .to(steps, { scaleY: 1, duration: .38, ease: 'power2.in', stagger: .035 }, '+=.08')                                                     // fills the screen
+      .set([pre.querySelector('.preloader__bg'), logo], { opacity: 0 })
+      .to(steps, { yPercent: -100, duration: .62, ease: 'power3.inOut', stagger: .055 }, '+=.04');                                          // lifts away step by step
+  }
+  runPreloader();
+
   /* ---------- header: shrink + hide on scroll down ---------- */
   var header = doc.querySelector('.site-header');
   var lastY = 0;
@@ -162,16 +194,18 @@
     return tl;
   }
 
-  /* ---------- hero headline: in view on load, so it just plays ---------- */
-  doc.querySelectorAll('[data-split], .hv__title').forEach(function (el) {
-    gsap.from(words(el), { opacity: 0, y: '.35em', filter: BLUR, duration: .9, ease: 'power3.out', stagger: .06, delay: .15, clearProps: 'filter,transform' });
-  });
+  afterPreloader(function () {
+    /* ---------- hero headline: in view on load, so it just plays ---------- */
+    doc.querySelectorAll('[data-split], .hv__title').forEach(function (el) {
+      gsap.from(words(el), { opacity: 0, y: '.35em', filter: BLUR, duration: .9, ease: 'power3.out', stagger: .06, delay: .15, clearProps: 'filter,transform' });
+    });
 
-  /* ---------- scroll reveals ---------- */
-  ScrollTrigger.batch('[data-reveal]', {
-    start: 'top 92%',
-    once: true,
-    onEnter: function (els) { els.forEach(function (el, i) { enter(el, Math.min(i, 6) * .11); }); }
+    /* ---------- scroll reveals ---------- */
+    ScrollTrigger.batch('[data-reveal]', {
+      start: 'top 92%',
+      once: true,
+      onEnter: function (els) { els.forEach(function (el, i) { enter(el, Math.min(i, 6) * .11); }); }
+    });
   });
 
   /* ---------- drawn lines: [data-draw="x"|"y"] grow in as they scroll into view ---------- */
@@ -222,7 +256,7 @@
   initStrips();
   win.addEventListener('load', function () { ScrollTrigger.refresh(); });
   // safety net: anything still hidden 4s after load is shown (e.g. if ScrollTrigger never fires)
-  setTimeout(function () { doc.querySelectorAll('[data-reveal]').forEach(function (el) { if (el.closest('.globe-hero')) return; if (getComputedStyle(el).opacity === '0' && el.getBoundingClientRect().top < win.innerHeight) enter(el, 0); }); }, 4000);
+  afterPreloader(function () { setTimeout(function () { doc.querySelectorAll('[data-reveal]').forEach(function (el) { if (el.closest('.globe-hero')) return; if (getComputedStyle(el).opacity === '0' && el.getBoundingClientRect().top < win.innerHeight) enter(el, 0); }); }, 4000); });
 
   /* ============================================================
      Step-by-step form: groups the existing fields into panels.

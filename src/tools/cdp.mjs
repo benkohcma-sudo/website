@@ -25,7 +25,7 @@ try {
   await send('Page.enable'); await send('Runtime.enable');
   await send('Emulation.setDeviceMetricsOverride', { width: +W, height: +H, deviceScaleFactor: 1, mobile: false });
   await send('Page.navigate', { url });
-  await sleep(2500);
+  await sleep(+(process.env.CDP_WAIT ?? 2500));
   const run = async (file) => {
     const body = readFileSync(file, 'utf8');
     const r = await send('Runtime.evaluate', { expression: `(async () => { ${body} })()`, awaitPromise: true, returnByValue: true });
