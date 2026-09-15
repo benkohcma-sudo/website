@@ -66,12 +66,12 @@ GSAP 3 (cdnjs), ScrollTrigger and `main.js`.
 | Where | What happens |
 |---|---|
 | Home hero | Staircase film. Page holds on the first frame with the headline; the first scroll plays the climb at 2× speed, then the welcome block rises in centred over the classroom and the page releases. Replays on every load. Phones play on arrival without the hold. |
-| About Us hero | Globe film. One scroll plays it at 2× while the subheading gives way to four counters in one orange row. Scrolling back up reverses it. |
+| About Us hero | Globe film, driven by the scroll bar. The hero pins for about one and a half screens: the scroll position sets the film frame (so the earth spins as you scroll), the subheading fades out, then four centred counters count up. Scrolling back up runs it in reverse. Below 960px the film simply loops and the counters show. |
 | Our Story, Certification | Curved orange journey line drawn by scroll, milestone cards slide in. |
 | Our Faculty | Featured large card driven by the small cards and arrows; tabs per group. |
 | Certification badges, Our Services badges | Badges fly into line from above and below as the row scrolls in (`[data-strip]`). |
 | Client logos | Two endless lanes drifting in opposite directions (`.logo-lanes`). |
-| Everywhere | Scroll reveals (`[data-reveal]`), split headlines (`[data-split]`), counters (`[data-count]`), marquees (`.marquee`). |
+| Everywhere | Section entrances on `[data-reveal]`: headings and short copy arrive word by word with a soft blur, cards land as a shell first and then fill in, images scale in, buttons come last; items entering together are sequenced in DOM order. Hero headlines use `[data-split]`. Counters (`[data-count]`), marquees (`.marquee`). Add `?nomotion` to any URL to see the page without animation. |
 
 Add `?nomotion` to any URL to see a page with all motion switched off. Users with
 "reduce motion" turned on get that automatically.

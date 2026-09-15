@@ -69,31 +69,109 @@
     initFaculty(); initGlobe(true); initJourney(true); initHeroVideo(true); initHomeHero(true); return;
   }
 
-  /* ---------- split headline into rising words ---------- */
-  doc.querySelectorAll('[data-split], .hv__title').forEach(function (el) {
-    var nodes = Array.prototype.slice.call(el.childNodes), out = '';
-    nodes.forEach(function (n) {
-      if (n.nodeType === 3) {
-        out += n.textContent.split(/(\s+)/).map(function (w) {
-          return /^\s+$/.test(w) ? ' ' : (w ? '<span class="split-word"><span>' + w + '</span></span>' : '');
-        }).join('');
-      } else if (n.nodeType === 1) {
-        var tag = n.tagName.toLowerCase();
-        out += '<' + tag + (n.className ? ' class="' + n.className + '"' : '') + '>' +
-          n.textContent.split(/(\s+)/).map(function (w) { return /^\s+$/.test(w) ? ' ' : (w ? '<span class="split-word"><span>' + w + '</span></span>' : ''); }).join('') + '</' + tag + '>';
-      }
+  /* ============================================================
+     Section entrances. Everything that carries [data-reveal] (and
+     the hero headline) comes in the way the reference does:
+       - headings and short text arrive word by word, soft and quick
+       - cards land as an empty shell first, then their contents fill in
+       - images scale gently into place, buttons follow last
+     Elements that enter the viewport together are sequenced in DOM
+     order, so a section reads: heading -> copy -> cards left to right.
+     ============================================================ */
+  var CARD_SEL = '.card, .icon-card, .service, .acc-card, .stand__card, .do-card, .stat, .quote-card, .pull, .proof__item, .news-card, .person, .feature-card, .office, .step-card, .track-card, .badge-float, .tab-panel__grid > *, .cta-full__inner';
+  var PART_SEL = 'h1, h2, h3, h4, p, li, .lead, .btn, .link, img, video, figure, .eyebrow, .stat__num, .stat__label, .acc-card__head, .card__media, .do-card__media, .icon-card__img, .actions';
+  var TEXT_SEL = 'p, li, .lead, .eyebrow, .stat__label, .acc-card__title, .acc-card__sub, blockquote';
+  var mobileMotion = win.matchMedia('(max-width: 760px)').matches;
+  var BLUR = mobileMotion ? 'blur(0px)' : 'blur(7px)';
+
+  function wrapWords(node) {                                         // wrap every word in the text nodes below `node`
+    if (node.nodeType === 3) {
+      if (!/\S/.test(node.nodeValue)) return;
+      var frag = doc.createDocumentFragment();
+      node.nodeValue.split(/(\s+)/).forEach(function (w) {
+        if (!w) return;
+        if (/^\s+$/.test(w)) { frag.appendChild(doc.createTextNode(' ')); return; }
+        var sp = doc.createElement('span'); sp.className = 'w'; sp.textContent = w; frag.appendChild(sp);
+      });
+      node.parentNode.replaceChild(frag, node);
+      return;
+    }
+    if (node.nodeType !== 1) return;
+    if (/^(SVG|IMG|VIDEO|INPUT|SELECT|TEXTAREA|BUTTON|CODE|PRE|BR)$/.test(node.tagName)) return;
+    if (node.hasAttribute('data-count') || node.classList.contains('w')) return;
+    Array.prototype.slice.call(node.childNodes).forEach(wrapWords);
+  }
+  function words(el) {
+    if (!el.dataset.split) { wrapWords(el); el.dataset.split = '1'; }
+    return el.querySelectorAll('.w');
+  }
+  function wordCount(el) { return (el.textContent.match(/\S+/g) || []).length; }
+
+  function kindOf(el) {
+    if (el.matches('.marquee, .marquee__track, .logo-section, .logo-row, .partners')) return 'plain';   // moving bands come in whole
+    if (el.matches(CARD_SEL)) return 'card';
+    if (/^H[1-4]$/.test(el.tagName)) return 'head';
+    if (el.matches('img, video, figure, picture, .media, .media-stack, .card__media, .do-card__media, .icon-card__img, .globe-wrap, .split__media, iframe')) return 'media';
+    if (el.matches('.btn, .link, .actions, .cta-full__actions, .hero__actions, .subnav, .badge-strip')) return 'action';
+    if (el.matches('ul, ol')) return 'list';
+    if (el.matches(TEXT_SEL)) return 'text';
+    return 'block';
+  }
+
+  function addPart(tl, el, pos) {                                    // one element's own entrance, placed at `pos`
+    var k = kindOf(el);
+    if (el.querySelector('[data-count]') && k !== 'card' && k !== 'block') k = 'plain';
+    if ((k === 'head' || k === 'text') && !words(el).length) k = 'plain';
+    if (k === 'head') {
+      tl.from(words(el), { opacity: 0, y: '.35em', filter: BLUR, duration: .75, ease: 'power3.out', stagger: .055, clearProps: 'filter,transform' }, pos);
+    } else if (k === 'text' && wordCount(el) <= 48) {
+      tl.from(words(el), { opacity: 0, y: '.25em', filter: mobileMotion ? 'blur(0px)' : 'blur(4px)', duration: .55, ease: 'power2.out', stagger: .014, clearProps: 'filter,transform' }, pos);
+    } else if (k === 'media') {
+      tl.from(el, { opacity: 0, scale: 1.06, duration: 1, ease: 'power3.out', clearProps: 'transform' }, pos);
+    } else if (k === 'action') {
+      var kids = el.children.length > 1 && el.matches('.actions, .cta-full__actions, .hero__actions, .badge-strip') ? el.children : el;
+      tl.from(kids, { opacity: 0, y: 12, scale: .97, duration: .55, ease: 'power3.out', stagger: .08, clearProps: 'transform' }, pos);
+    } else if (k === 'list' && el.children.length) {
+      tl.from(el.children, { opacity: 0, x: -14, duration: .55, ease: 'power3.out', stagger: .07, clearProps: 'transform' }, pos);
+    } else if (k === 'card') {
+      tl.from(el, { opacity: 0, y: 24, scale: .96, duration: .6, ease: 'power3.out', clearProps: 'transform' }, pos);
+      parts(el).forEach(function (c, i) { addPart(tl, c, i === 0 ? '<.16' : '<.1'); });
+    } else if (k === 'block') {
+      var ps = parts(el);
+      if (ps.length && ps.length <= 14) {
+        ps.forEach(function (c, i) { addPart(tl, c, i === 0 ? '<' : '<.1'); });
+      } else tl.from(el, { opacity: 0, y: 22, duration: .8, ease: 'power3.out', clearProps: 'transform' }, pos);
+    } else {
+      tl.from(el, { opacity: 0, y: 16, duration: .7, ease: 'power3.out', clearProps: 'transform' }, pos);
+    }
+  }
+  function parts(root) {                                             // the pieces inside a card / block, outermost first
+    var all = Array.prototype.slice.call(root.querySelectorAll(PART_SEL + ', ' + CARD_SEL)), out = [];
+    all.forEach(function (el) {
+      if (el === root) return;
+      var p = el.parentElement, nested = false;
+      while (p && p !== root) { if (p.hasAttribute('data-reveal') || p.matches(CARD_SEL) || (p !== root && p.matches(PART_SEL))) { nested = true; break; } p = p.parentElement; }
+      if (!nested) out.push(el);
     });
-    el.innerHTML = out;
-    gsap.from(el.querySelectorAll('.split-word > span'), { yPercent: 115, duration: 1.1, ease: 'power4.out', stagger: 0.045, delay: 0.1 });
+    return out;
+  }
+  function enter(el, delay) {
+    if (el.dataset.entered) return; el.dataset.entered = '1';       // CSS now holds it visible; tweens below draw it in
+    var tl = gsap.timeline({ delay: delay || 0 });
+    addPart(tl, el, 0);
+    return tl;
+  }
+
+  /* ---------- hero headline: in view on load, so it just plays ---------- */
+  doc.querySelectorAll('[data-split], .hv__title').forEach(function (el) {
+    gsap.from(words(el), { opacity: 0, y: '.35em', filter: BLUR, duration: .9, ease: 'power3.out', stagger: .06, delay: .15, clearProps: 'filter,transform' });
   });
 
   /* ---------- scroll reveals ---------- */
   ScrollTrigger.batch('[data-reveal]', {
-    start: 'top 90%',
+    start: 'top 92%',
     once: true,
-    onEnter: function (els) {
-      gsap.to(els, { opacity: 1, x: 0, y: 0, scale: 1, duration: 0.9, ease: 'power3.out', stagger: 0.08, overwrite: true, clearProps: 'transform' });
-    }
+    onEnter: function (els) { els.forEach(function (el, i) { enter(el, Math.min(i, 6) * .11); }); }
   });
 
   /* ---------- drawn lines: [data-draw="x"|"y"] grow in as they scroll into view ---------- */
@@ -144,7 +222,7 @@
   initStrips();
   win.addEventListener('load', function () { ScrollTrigger.refresh(); });
   // safety net: anything still hidden 4s after load is shown (e.g. if ScrollTrigger never fires)
-  setTimeout(function () { doc.querySelectorAll('[data-reveal]').forEach(function (el) { if (el.closest('.globe-hero')) return; if (getComputedStyle(el).opacity === '0' && el.getBoundingClientRect().top < win.innerHeight) gsap.to(el, { opacity: 1, x: 0, y: 0, scale: 1, duration: .6 }); }); }, 4000);
+  setTimeout(function () { doc.querySelectorAll('[data-reveal]').forEach(function (el) { if (el.closest('.globe-hero')) return; if (getComputedStyle(el).opacity === '0' && el.getBoundingClientRect().top < win.innerHeight) enter(el, 0); }); }, 4000);
 
   /* ============================================================
      Step-by-step form: groups the existing fields into panels.
@@ -621,63 +699,41 @@
     function showStatsNow() {
       stats.forEach(function (st) { st.style.opacity = 1; st.style.transform = 'none'; var n = st.querySelector('[data-count]'); if (n) n.textContent = parseFloat(n.dataset.count).toLocaleString(); });
     }
-    if (staticOnly || win.matchMedia('(max-width: 960px)').matches || win.scrollY > 40 || location.hash) {
+    if (staticOnly || win.matchMedia('(max-width: 960px)').matches) {
       video.loop = true; video.autoplay = true; video.play().catch(function () {}); showStatsNow(); return;
     }
     doc.documentElement.classList.add('js-motion');
 
-    // Enter on the first frame with only the headline. One scroll runs the globe to the end in ~3s
-    // while the headline gives way to the counters. Scrolling back up runs the whole thing in reverse.
-    var html = doc.documentElement, locked = true, dur = 6, TOTAL = 3;
-    html.classList.add('is-locked');
-    win.scrollTo(0, 0);
+    // The hero stays put while the page is scrolled through it: the scroll position drives the globe's
+    // spin frame by frame, the subheading gives way to the counters, then the page carries on down.
+    // Scrolling back up runs it all in reverse.
+    var dur = 6, last = -1;
     video.pause(); video.currentTime = 0;
     var vs = { t: 0 };
-    function seek() { if (dur) video.currentTime = Math.min(dur - 0.03, vs.t * dur); }
+    function seek() {
+      var t = Math.min(dur - 0.03, vs.t * dur);
+      if (Math.abs(t - last) < 1 / 30) return;
+      last = t; try { video.currentTime = t; } catch (e) {}
+    }
     video.addEventListener('loadedmetadata', function () { dur = video.duration || 6; seek(); });
 
-    function release() { locked = false; html.classList.remove('is-locked'); if (hint) hint.classList.add('is-done'); ScrollTrigger.refresh(); }
-    function relock() { locked = true; html.classList.add('is-locked'); win.scrollTo(0, 0); if (hint) hint.classList.remove('is-done', 'is-playing'); }
-
-    var tl = gsap.timeline({ paused: true, onComplete: release, onReverseComplete: relock });
-    tl.to(vs, { t: 1, duration: TOTAL, ease: 'none', onUpdate: seek }, 0)
-      .to(lead, { opacity: 0, y: -16, duration: .4, ease: 'power2.in' }, 0);
+    var tl = gsap.timeline({ paused: true });
+    tl.to(vs, { t: 1, duration: 1, ease: 'none', onUpdate: seek }, 0);
+    if (hint) tl.to(hint, { opacity: 0, duration: .08 }, 0);
+    tl.to(lead, { opacity: 0, y: -14, duration: .18, ease: 'power2.in' }, 0.02);
     stats.forEach(function (st, i) {
       var num = st.querySelector('[data-count]'); var target = num ? parseFloat(num.dataset.count) : 0; var obj = { v: 0 };
-      var at = 0.7 + i * ((TOTAL - 0.7 - 0.8) / stats.length);
-      tl.to(st, { opacity: 1, y: 0, duration: .6, ease: 'power3.out' }, at);
-      if (num) tl.to(obj, { v: target, duration: .8, ease: 'power2.out', onUpdate: function () { num.textContent = Math.round(obj.v).toLocaleString(); } }, at);
+      var at = 0.3 + i * 0.1;
+      tl.to(st, { opacity: 1, y: 0, duration: .22, ease: 'power3.out' }, at);
+      if (num) tl.to(obj, { v: target, duration: .3, ease: 'power2.out', onUpdate: function () { num.textContent = Math.round(obj.v).toLocaleString(); } }, at);
     });
 
-    function forward() { if (hint) hint.classList.add('is-playing'); tl.play(); }
-    function backward() { if (hint) hint.classList.remove('is-playing'); tl.reverse(); }
-    function onWheel(e) {
-      if (locked) { e.preventDefault(); if (e.deltaY > 0) forward(); else if (e.deltaY < 0) backward(); return; }
-      if (win.scrollY <= 0 && e.deltaY < 0) { e.preventDefault(); relock(); backward(); }
-    }
-    function onKey(e) {
-      if (locked && /^(ArrowDown|PageDown|Space| )$/.test(e.key)) { e.preventDefault(); forward(); }
-      else if (locked && /^(ArrowUp|PageUp)$/.test(e.key)) { e.preventDefault(); backward(); }
-      else if (!locked && win.scrollY <= 0 && /^(ArrowUp|PageUp)$/.test(e.key)) { e.preventDefault(); relock(); backward(); }
-    }
-    var touchY = null;
-    function onTouchStart(e) { touchY = e.touches[0].clientY; }
-    function onTouchMove(e) {
-      if (touchY === null) return;
-      var dy = touchY - e.touches[0].clientY;
-      if (locked) { e.preventDefault(); if (dy > 8) forward(); else if (dy < -8) backward(); }
-      else if (win.scrollY <= 0 && dy < -8) { e.preventDefault(); relock(); backward(); }
-    }
-    win.addEventListener('wheel', onWheel, { passive: false });
-    win.addEventListener('keydown', onKey);
-    win.addEventListener('touchstart', onTouchStart, { passive: true });
-    win.addEventListener('touchmove', onTouchMove, { passive: false });
+    ScrollTrigger.create({
+      trigger: hero, start: 'top top', end: '+=160%', pin: true, pinSpacing: true, scrub: 0.6, animation: tl, anticipatePin: 1
+    });
     video.load();
   }
 
-  /* ============================================================
-     Journey — S-curve path drawn as you scroll, dot travels along
-     ============================================================ */
   function initJourney(staticOnly) {
     doc.querySelectorAll('.journey').forEach(function (root) {
       var svg = root.querySelector('svg.journey__svg'), list = root.querySelector('.journey__list');
