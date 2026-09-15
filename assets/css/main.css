@@ -1683,3 +1683,9 @@ main > section.landing:last-child:has(> .container > .lp-block--logos:last-child
 .card__round img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .card--round h3 { font-size: clamp(19px, 1.6vw, 22px); line-height: 1.3; margin: 0 auto 10px; max-width: 26ch; }
 .card--round p { margin: 0 auto; max-width: 36ch; color: var(--body); }
+
+/* schedule table: long dropdown names stay inside their column */
+.schedule table { table-layout: auto; }
+.schedule table select { width: 100%; max-width: 230px; text-overflow: ellipsis; }
+.schedule thead th:nth-child(2) select { max-width: 260px; }
+.schedule td:nth-child(3), .schedule td:nth-child(5) { white-space: nowrap; }

@@ -2025,7 +2025,10 @@ def calendar_page(page):
     if enrich_form is not None:
         k = nodes.index(enrich_form)
         if k and getattr(nodes[k - 1], 'name', None) == 'h2': enrich_head = nodes[k - 1]
-    training = ''.join(str(n) for n in nodes if n is not tab_ul and n is not enrich_form and n is not enrich_head)
+    def _popup_leftover(n):                                           # the live page's hidden video popup: a close "×" link and an empty frame
+        nm = getattr(n, 'name', None)
+        return (nm == 'a' and _txt(n) in ('×', 'x', '✕')) or (nm == 'iframe' and not (n.get('src') or '').strip())
+    training = ''.join(str(n) for n in nodes if n is not tab_ul and n is not enrich_form and n is not enrich_head and not _popup_leftover(n))
 
     data = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'content', 'calendar_enrichment.json')))
     def options(name, placeholder, values, month=False):
