@@ -852,8 +852,10 @@
     }
     video.addEventListener('loadedmetadata', function () { dur = video.duration || 6; seek(); });
 
+    doc.documentElement.classList.add('hero-pinned');   // the next section rides up over the held hero
     var tl = gsap.timeline({ paused: true });
     tl.to(vs, { t: 1, duration: 1, ease: 'none', onUpdate: seek }, 0);
+    tl.to({}, { duration: .625 }, 1);                       // hold the last frame while the page covers it
     if (hint) tl.to(hint, { opacity: 0, duration: .08 }, 0);
     tl.to(lead, { opacity: 0, y: -14, duration: .18, ease: 'power2.in' }, 0.02);
     stats.forEach(function (st, i) {
@@ -864,7 +866,7 @@
     });
 
     ScrollTrigger.create({
-      trigger: hero, start: 'top top', end: '+=160%', pin: true, pinSpacing: true, scrub: 0.6, animation: tl, anticipatePin: 1
+      trigger: hero, start: 'top top', end: '+=260%', pin: true, pinSpacing: false, scrub: 0.6, animation: tl, anticipatePin: 1
     });
     video.load();
   }

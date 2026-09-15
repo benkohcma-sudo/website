@@ -270,6 +270,7 @@ def about(page):
   </div>
   <div class="globe-hint"><i></i><span>Scroll to spin</span></div>
 </section>
+<div class="globe-hero__space" aria-hidden="true"></div>
 
 <section class="section section--surface">
   <div class="container">
