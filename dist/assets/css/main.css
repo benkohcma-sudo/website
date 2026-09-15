@@ -1512,3 +1512,4 @@ main > section.landing:last-child:has(> .container > .lp-block--logos:last-child
 .offices__arrow:hover::before { border-color: #fff; }
 @media (max-width: 900px) { .offices--globe .offices__layout { grid-template-columns: 1fr; } .offices__globe { max-width: 420px; margin: 0 auto; } }
 .prose a, .office__row a { overflow-wrap: anywhere; }   /* long web addresses and emails wrap instead of pushing past a phone screen */
+.link { white-space: nowrap; flex-shrink: 0; }   /* arrow links stay on one line inside heading rows */
