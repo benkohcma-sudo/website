@@ -271,21 +271,18 @@ def about(page):
   <div class="globe-hint"><i></i><span>Scroll to spin</span></div>
 </section>
 
-<section class="section">
-  <div class="container split split--wide">
-    <div>
+<section class="cma-photo">
+  <img class="cma-photo__img" src="/assets/img/about-conversation.jpg" alt="" data-parallax="30">
+  <div class="container cma-photo__grid">
+    <div class="cma-photo__intro">
       <p class="eyebrow" data-reveal>CMA</p>
       <h2 class="cma-words" data-reveal><span class="cma-words__w">Conversation.</span> <span class="cma-words__w cma-words__w--alt">Meaning.</span> <span class="cma-words__w">Agency.</span></h2>
-      <p class="lead" data-reveal>We are a global coaching organisation with more than a decade of work across professional coaching certification, organisational coaching capability and coaching services.</p>
+      <p class="cma-photo__lead" data-reveal>We are a global coaching organisation with more than a decade of work across professional coaching certification, organisational coaching capability and coaching services.</p>
       <p data-reveal>At the heart of our work, one question has continued to guide us:</p>
     </div>
-    <div>
-      <div class="pull" data-reveal><i class="pull__rule"></i><p class="pull__text"><strong class="pull__stmt"><em class="hl">How can coaching</em> help people create change they can truly own?</strong></p></div>
-      <div class="prose" data-auto-reveal style="margin-top:26px">
-        <p>That question has shaped how we educate, how we work with organisations and how we coach.</p>
-        <p>It has also kept us looking beyond technique and immediate solutions towards a deeper understanding of how change happens.</p>
-      </div>
-    </div>
+    <p class="cma-photo__question" data-reveal><em class="hl">How can coaching</em> help people create change they can truly own?</p>
+    <div class="cma-photo__note" data-reveal><p>That question has shaped how we educate, how we work with organisations and how we coach.</p>
+        <p>It has also kept us looking beyond technique and immediate solutions towards a deeper understanding of how change happens.</p></div>
   </div>
 </section>
 
