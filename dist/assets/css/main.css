@@ -1042,3 +1042,24 @@ main > section:last-child:not(.cta-full) { padding-bottom: clamp(72px, 9vw, 140p
 .cta-full__inner--stack h2, .cta-full__inner--stack p { margin-left: auto; margin-right: auto; max-width: 30ch; }
 .cta-full__inner--stack p { max-width: 62ch; }
 .cta-full__actions--three { justify-content: center; }
+
+/* ---------- About: three words, what we stand for, what we do ---------- */
+.cma-words { font-size: clamp(34px, 4.6vw, 64px); line-height: 1.04; letter-spacing: -.035em; margin: 0 0 20px; }
+.cma-words__w { display: inline-block; color: var(--ink); }
+.cma-words__w--alt { color: var(--orange); }
+.stand__grid { margin-top: 8px; }
+.stand__card { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.14); border-radius: 20px; padding: 28px 26px 30px; transition: background .35s, transform .45s var(--ease); }
+.stand__card:hover { background: rgba(255,255,255,.1); transform: translateY(-4px); }
+.stand__num { display: inline-block; font-family: var(--font-head); font-size: 12px; font-weight: 700; letter-spacing: .2em; color: var(--orange); margin-bottom: 18px; }
+.stand__card h3 { color: #fff; font-size: 22px; margin: 0 0 10px; }
+.stand__card p { color: #C7D4BF; font-size: 15.5px; line-height: 1.55; margin: 0; }
+.stand__line { text-align: center; font-family: var(--font-head); font-weight: 600; font-size: clamp(22px, 2.6vw, 34px); color: #fff; letter-spacing: -.02em; margin: clamp(36px, 5vw, 56px) 0 0; }
+.do-card { display: flex; flex-direction: column; background: var(--bg); border: 1px solid var(--line); border-radius: 22px; overflow: hidden; color: inherit; transition: transform .45s var(--ease), box-shadow .45s var(--ease), border-color .3s; }
+.do-card:hover { transform: translateY(-5px); box-shadow: var(--shadow); border-color: transparent; }
+.do-card__media { aspect-ratio: 4 / 3; overflow: hidden; }
+.do-card__media img { width: 100%; height: 100%; object-fit: cover; transition: transform .9s var(--ease); }
+.do-card:hover .do-card__media img { transform: scale(1.05); }
+.do-card__body { padding: 26px 26px 28px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+.do-card__body h3 { font-size: 21px; margin: 0; }
+.do-card__body p { font-size: 15px; color: var(--body); margin: 0; }
+.do-card__body .link { margin-top: auto; padding-top: 8px; }
