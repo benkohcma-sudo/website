@@ -1480,3 +1480,209 @@ def generic_page(page):
 </section>
 {cta_band()}'''
     return _layout(page, body)
+
+
+# ====================================================================== Mentor Coaching + Our Unique Approach (open layouts, Sep 2026)
+def _mc_curve(side):
+    return ('<svg class="deco-curve deco-curve--' + side + '" viewBox="0 0 220 900" preserveAspectRatio="none" aria-hidden="true">'
+            '<path class="deco-curve__fill" d="M220 0 H150 C60 160 200 330 110 480 C30 620 170 760 90 900 H220 Z"/>'
+            '<path class="deco-curve__line" d="M118 0 C28 160 168 330 78 480 C-2 620 138 760 58 900"/></svg>')
+
+def _inner(n):
+    return n.decode_contents().strip() if hasattr(n, 'decode_contents') else str(n).strip()
+
+def _plain(h):
+    return re.sub(r'<[^>]+>', '', h).strip()
+
+def _mc_testimonials(details):
+    """Irregular photo / name / words runs inside the praise section -> list of dicts."""
+    out = []; pending = None; cur = None
+    for n in details.children:
+        nm = getattr(n, 'name', None)
+        if nm in (None, 'summary'): continue
+        im = n if nm == 'img' else n.find('img')
+        if im is not None: pending = im.get('src')
+        if not _txt(n): continue
+        if cur is not None and not cur['text']:
+            for t in n.find_all(['img', 'br']): t.decompose()
+            cur['text'] = _inner(n)
+        else:
+            cur = {'name': _txt(n), 'img': pending, 'text': ''}; pending = None; out.append(cur)
+    return [t for t in out if t['text']]
+
+def _mc_quote(t):
+    m = re.match(r'(.+?)\s+(from\s.+)$', t['name'])
+    who = ('<b>' + esc(m.group(1)) + '</b><span>' + esc(m.group(2)) + '</span>') if m else '<b>' + esc(t['name']) + '</b>'
+    av = ('<img src="' + t['img'] + '" alt="">') if t['img'] else '<span class="quote-card__initial" aria-hidden="true">' + esc(t['name'][:1]) + '</span>'
+    return '<figure class="quote-card quote-card--mentor"><span class="q">“</span><p>' + t['text'] + '</p><figcaption class="who">' + av + '<div>' + who + '</div></figcaption></figure>'
+
+_PKG_RE = re.compile(r'^(Package\s+\d+)\s*\[\s*(.*?)\s*\]\s*@\s*(\S+)$')
+_FEAT_RE = re.compile(r'^(\d+)\s+(.*?)\s*(\[[^\]]*\])?$')
+
+def _mc_packages(details):
+    intro = []; pkgs = []
+    for n in details.children:
+        nm = getattr(n, 'name', None)
+        if nm in (None, 'summary'): continue
+        txt = _txt(n)
+        if not txt: continue
+        if nm == 'h5' and _PKG_RE.match(txt):
+            a, b, c = _PKG_RE.match(txt).groups(); pkgs.append({'name': a, 'tier': b, 'price': c, 'desc': [], 'feats': []})
+        elif nm == 'h5' and pkgs and _FEAT_RE.match(txt):
+            pkgs[-1]['feats'].append(_FEAT_RE.match(txt).groups())
+        elif pkgs: pkgs[-1]['desc'].append(_inner(n))
+        else: intro.append(_inner(n))
+    return intro, pkgs
+
+def _mc_price(pk, k):
+    def feat(num, label, note):
+        note_html = (' <span class="price__note">' + esc(note) + '</span>') if note else ''
+        return '<li><b class="price__n">' + esc(num) + '</b> <span>' + esc(label) + note_html + '</span></li>'
+    desc = ''.join('<p class="price__desc">' + (d.replace('50 coaches', '<strong>50 coaches</strong>', 1) if k else d) + '</p>' for d in pk['desc'])
+    return ('<div class="price' + (' price--featured' if k else '') + '" data-reveal>'
+            '<div class="price__head"><span class="price__name">' + esc(pk['name']) + '</span> <span class="price__br" aria-hidden="true">[</span> '
+            '<span class="price__tier">' + esc(pk['tier']) + '</span> <span class="price__br" aria-hidden="true">]</span></div>'
+            '<div class="price__amount"><span class="price__br" aria-hidden="true">@</span> ' + esc(pk['price']) + '</div>'
+            + desc + '<ul class="price__list">' + ''.join(feat(*f) for f in pk['feats']) + '</ul></div>')
+
+def _mc_how(details):
+    kids = [n for n in details.children if getattr(n, 'name', None) not in (None, 'summary')]
+    ul_i = next(i for i, n in enumerate(kids) if n.name == 'ul')
+    before = [_inner(n) for n in kids[:ul_i] if _txt(n)]
+    steps, reviews, closing = [], [], []
+    for li in kids[ul_i].find_all('li'):
+        t = _txt(li)
+        if not t: continue
+        (reviews if (':' in t[:40] and len(t) > 60) else steps).append(_inner(li))
+    for n in kids[ul_i + 1:]:
+        t = _txt(n)
+        if not t: continue
+        (reviews if (':' in t[:40] and len(t) > 60) else closing).append(_inner(n))
+    return before, steps, reviews, closing
+
+def mentor_coaching(page):
+    nodes = top_nodes(page['content'])
+    tags = [getattr(n, 'name', None) for n in nodes]
+    dets = [n for n in nodes if getattr(n, 'name', None) == 'details']
+    if len(dets) != 4 or 'img' not in tags or tags[0] != 'h4':
+        print('!! mentor-coaching layout pattern changed:', tags); return smart_page(page)
+    i_img = tags.index('img'); i_det = tags.index('details'); i_after = max(i for i, t in enumerate(tags) if t == 'details') + 1
+    title = _txt(nodes[0])
+    title_html = (esc(title[:-10]) + '<em class="hl">Dr Ben Koh</em>') if title.endswith(' Dr Ben Koh') else esc(title)
+    intro = [_inner(n) for n in nodes[1:i_img] if getattr(n, 'name', None) == 'p' and _txt(n)]
+    ben = [_inner(n) for n in nodes[i_img + 1:i_det] if getattr(n, 'name', None) == 'p' and _txt(n)]
+    d_how, d_samples, d_pkg, d_praise = dets
+    summ = lambda d: _txt(d.summary) if d.summary else ''
+
+    # how it works
+    before, steps, reviews, closing = _mc_how(d_how)
+    label = before[-1] if before and len(_plain(before[-1])) < 70 else ''
+    how_ps = before[1:-1] if label else before[1:]
+    def review(h):
+        a, b = h.split(':', 1)
+        return '<div class="mc-review" data-reveal><h3>' + a.strip() + ':</h3><p>' + b.strip() + '</p></div>'
+    # samples
+    sample_ps = [_inner(n) for n in d_samples.children if getattr(n, 'name', None) == 'p' and _txt(n)]
+    shots = [im.get('src', '') for im in d_samples.find_all('img')]
+    thumbs = ''.join('<a class="report-thumb" href="' + esc(src.replace(' ', '%20')) + '" data-lightbox="reports" data-reveal>'
+                     '<img src="' + esc(src.replace(' ', '%20')) + '" alt="Sample feedback report ' + str(k + 1) + '" loading="lazy">'
+                     '<span class="report-thumb__zoom" aria-hidden="true"></span></a>' for k, src in enumerate(shots))
+    # packages + praise
+    pkg_intro, pkgs = _mc_packages(d_pkg)
+    praise = _mc_testimonials(d_praise); half = (len(praise) + 1) // 2
+    # ICF credential + video
+    tail = nodes[i_after:]
+    t_h = next((k for k, n in enumerate(tail) if getattr(n, 'name', None) in ('h2', 'h3', 'h4')), None)
+    ifr = next((n.find('iframe') for n in tail if hasattr(n, 'find') and n.find('iframe')), None)
+    ym = re.search(r'embed/([\w-]{6,})', ifr.get('src', '')) if ifr else None
+    yid = ym.group(1) if ym else ''
+    tail_ps = lambda seq: [_inner(n) for n in seq if getattr(n, 'name', None) == 'p' and _txt(n)]
+    cred_ps = tail_ps(tail[:t_h] if t_h is not None else tail) + tail_ps(tail[t_h + 1:] if t_h is not None else [])
+    if cred_ps: cred_ps[0] = cred_ps[0].replace('SETS YOU APART', '<strong>SETS YOU APART</strong>', 1)
+    cred_h = _txt(tail[t_h]) if t_h is not None else ''
+
+    body = subnav(page) + page_hero(page) + (
+        '<section class="section mc-intro"><div class="container mc-intro__grid">'
+          '<div><h2 data-reveal>' + title_html + '</h2>'
+          + ''.join(('<p class="lead" data-reveal>' if k == 0 else '<p data-reveal>') + x + '</p>' for k, x in enumerate(intro)) +
+          '</div>'
+          '<div class="media-stack" data-reveal="scale"><div class="media media--tall media--blob"><img src="/assets/img/ben-mentor.jpg" alt="Dr Ben Koh, Master Certified Coach" data-parallax="20"></div>'
+          '<div class="badge-float" style="left:-6%;right:auto;top:auto;bottom:12%"><img src="/assets/img/badges/icf-mcc.png" alt="" width="54" height="54"><div><b>MCC</b><span>Master Certified Coach</span></div></div></div>'
+        '</div></section>'
+
+        '<section class="section section--green ben-band has-curve">' + _mc_curve('right') +
+        '<div class="container ben-band__grid">'
+          '<p class="ben-band__big" data-reveal>' + (ben[0].replace('more than 2000 coaches', '<strong>more than 2000 coaches</strong>', 1) if ben else '') + '</p>'
+          '<div class="ben-band__side">' + ''.join(('<p class="ben-band__close" data-reveal>' if k == len(ben) - 2 else '<p data-reveal>') + x + '</p>' for k, x in enumerate(ben[1:])) + '</div>'
+        '</div></section>'
+
+        '<section class="section section--white mc-how"><div class="container mc-how__grid">'
+          '<div class="mc-how__left"><h2 data-reveal>' + esc(summ(d_how)) + '</h2>' + (('<p class="lead" data-reveal>' + before[0] + '</p>') if before else '') + '</div>'
+          '<div class="mc-how__right">' + ''.join('<p data-reveal>' + x + '</p>' for x in how_ps)
+          + (('<p class="mc-label" data-reveal>' + label + '</p>') if label else '')
+          + '<ol class="mc-steps">' + ''.join('<li data-reveal>' + x + '</li>' for x in steps) + '</ol>'
+          + '<div class="mc-reviews">' + ''.join(review(r) for r in reviews) + '</div>'
+          + ''.join('<p data-reveal>' + x + '</p>' for x in closing) +
+        '</div></div></section>'
+
+        '<section class="section section--surface mc-samples"><div class="container mc-samples__grid">'
+          '<div class="mc-samples__text"><h2 data-reveal>' + esc(summ(d_samples)) + '</h2>' + ''.join('<p data-reveal>' + x + '</p>' for x in sample_ps) + '</div>'
+          '<div class="reports">' + thumbs + '</div>'
+        '</div></section>'
+
+        '<section class="section packages has-curve">' + _mc_curve('left') + '<div class="container">'
+          '<div class="section-head center" style="margin-inline:auto"><h2 data-reveal>' + esc(summ(d_pkg)) + '</h2>' + ''.join('<p data-reveal>' + x + '</p>' for x in pkg_intro) + '</div>'
+          '<div class="price-row">' + ''.join(_mc_price(pk, k) for k, pk in enumerate(pkgs)) + '</div>'
+        '</div></section>'
+
+        '<section class="section section--surface praise"><div class="container"><div class="section-head center" style="margin-inline:auto"><h2 data-reveal>' + esc(summ(d_praise)) + '</h2></div></div>'
+          '<div class="marquee" data-reveal="none"><div class="marquee__track" style="animation-duration:95s">' + ''.join(_mc_quote(t) for t in praise[:half]) + '</div></div>'
+          '<div class="marquee marquee--reverse" data-reveal="none"><div class="marquee__track" style="animation-duration:110s">' + ''.join(_mc_quote(t) for t in praise[half:]) + '</div></div>'
+        '</section>'
+
+        '<section class="section section--white mc-cred"><div class="container mc-cred__grid">'
+          '<div>' + ''.join(('<p class="mc-cred__lead" data-reveal>' if k == 0 else '<p data-reveal>') + x + '</p>' for k, x in enumerate(cred_ps)) + '</div>'
+          '<div>' + (('<div class="video-card mc-cred__video" data-reveal="scale"><img src="https://i.ytimg.com/vi/' + yid + '/hqdefault.jpg" alt="" loading="lazy">'
+                      '<a class="video-card__play" href="https://www.youtube.com/watch?v=' + yid + '" data-video aria-label="Play video"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></a></div>') if yid else '')
+          + (('<h3 class="mc-cred__caption" data-reveal>' + esc(cred_h) + '</h3>') if cred_h else '') + '</div>'
+        '</div></section>')
+    return layout(page, body)
+
+def unique_approach(page):
+    nodes = top_nodes(page['content'])
+    tags = [getattr(n, 'name', None) for n in nodes]
+    expect = ['h2', 'p', 'p', 'p', 'p', 'h5', 'h3', 'p', 'h3', 'p', 'ul', 'img', 'h5', 'ul']
+    if tags != expect:
+        print('!! our-unique-approach layout pattern changed:', tags); return smart_page(page)
+    h2, p1, p2, p3, q1, q2, h3a, pa, h3b, pb, ul1, logo, q3, ul2 = nodes
+    lis = lambda ul: ''.join('<li data-reveal>' + _inner(li) + '</li>' for li in ul.find_all('li') if _txt(li))
+    body = subnav(page) + page_hero(page) + (
+        '<section class="section ua-intro has-curve">' + _mc_curve('right') + '<div class="container ua-intro__grid">'
+          '<div><h2 data-reveal>' + _inner(h2) + '</h2><p class="ua-intro__lead" data-reveal>' + _inner(p1) + '</p></div>'
+          '<div><p data-reveal>' + _inner(p2) + '</p><p class="ua-intro__strong" data-reveal>' + _inner(p3) + '</p></div>'
+        '</div></section>'
+
+        '<section class="section section--green ua-quotes">'
+          '<svg class="ua-quotes__curve" viewBox="0 0 1440 600" preserveAspectRatio="none" aria-hidden="true">'
+            '<path d="M-20 600 L-20 560 C320 430 540 660 840 500 S1280 230 1460 310 L1460 600 Z" fill="#eb6422" opacity=".16"/>'
+            '<path d="M-20 520 C300 380 520 620 820 460 S1260 180 1460 260" fill="none" stroke="#eb6422" stroke-width="2" opacity=".65" vector-effect="non-scaling-stroke"/></svg>'
+          '<div class="container ua-quotes__grid">'
+            '<blockquote class="ua-quote ua-quote--big" data-reveal><div>' + _inner(q1) + '</div></blockquote>'
+            '<blockquote class="ua-quote ua-quote--small" data-reveal><div>' + _inner(q2) + '</div></blockquote>'
+        '</div></section>'
+
+        '<section class="section section--white ua-steps"><div class="container ua-steps__grid">'
+          '<svg class="ua-steps__link" viewBox="0 0 400 300" preserveAspectRatio="none" aria-hidden="true"><path d="M0 30 C170 30 190 270 400 262" fill="none" stroke="#eb6422" stroke-width="2" stroke-dasharray="6 9" vector-effect="non-scaling-stroke"/></svg>'
+          '<div class="ua-step"><h3 data-reveal>' + _inner(h3a) + '</h3><p data-reveal>' + _inner(pa) + '</p></div>'
+          '<div class="ua-step ua-step--low"><h3 data-reveal>' + _inner(h3b) + '</h3><p class="ua-step__lead" data-reveal>' + _inner(pb) + '</p><ul class="list-check">' + lis(ul1) + '</ul></div>'
+        '</div></section>'
+
+        '<section class="section section--surface ua-close has-curve">' + _mc_curve('left') + '<div class="container ua-close__grid">'
+          '<div><div class="ua-close__logo" data-reveal="scale"><img src="' + esc(logo.get('src', '')) + '" alt="ICF Coaching Education" loading="lazy"></div>'
+          '<blockquote class="ua-quote ua-quote--ink" data-reveal><div>' + _inner(q3) + '</div></blockquote></div>'
+          '<ul class="ua-close__list">' + lis(ul2) + '</ul>'
+        '</div></section>')
+    return layout(page, body)
+
+RENDERERS['/pages/mentor-coaching'] = mentor_coaching
+RENDERERS['/pages/our-unique-approach'] = unique_approach

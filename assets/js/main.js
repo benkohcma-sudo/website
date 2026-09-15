@@ -87,6 +87,7 @@
   initTabs();
   initOffices();
   initVideoModal();
+  initLightbox();
 
   /* ---------- marquee: duplicate track content for seamless loop ---------- */
   doc.querySelectorAll('.marquee__track').forEach(function (t) {
@@ -419,6 +420,55 @@
     wrap.addEventListener('click', function (ev) { if (ev.target === wrap) shut(); });
     doc.addEventListener('keydown', onKey);
     requestAnimationFrame(function () { wrap.classList.add('is-open'); close.focus(); });
+  }
+
+  /* [data-lightbox="group"] links open their image large, with previous / next through the group */
+  function initLightbox() {
+    doc.addEventListener('click', function (e) {
+      var a = e.target.closest ? e.target.closest('[data-lightbox]') : null;
+      if (!a) return;
+      e.preventDefault();
+      var group = Array.prototype.slice.call(doc.querySelectorAll('[data-lightbox="' + a.getAttribute('data-lightbox') + '"]'));
+      openLightbox(group, group.indexOf(a), a);
+    });
+  }
+  function openLightbox(items, at, opener) {
+    var wrap = doc.createElement('div');
+    wrap.className = 'video-modal lightbox';
+    wrap.setAttribute('role', 'dialog'); wrap.setAttribute('aria-modal', 'true'); wrap.setAttribute('aria-label', 'Image viewer');
+    wrap.innerHTML = '<figure class="lightbox__stage"><img alt=""><figcaption class="lightbox__count"></figcaption></figure>' +
+      '<button class="lightbox__nav lightbox__nav--prev" type="button" aria-label="Previous image"></button>' +
+      '<button class="lightbox__nav lightbox__nav--next" type="button" aria-label="Next image"></button>' +
+      '<button class="video-modal__close" type="button" aria-label="Close"></button>';
+    var img = wrap.querySelector('img'), count = wrap.querySelector('.lightbox__count');
+    if (items.length < 2) wrap.classList.add('lightbox--single');
+    function show(i) {
+      at = (i + items.length) % items.length;
+      img.src = items[at].getAttribute('href');
+      var t = items[at].querySelector('img'); img.alt = t ? t.alt : '';
+      count.textContent = (at + 1) + ' / ' + items.length;
+    }
+    function shut() {
+      wrap.classList.remove('is-open');
+      doc.documentElement.classList.remove('modal-open');
+      doc.removeEventListener('keydown', onKey);
+      setTimeout(function () { if (wrap.parentNode) wrap.parentNode.removeChild(wrap); }, 320);
+      if (opener && opener.focus) opener.focus();
+    }
+    function onKey(ev) {
+      if (ev.key === 'Escape') shut();
+      else if (ev.key === 'ArrowRight') show(at + 1);
+      else if (ev.key === 'ArrowLeft') show(at - 1);
+    }
+    wrap.querySelector('.video-modal__close').addEventListener('click', shut);
+    wrap.querySelector('.lightbox__nav--prev').addEventListener('click', function () { show(at - 1); });
+    wrap.querySelector('.lightbox__nav--next').addEventListener('click', function () { show(at + 1); });
+    wrap.addEventListener('click', function (ev) { if (ev.target === wrap || ev.target.classList.contains('lightbox__stage')) shut(); });
+    doc.addEventListener('keydown', onKey);
+    show(at);
+    doc.body.appendChild(wrap);
+    doc.documentElement.classList.add('modal-open');
+    requestAnimationFrame(function () { wrap.classList.add('is-open'); wrap.querySelector('.video-modal__close').focus(); });
   }
 
   function initStrips() {

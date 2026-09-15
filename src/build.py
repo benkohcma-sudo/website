@@ -293,7 +293,16 @@ def group_form_fields(body):
         for n in new: form.append(n)
         return str(form)
     if '<form' not in body: return body
-    return re.sub(r'<form\b[^>]*>.*?</form>', one, body, flags=re.S)
+    body = re.sub(r'<form\b[^>]*>.*?</form>', one, body, flags=re.S)
+    def frame(m):
+        # long interest forms: the heading and note just above move into the form, and the form sits in an orange frame
+        intro, form = m.group(1) or '', m.group(3)
+        if form.count('class="field') < 5: return m.group(0)
+        if intro:
+            k = form.index('>') + 1
+            form = form[:k] + '<div class="form-intro">' + intro + '</div>' + form[k:]
+        return '<div class="form-frame">' + form + '</div>'
+    return re.sub(r'((<h[2-4]>(?:(?!</h[2-4]>).)*</h[2-4]>)\s*(?:<p>(?:(?!</p>|<form).)*</p>\s*)?)?(<form\b[^>]*>(?:(?!</form>).)*</form>)', frame, body, flags=re.S)
 
 def layout(page, body, extra_head='', extra_js='', body_class=''):
     body = fix_links(group_form_fields(emphasize(body)))
