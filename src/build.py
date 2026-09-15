@@ -503,6 +503,36 @@ def rewrite_pagination(html_text):
     """?page=N links -> /page-N/ folders so the static preview works; Laravel keeps ?page=N."""
     return re.sub(r'href="(/[^"?]*)\?page=(\d+)"', r'href="\1/page-\2/"', html_text)
 
+# The live certification pages show a poster with a play button after this paragraph; the extractor dropped it
+# because the link held only an icon. Re-inserted after rendering, outside the hero.
+VIDEO_CARD = ('<div class="video-card" data-reveal="scale">'
+              '<img src="https://www.coachmastersacademy.com/public/twenty25/images/cma-3.png" alt="" loading="lazy">'
+              '<a class="video-card__play" href="https://www.coachmastersacademy.com/public/storage/CoachMastersAcademyVideo.mp4" data-video aria-label="Play video">'
+              '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></a></div>')
+VIDEO_AFTER = {'/icf-coaching-training-program': 'shape lives and systems.</p>', '/pages/coaching-certification': 'shape lives and systems.</p>'}
+
+CALL_BLOCK_RE = re.compile(r'<p>\s*You can call our Global Office.*?</p>\s*<a [^>]*>\s*Schedule a Call\s*</a>', re.S)
+
+def strip_call_block(page):
+    """The 'call our Global Office / Schedule a Call' block was removed at the client's request (Sep 2026)."""
+    if 'You can call our Global Office' in page.get('content', ''):
+        page = dict(page); page['content'] = CALL_BLOCK_RE.sub('', page['content'])
+    return page
+
+def insert_videos(url, html_text):
+    anchor = VIDEO_AFTER.get(url)
+    if not anchor: return html_text
+    pos = 0
+    while True:
+        i = html_text.find(anchor, pos)
+        if i < 0:
+            print('!! video anchor not found outside the hero:', url); return html_text
+        sec = html_text.rfind('<section class="', 0, i)
+        if sec >= 0 and 'page-hero' in html_text[sec:sec + 60]:
+            pos = i + len(anchor); continue
+        j = i + len(anchor)
+        return html_text[:j] + VIDEO_CARD + html_text[j:]
+
 def build():
     if os.path.exists(DIST): shutil.rmtree(DIST)
     os.makedirs(DIST)
@@ -515,10 +545,10 @@ def build():
         url = page['url']
         fn = custom.get(url) or next((f for k, f in pages_custom.PREFIX_RENDERERS if url.startswith(k)), None) or pages_custom.smart_page
         try:
-            html_text = fn(page)
+            html_text = fn(strip_call_block(page))
         except Exception as e:
             print('!! failed', url, e); html_text = generic_page(page)
-        write(url, rewrite_pagination(html_text)); n += 1
+        write(url, rewrite_pagination(insert_videos(url, html_text))); n += 1
     print(n, 'pages ->', DIST)
 
 if __name__ == '__main__':

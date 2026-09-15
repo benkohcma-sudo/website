@@ -86,6 +86,7 @@
   initAccordions();
   initTabs();
   initOffices();
+  initVideoModal();
 
   /* ---------- marquee: duplicate track content for seamless loop ---------- */
   doc.querySelectorAll('.marquee__track').forEach(function (t) {
@@ -263,6 +264,7 @@
   initHeroVideo();
   initHomeHero(false);
   initStrips();
+  initFlowSide();
   win.addEventListener('load', function () { ScrollTrigger.refresh(); });
   // safety net: anything still hidden 4s after load is shown (e.g. if ScrollTrigger never fires)
   afterPreloader(function () { setTimeout(function () { doc.querySelectorAll('[data-reveal]').forEach(function (el) { if (el.closest('.globe-hero')) return; if (getComputedStyle(el).opacity === '0' && el.getBoundingClientRect().top < win.innerHeight) enter(el, 0); }); }, 4000); });
@@ -371,6 +373,54 @@
      and slide into line as the strip scrolls up the screen; then the
      whole row drifts sideways a little as you keep scrolling.
      ============================================================ */
+  /* orange ribbon in a side margin that pours down as its section scrolls past */
+  function initFlowSide() {
+    doc.querySelectorAll('.flow-side__svg').forEach(function (svg) {
+      if (getComputedStyle(svg).display === 'none') return;
+      gsap.fromTo(svg, { clipPath: 'inset(0% 0% 100% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', ease: 'none',
+        scrollTrigger: { trigger: svg.parentElement, start: 'top 75%', end: 'bottom 65%', scrub: 0.8 } });
+    });
+  }
+
+  /* [data-video] links open their video in a popup: YouTube in an embedded player, files in a native player */
+  function initVideoModal() {
+    doc.addEventListener('click', function (e) {
+      var a = e.target.closest ? e.target.closest('[data-video]') : null;
+      if (!a) return;
+      var src = a.getAttribute('href') || a.getAttribute('data-video');
+      if (!src) return;
+      e.preventDefault();
+      openVideo(src, a);
+    });
+  }
+  function openVideo(src, opener) {
+    var yt = src.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]{6,})/);
+    var wrap = doc.createElement('div');
+    wrap.className = 'video-modal';
+    wrap.setAttribute('role', 'dialog'); wrap.setAttribute('aria-modal', 'true'); wrap.setAttribute('aria-label', 'Video');
+    var media = yt
+      ? '<iframe src="https://www.youtube.com/embed/' + yt[1] + '?autoplay=1&rel=0" title="Video" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>'
+      : '<video controls autoplay playsinline preload="metadata"></video>';
+    wrap.innerHTML = '<div class="video-modal__box">' + media + '</div><button class="video-modal__close" type="button" aria-label="Close video"></button>';
+    if (!yt) wrap.querySelector('video').src = src;
+    doc.body.appendChild(wrap);
+    doc.documentElement.classList.add('modal-open');
+    var close = wrap.querySelector('.video-modal__close');
+    function shut() {
+      var v = wrap.querySelector('video'); if (v) { v.pause(); v.removeAttribute('src'); v.load(); }
+      wrap.classList.remove('is-open');
+      doc.documentElement.classList.remove('modal-open');
+      doc.removeEventListener('keydown', onKey);
+      setTimeout(function () { if (wrap.parentNode) wrap.parentNode.removeChild(wrap); }, 320);
+      if (opener && opener.focus) opener.focus();
+    }
+    function onKey(ev) { if (ev.key === 'Escape') shut(); }
+    close.addEventListener('click', shut);
+    wrap.addEventListener('click', function (ev) { if (ev.target === wrap) shut(); });
+    doc.addEventListener('keydown', onKey);
+    requestAnimationFrame(function () { wrap.classList.add('is-open'); close.focus(); });
+  }
+
   function initStrips() {
     doc.querySelectorAll('[data-strip]').forEach(function (strip) {
       var items = Array.prototype.slice.call(strip.children);

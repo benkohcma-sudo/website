@@ -1162,3 +1162,48 @@ section:has(.form-stage) { overflow: hidden; }
 /* ---------- a white logos band that closes a section runs into the next band ---------- */
 .landing:has(> .container > .lp-block--logos:last-child) { padding-bottom: 0; }
 .landing:has(> .container > .lp-block--logos:last-child) + .cta-full { margin-top: 0; }
+
+/* ---------- orange ribbon flowing down a side margin (founder page) ---------- */
+.flow-side { position: relative; overflow: hidden; }
+.flow-side > .container { position: relative; z-index: 1; }
+.flow-side__svg { position: absolute; left: 0; top: 0; height: 100%; width: min(300px, calc((100vw - var(--measure)) / 2 - 48px)); pointer-events: none; z-index: 0; }   /* sized from the text column so it never reaches the words */
+.flow-side__line { fill: none; stroke: #eb6422; stroke-width: 2; vector-effect: non-scaling-stroke; opacity: .55; }
+@media (max-width: 1280px) { .flow-side__svg { display: none; } }
+@media (max-width: 640px) { .media-stack .badge-float { right: 8px !important; } }   /* keep the portrait badge inside the screen on phones */
+
+/* ---------- certification video card + popup player ---------- */
+.video-card { position: relative; border-radius: 30px; overflow: hidden; aspect-ratio: 16 / 8; margin: clamp(28px, 4vw, 48px) 0; background: var(--green); }
+.prose .video-card img, .video-card img { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; margin: 0; border-radius: 0; object-fit: cover; transition: transform 1s var(--ease); }
+.video-card::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(23,56,14,.05), rgba(23,56,14,.38)); pointer-events: none; }
+.video-card:hover img { transform: scale(1.03); }
+.video-card__play { position: absolute; left: 50%; top: 50%; z-index: 1; width: clamp(72px, 8vw, 104px); aspect-ratio: 1; border-radius: 50%; background: #fff; color: var(--orange); display: grid; place-items: center; transform: translate(-50%, -50%); animation: playPulse 2.2s ease-out infinite; transition: transform .3s var(--ease), background .3s, color .3s; }
+.video-card__play svg { width: 34%; height: 34%; margin-left: 6%; }
+.video-card__play:hover, .video-card__play:focus-visible { background: var(--orange); color: #fff; transform: translate(-50%, -50%) scale(1.06); }
+@keyframes playPulse { 0% { box-shadow: 0 0 0 0 rgba(255,255,255,.55); } 100% { box-shadow: 0 0 0 26px rgba(255,255,255,0); } }
+.reduce-motion .video-card__play { animation: none; }
+html.modal-open, html.modal-open body { overflow: hidden; }
+.video-modal { position: fixed; inset: 0; z-index: 10000; display: grid; place-items: center; padding: clamp(16px, 4vw, 56px); background: rgba(10, 24, 6, .88); opacity: 0; transition: opacity .3s; }
+.video-modal.is-open { opacity: 1; }
+.video-modal__box { width: min(1100px, 100%); aspect-ratio: 16 / 9; background: #000; border-radius: 18px; overflow: hidden; transform: scale(.96); transition: transform .4s var(--ease); box-shadow: 0 40px 120px rgba(0,0,0,.5); }
+.video-modal.is-open .video-modal__box { transform: none; }
+.video-modal__box video, .video-modal__box iframe { display: block; width: 100%; height: 100%; border: 0; background: #000; }
+.video-modal__close { position: absolute; top: clamp(12px, 2.5vw, 28px); right: clamp(12px, 2.5vw, 28px); width: 48px; height: 48px; border-radius: 50%; border: 1px solid rgba(255,255,255,.45); background: rgba(255,255,255,.08); cursor: pointer; }
+.video-modal__close::before, .video-modal__close::after { content: ""; position: absolute; left: 50%; top: 50%; width: 18px; height: 2px; background: #fff; }
+.video-modal__close::before { transform: translate(-50%, -50%) rotate(45deg); }
+.video-modal__close::after { transform: translate(-50%, -50%) rotate(-45deg); }
+.video-modal__close:hover { background: var(--orange); border-color: var(--orange); }
+
+/* ---------- stepper form: orange ribbon flowing behind a white card ---------- */
+section:has(form.js-steps) { position: relative; overflow: hidden; }
+.prose:has(> form.js-steps) { position: relative; isolation: isolate; }
+.prose:has(> form.js-steps)::before { content: ""; position: absolute; z-index: -1; left: -30vw; right: -30vw; top: 22%; bottom: -6%;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 600' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='0'%3E%3Cstop offset='0' stop-color='%23F08A4F'/%3E%3Cstop offset='.5' stop-color='%23eb6422'/%3E%3Cstop offset='1' stop-color='%23E55C00'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath fill='url(%23g)' d='M0 430 C220 300 420 530 640 410 S1020 190 1200 270 L1200 390 C1020 310 860 530 640 530 S240 450 0 570 Z'/%3E%3Cpath fill='none' stroke='%23eb6422' stroke-opacity='.45' stroke-width='3' d='M0 360 C240 240 440 470 660 345 S1040 130 1200 205'/%3E%3C/svg%3E") center / 100% 100% no-repeat; pointer-events: none; }
+.prose:has(> form.js-steps)::after { content: ""; position: absolute; z-index: -1; top: -34px; right: -34px; width: clamp(110px, 11vw, 160px); aspect-ratio: 1; border-radius: 50%;
+  border: 2px solid rgba(235,100,34,.4); background: radial-gradient(rgba(23,56,14,.22) 1.4px, transparent 1.6px) 0 0 / 14px 14px; pointer-events: none; }
+.prose form.js-steps { position: relative; background: #fff; box-shadow: 0 40px 90px -40px rgba(23,56,14,.4); }
+@media (max-width: 900px) { .prose:has(> form.js-steps)::before, .prose:has(> form.js-steps)::after { display: none; } }
+
+/* ---------- a page that now ends on the white logos band has no cream strip under it ---------- */
+main > section.landing:last-child:has(> .container > .lp-block--logos:last-child) { padding-bottom: 0; }
+
+@media (max-width: 640px) { .badge-strip { max-width: 100%; width: auto; margin-inline: 0; flex-wrap: wrap; justify-content: center; row-gap: 14px; } .badge-strip img { flex: 0 0 28%; max-width: 104px; } }   /* badge row fits a phone */

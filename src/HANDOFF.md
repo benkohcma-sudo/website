@@ -76,6 +76,10 @@ GSAP 3 (cdnjs), ScrollTrigger and `main.js`.
 | About Us | What We Stand For cards land one after another (`[data-seq]` on the grid: each child waits ~0.4s after the previous). Phones: the globe film sits behind the hero, centred in the upper middle, with the headline and counters below. |
 | Forms (workshop interest, registration, webinars, calendar, certification) | Flat label + field runs are grouped at build time into `.field` wrappers; radio/checkbox options sit under their question in `.field--choices`. Field names, values and wording are unchanged. |
 | Home brochure form | Orange staircase shape climbs into the form's lower-left corner (`.form-stage::before`, pure CSS clip-path), with a thin orange ring at the top-left. |
+| Video popups | Any link with `data-video` opens in a popup: YouTube links play in an embedded player, video files in a native player. Closes on the X, a click outside, or Escape, and returns focus to the link. The certification pages' poster video (`CoachMastersAcademyVideo.mp4`) is back after the paragraph ending 'shape lives and systems.'; About's Watch Video uses the same popup. |
+| Removed sections | The shared closing registration band (Registration / Schedule a Call) and the certification pages' 'You can call our Global Office…' call block are no longer rendered, at the client's request. |
+| Certification stepper form | White card with an orange flowing ribbon passing behind it, plus a dotted ring at the top-right. Hidden on phones. |
+| Founder page | Orange ribbon pours down the left margin beside the long biography as it scrolls past (`.flow-side`). Sized from the text column so it never reaches the words; hidden below 1280px. |
 | Everywhere | Section entrances on `[data-reveal]`: headings and short copy arrive word by word with a soft blur, cards land as a shell first and then fill in, images scale in, buttons come last; items entering together are sequenced in DOM order. Hero headlines use `[data-split]`. Counters (`[data-count]`), marquees (`.marquee`). Add `?nomotion` to any URL to see the page without animation. |
 
 Add `?nomotion` to any URL to see a page with all motion switched off. Users with

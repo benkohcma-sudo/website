@@ -412,7 +412,7 @@ def about(page):
     <div class="section-head center" style="margin-inline:auto">
       <h2 data-reveal>A Vision to Inspire Positive Change through  Mastery of Coaching</h2>
     </div>
-    <a class="video-cta" href="https://www.youtube.com/watch?v=NAVllbMOilw" target="_blank" rel="noopener" data-reveal="scale">
+    <a class="video-cta" href="https://www.youtube.com/watch?v=NAVllbMOilw" target="_blank" rel="noopener" data-video data-reveal="scale">
       <img src="{IMG}featured_image1/2/our-potential-img.jpg" alt="" data-parallax="40">
       <div style="position:relative;z-index:1;display:grid;justify-items:center"><div class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div><span>watch video</span></div>
     </a>
@@ -488,7 +488,8 @@ def story(page):
     return layout(page, body)
 
 def cta_band():
-    """Full-width registration band that runs straight into the footer."""
+    """The shared registration band was removed at the client's request (Sep 2026); kept as a stub so callers stay unchanged."""
+    return ''
     return f'''
 <section class="cta-full">
   <div class="container cta-full__inner">
@@ -1084,7 +1085,12 @@ def founder(page):
     </div>
   </div>
 </section>
-<section class="section section--tight">
+<section class="section section--tight flow-side">
+  <svg class="flow-side__svg" viewBox="0 0 300 1000" preserveAspectRatio="none" aria-hidden="true">
+    <defs><linearGradient id="flowSideGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F08A4F"/><stop offset=".55" stop-color="#eb6422"/><stop offset="1" stop-color="#E55C00"/></linearGradient></defs>
+    <path fill="url(#flowSideGrad)" d="M0 0 H110 C30 170, 240 330, 160 520 C90 690, 250 830, 140 1000 H0 Z"/>
+    <path class="flow-side__line" d="M150 0 C70 170, 280 330, 200 520 C130 690, 290 830, 180 1000"/>
+  </svg>
   <div class="container"><div class="prose prose--wide" data-auto-reveal style="max-width:860px">{''.join(rest)}</div></div>
 </section>
 <section class="section section--surface">
