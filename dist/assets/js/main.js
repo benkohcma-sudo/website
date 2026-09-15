@@ -51,6 +51,7 @@
   function onScroll() {
     var y = win.scrollY;
     if (!header) return;
+    if (doc.documentElement.classList.contains('keep-header')) { header.classList.add('is-scrolled'); header.classList.remove('is-hidden'); lastY = y; return; }   // a pinned section sits under the compact header
     header.classList.toggle('is-scrolled', y > 10);
     if (y > 320 && y > lastY + 4) header.classList.add('is-hidden');
     else if (y < lastY - 4) header.classList.remove('is-hidden');
@@ -570,24 +571,119 @@
      ============================================================ */
   function initOffices() {
     doc.querySelectorAll('[data-offices]').forEach(function (root) {
-      var tabs = root.querySelectorAll('.offices__tabs button');
-      var panels = root.querySelectorAll('.offices__panel');
-      var frame = root.querySelector('.offices__map iframe');
-      function go(q) { if (frame && q) frame.src = 'https://maps.google.com/maps?q=' + q + '&z=13&output=embed'; }
-      function pick(card) {
-        root.querySelectorAll('.office').forEach(function (o) { o.classList.remove('is-active'); });
-        card.classList.add('is-active'); go(card.dataset.q);
+      var canvas = root.querySelector('.offices__canvas');
+      var cards = Array.prototype.slice.call(root.querySelectorAll('.office--globe'));
+      var regions = Array.prototype.slice.call(root.querySelectorAll('.offices__regions .chip'));
+      var placeSets = Array.prototype.slice.call(root.querySelectorAll('.offices__places'));
+      var places = Array.prototype.slice.call(root.querySelectorAll('.chip--place'));
+      var count = root.querySelector('.offices__count b');
+      if (!cards.length) return;
+      var land = win.CMA_LAND || new Float32Array(0), dpr = Math.min(2, win.devicePixelRatio || 1);
+      var ctx = canvas ? canvas.getContext('2d') : null;
+      var motion = hasGsap && !reduce;
+      var rot = { y: 0, x: 0.3 }, size = 0, R = 0, auto = true, resumeAt = 0, active = 0, drag = null, inView = true;
+      var pts = new Float32Array(land.length / 2 * 3);
+      function toXYZ(lat, lon) { var la = lat * Math.PI / 180, lo = lon * Math.PI / 180; return [Math.cos(la) * Math.cos(lo), Math.sin(la), Math.cos(la) * Math.sin(lo)]; }
+      for (var i = 0; i < land.length; i += 2) { var q = toXYZ(land[i], land[i + 1]); pts[i / 2 * 3] = q[0]; pts[i / 2 * 3 + 1] = q[1]; pts[i / 2 * 3 + 2] = q[2]; }
+      var pins = cards.map(function (c) { var lat = +c.dataset.lat, lon = +c.dataset.lon; return { lat: lat, lon: lon, xyz: toXYZ(lat, lon), sx: 0, sy: 0, z: -1 }; });
+      var home = 0;
+      cards.forEach(function (c, i) { if (/singapore/i.test(c.querySelector('.office__name').textContent)) home = i; });
+      function resize() { if (!canvas) return; size = canvas.clientWidth; canvas.width = size * dpr; canvas.height = size * dpr; R = size * 0.44; }
+      function project(v) {
+        var cy = Math.cos(rot.y), sy = Math.sin(rot.y), x1 = v[0] * cy - v[2] * sy, z1 = v[0] * sy + v[2] * cy;
+        var cx = Math.cos(rot.x), sx = Math.sin(rot.x), y1 = v[1] * cx - z1 * sx, z2 = v[1] * sx + z1 * cx;
+        return [size / 2 + x1 * R, size / 2 - y1 * R, z2];
       }
-      tabs.forEach(function (b) {
-        b.addEventListener('click', function () {
-          tabs.forEach(function (x) { x.classList.toggle('is-active', x === b); });
-          panels.forEach(function (p) { p.hidden = p.dataset.region !== b.dataset.region; });
-          var first = root.querySelector('.offices__panel:not([hidden]) .office');
-          if (first) pick(first);
-          if (hasGsap && !reduce) { var p = root.querySelector('.offices__panel:not([hidden])'); gsap.from(p.children, { opacity: 0, y: 16, duration: .5, stagger: .06, ease: 'power3.out', clearProps: 'all' }); }
+      function draw() {
+        if (!ctx || !size) return;
+        var k = size / 640;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, size, size);
+        ctx.fillStyle = '#F4EFE7'; ctx.beginPath(); ctx.arc(size / 2, size / 2, R, 0, 6.283); ctx.fill();
+        ctx.strokeStyle = 'rgba(23,56,14,0.12)'; ctx.lineWidth = 1; ctx.stroke();
+        ctx.strokeStyle = 'rgba(23,56,14,0.07)';
+        for (var lat = -60; lat <= 60; lat += 30) {
+          ctx.beginPath(); var first = true;
+          for (var lon = -180; lon <= 180; lon += 6) { var s = project(toXYZ(lat, lon)); if (s[2] < 0) { first = true; continue; } if (first) { ctx.moveTo(s[0], s[1]); first = false; } else ctx.lineTo(s[0], s[1]); }
+          ctx.stroke();
+        }
+        for (var i = 0; i < pts.length; i += 3) {
+          var s2 = project([pts[i], pts[i + 1], pts[i + 2]]); if (s2[2] < -0.02) continue;
+          ctx.fillStyle = 'rgba(23,56,14,' + ((0.25 + 0.75 * Math.max(0, s2[2])) * 0.85).toFixed(3) + ')';
+          ctx.beginPath(); ctx.arc(s2[0], s2[1], (1.1 + 1.3 * s2[2]) * k, 0, 6.283); ctx.fill();
+        }
+        var t = performance.now() / 1000, a = pins[active], h = pins[home];
+        var pa = project(a.xyz), ph = project(h.xyz);
+        if (pa[2] > 0 && ph[2] > 0 && active !== home) {                                   // arc from the Global Office to the chosen office
+          var mx = (a.xyz[0] + h.xyz[0]) / 2, my = (a.xyz[1] + h.xyz[1]) / 2, mz = (a.xyz[2] + h.xyz[2]) / 2, ml = Math.sqrt(mx * mx + my * my + mz * mz) || 1;
+          var m = project([mx / ml * 1.3, my / ml * 1.3, mz / ml * 1.3]);
+          ctx.strokeStyle = 'rgba(235,100,34,0.55)'; ctx.lineWidth = 1.4 * k; ctx.beginPath(); ctx.moveTo(ph[0], ph[1]); ctx.quadraticCurveTo(m[0], m[1], pa[0], pa[1]); ctx.stroke();
+        }
+        pins.forEach(function (p, i) {
+          var s3 = project(p.xyz); p.sx = s3[0]; p.sy = s3[1]; p.z = s3[2];
+          if (s3[2] < 0.05) return;
+          var on = i === active;
+          if (on) { var pulse = (Math.sin(t * 2.4) + 1) / 2; ctx.strokeStyle = 'rgba(235,100,34,' + (0.9 - 0.6 * pulse) + ')'; ctx.lineWidth = 2 * k; ctx.beginPath(); ctx.arc(s3[0], s3[1], (9 + 12 * pulse) * k, 0, 6.283); ctx.stroke(); }
+          ctx.fillStyle = on ? '#eb6422' : 'rgba(235,100,34,' + (0.45 + 0.55 * s3[2]).toFixed(2) + ')';
+          ctx.beginPath(); ctx.arc(s3[0], s3[1], (on ? 6 : 3.6) * k, 0, 6.283); ctx.fill();
+          if (on) { ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(s3[0], s3[1], 2.2 * k, 0, 6.283); ctx.fill(); }
         });
+      }
+      function targetFor(i) {
+        var p = pins[i], ty = Math.PI / 2 - p.lon * Math.PI / 180, tx = Math.max(-1, Math.min(1, p.lat * Math.PI / 180 * 0.9));
+        var twoPi = Math.PI * 2; ty = rot.y + ((ty - rot.y + Math.PI) % twoPi + twoPi) % twoPi - Math.PI;   // shortest way round
+        return { y: ty, x: tx };
+      }
+      function select(i, opts) {
+        opts = opts || {};
+        active = (i + cards.length) % cards.length;
+        var region = cards[active].dataset.region;
+        cards.forEach(function (c, k) { c.hidden = k !== active; });
+        places.forEach(function (b) { b.classList.toggle('is-active', +b.dataset.office === active); });
+        regions.forEach(function (b) { b.classList.toggle('is-active', b.dataset.region === region); b.setAttribute('aria-selected', b.dataset.region === region); });
+        placeSets.forEach(function (p) { p.hidden = p.dataset.region !== region; });
+        if (count) count.textContent = active + 1;
+        var tg = targetFor(active);
+        if (motion) {
+          gsap.killTweensOf(rot); gsap.to(rot, { y: tg.y, x: tg.x, duration: opts.instant ? 0 : 1.1, ease: 'power3.inOut' });
+          if (!opts.quiet) gsap.from(cards[active], { opacity: 0, y: 14, duration: .45, ease: 'power3.out', clearProps: 'all' });
+        } else { rot.y = tg.y; rot.x = tg.x; draw(); }
+        auto = false; resumeAt = performance.now() + 7000;
+      }
+      regions.forEach(function (b) { b.addEventListener('click', function () { for (var k = 0; k < cards.length; k++) if (cards[k].dataset.region === b.dataset.region) { select(k); break; } }); });
+      places.forEach(function (b) { b.addEventListener('click', function () { select(+b.dataset.office); }); });
+      root.querySelectorAll('.offices__arrow').forEach(function (b) { b.addEventListener('click', function () { select(active + (+b.dataset.dir)); }); });
+      if (canvas) {                                                                                     // drag to spin, tap a pin to choose it
+        canvas.addEventListener('pointerdown', function (e) { drag = { x: e.clientX, y: e.clientY, ry: rot.y, rx: rot.x, moved: false }; try { canvas.setPointerCapture(e.pointerId); } catch (err) {} if (motion) gsap.killTweensOf(rot); });
+        canvas.addEventListener('pointermove', function (e) {
+          if (!drag) return; var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+          if (Math.abs(dx) + Math.abs(dy) > 4) drag.moved = true;
+          rot.y = drag.ry + dx * 0.006; rot.x = Math.max(-1.1, Math.min(1.1, drag.rx + dy * 0.006)); auto = false; resumeAt = performance.now() + 7000;
+          if (!motion) draw();
+        });
+        function up(e) {
+          if (!drag) return;
+          if (!drag.moved) {
+            var r = canvas.getBoundingClientRect(), x = (e.clientX - r.left) * (size / r.width), y = (e.clientY - r.top) * (size / r.height), best = -1, bd = 18 * (size / 640) * 1.4;
+            pins.forEach(function (p, i) { if (p.z < 0.05) return; var d = Math.hypot(p.sx - x, p.sy - y); if (d < bd) { bd = d; best = i; } });
+            if (best >= 0) select(best);
+          }
+          drag = null;
+        }
+        canvas.addEventListener('pointerup', up); canvas.addEventListener('pointercancel', function () { drag = null; });
+        canvas.style.touchAction = 'none';
+      }
+      resize(); win.addEventListener('resize', function () { resize(); draw(); });
+      select(0, { instant: true, quiet: true });
+      draw();
+      root.__globe = { select: select, get active() { return active; }, pins: pins, rot: rot };   // hook for tests
+      if (!motion) return;
+      if ('IntersectionObserver' in win) new IntersectionObserver(function (es) { inView = es[0].isIntersecting; }, { rootMargin: '120px' }).observe(root);
+      gsap.ticker.add(function (time, dt) {
+        if (!inView) return;
+        if (!auto && !drag && performance.now() > resumeAt && !gsap.isTweening(rot)) auto = true;
+        if (auto && !drag) rot.y += dt * 0.00012;
+        draw();
       });
-      root.querySelectorAll('.office').forEach(function (card) { card.addEventListener('click', function () { pick(card); }); });
     });
   }
 
@@ -865,9 +961,17 @@
       if (num) tl.to(obj, { v: target, duration: .3, ease: 'power2.out', onUpdate: function () { num.textContent = Math.round(obj.v).toLocaleString(); } }, at);
     });
 
+    var cover = doc.querySelector('.about-cover');
     ScrollTrigger.create({
       trigger: hero, start: 'top top', end: '+=260%', pin: true, pinSpacing: false, scrub: 0.6, animation: tl, anticipatePin: 1
     });
+    if (cover && header) {                                           // once it has risen, the Vision / Mission / Approach section holds under the compact header
+      var hdrH = function () { var had = header.classList.contains('is-scrolled'); header.classList.add('is-scrolled'); var h = header.offsetHeight; if (!had) header.classList.remove('is-scrolled'); return h; };
+      ScrollTrigger.create({
+        trigger: cover, start: function () { return 'top ' + hdrH(); }, end: '+=90%', pin: true, pinSpacing: true, anticipatePin: 1,
+        onToggle: function (st) { doc.documentElement.classList.toggle('keep-header', st.isActive); if (st.isActive) { header.classList.add('is-scrolled'); header.classList.remove('is-hidden'); } }
+      });
+    }
     video.load();
   }
 

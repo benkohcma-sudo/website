@@ -85,6 +85,8 @@ GSAP 3 (cdnjs), ScrollTrigger and `main.js`.
 | Open/close cards (everywhere) | Orange edge bar that grows on hover and fills on open, warm gradient when closed, orange corner curve and glow when open, orange focus ring instead of the browser's blue outline. |
 | Proven Success (certification) | Curving orange ribbons at both sides; hidden below 1100px. |
 | Site rule | No colour blends anywhere (client). Photo overlays are single flat tints, orange shapes are flat #eb6422, icons are plain SVG. Keep it that way in the CMS. |
+| Coaching Education offices | A dotted globe (canvas, `assets/js/globe-data.js`) with an orange pin per office. Region chips and office chips choose an office; the globe turns to it and draws an arc from the Singapore Global Office. Drag to spin, tap a pin, or use the arrows. One office card shows at a time; every card is in the DOM (hidden) with the original rows. Pin positions come from `OFFICE_COORDS` in `src/pages_custom.py`. |
+| About Us after the hero | Once the Vision / Mission / Approach section has risen over the held globe, it pins under the compact header for about a screen of scrolling (`.about-cover`), so the tabs can be used, then the page moves on. The header stays visible while it is pinned (`html.keep-header`). |
 | Everywhere | Section entrances on `[data-reveal]`: headings and short copy arrive word by word with a soft blur, cards land as a shell first and then fill in, images scale in, buttons come last; items entering together are sequenced in DOM order. Hero headlines use `[data-split]`. Counters (`[data-count]`), marquees (`.marquee`). Add `?nomotion` to any URL to see the page without animation. |
 
 Add `?nomotion` to any URL to see a page with all motion switched off. Users with

@@ -272,7 +272,7 @@ def about(page):
 </section>
 <div class="globe-hero__space" aria-hidden="true"></div>
 
-<section class="section section--surface">
+<section class="section section--surface about-cover">
   <div class="container">
     <div class="tabs tabs--center" role="tablist" data-tabs data-reveal="none">
       <button type="button" class="is-active" role="tab" aria-selected="true">Our Vision</button>
@@ -1084,41 +1084,58 @@ RENDERERS['/icf-master-certified-coach-mcc'] = founder
 
 
 # ====================================================================== regional offices (Coaching Education)
+OFFICE_COORDS = {   # one point per office, for the globe pins
+    'North America': (33.45, -112.07), 'South America': (-23.55, -46.63), 'United Kingdom': (51.5, -0.12), 'Eastern Europe': (44.43, 26.1),
+    'UAE': (25.2, 55.27), 'Lebanon': (33.89, 35.5), 'West Africa': (6.45, 3.4), 'East Africa': (-1.29, 36.82), 'India': (19.08, 72.88),
+    'Sri Lanka': (6.93, 79.85), 'Singapore': (1.29, 103.85), 'Greater China & Hong Kong': (22.3, 114.17), 'Vietnam': (21.03, 105.85),
+    'Philippines': (14.6, 120.98), 'Malaysia': (3.14, 101.69), 'Japan': (35.68, 139.69), 'Australia': (-33.87, 151.21), 'New Zealand': (-36.85, 174.76),
+}
+
 def offices_section():
-    """Region tabs, office cards and a map that follows the selected office.
-    Data: src/content/offices.json, taken verbatim from the live page's tab block."""
+    '''Regional offices on a spinning dotted globe: region chips, one office card at a time, pins you can tap,
+    drag to spin. Data: src/content/offices.json, taken verbatim from the live page's tab block.'''
     import json, os, urllib.parse
     data = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'content', 'offices.json')))
     def query(office):
         addr = next((r['value'] for r in office['rows'] if r['label'] == 'Office'), '')
         return urllib.parse.quote(addr or office['country'] + ' Coach Masters Academy')
-    tabs = ''.join(f'<button type="button" role="tab"{" class=is-active" if i == 0 else ""} data-region="{r["id"]}">{esc(r["label"])}</button>' for i, r in enumerate(data))
-    panels = ''
+    regions = ''.join(f'<button type="button" role="tab" class="chip{" is-active" if i == 0 else ""}" data-region="{r["id"]}">{esc(r["label"])}</button>' for i, r in enumerate(data))
+    places = ''; cards = ''; k = 0
     for i, r in enumerate(data):
-        cards = ''
-        for j, o in enumerate(r['offices']):
+        chips = ''
+        for o in r['offices']:
+            lat, lon = OFFICE_COORDS[o['country']]
+            chips += f'<button type="button" class="chip chip--place{" is-active" if k == 0 else ""}" data-office="{k}">{esc(o["country"])}</button>'
             rows = ''
             for row in o['rows']:
                 ext = ' target="_blank" rel="noopener"' if (row['href'] or '').startswith('http') else ''
                 val = f'<a href="{esc(row["href"])}"{ext}>{esc(row["value"])}</a>' if row['href'] else esc(row['value'])
                 rows += f'<div class="office__row"><span>{esc(row["label"])}</span><span>{val}</span></div>'
-            cards += (f'<button type="button" class="office{" is-active" if j == 0 else ""}" data-q="{query(o)}">'
-                      f'<span class="office__name">{PIN}{esc(o["country"])}</span>{rows}</button>')
-        panels += f'<div class="offices__panel"{"" if i == 0 else " hidden"} data-region="{r["id"]}">{cards}</div>'
-    first = query(data[0]['offices'][0])
-    return f'''
-<section class="section offices" data-offices>
-  <div class="container">
-    <div class="tabs offices__tabs" role="tablist" data-reveal="none">{tabs}</div>
-    <div class="offices__grid">
-      <div class="offices__list">{panels}</div>
-      <div class="offices__map" data-reveal="scale">
-        <iframe title="Office location map" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen
-          src="https://maps.google.com/maps?q={first}&z=13&output=embed"></iframe>
+            cards += (f'<div class="office office--globe" data-office="{k}" data-region="{r["id"]}" data-lat="{lat}" data-lon="{lon}"{"" if k == 0 else " hidden"}>'
+                      f'<p class="office__region">{esc(r["label"])}</p><h3 class="office__name">{PIN}{esc(o["country"])}</h3>{rows}'
+                      f'<a class="office__map link" href="https://www.google.com/maps/search/?api=1&query={query(o)}" target="_blank" rel="noopener">Open in Google Maps{ARROW}</a></div>')
+            k += 1
+        places += f'<div class="offices__places" data-region="{r["id"]}"{"" if i == 0 else " hidden"}>{chips}</div>'
+    return globe_scripts() + f'''
+<section class="section offices offices--globe" data-offices>
+  <div class="container offices__layout">
+    <div class="offices__globe" data-reveal="scale">
+      <canvas class="offices__canvas" aria-hidden="true"></canvas>
+      <p class="offices__hint" aria-hidden="true">Drag to spin · tap a pin</p>
+    </div>
+    <div class="offices__side">
+      <div class="offices__regions" role="tablist" data-reveal="none">{regions}</div>
+      {places}
+      <div class="offices__cards" data-reveal="none">{cards}</div>
+      <div class="offices__nav" data-reveal="none">
+        <button type="button" class="offices__arrow" data-dir="-1" aria-label="Previous office"></button>
+        <span class="offices__count"><b>1</b> / {k}</span>
+        <button type="button" class="offices__arrow offices__arrow--next" data-dir="1" aria-label="Next office"></button>
       </div>
     </div>
   </div>
 </section>'''
+
 
 def coaching_education(page):
     return smart_page(page, extra=offices_section())

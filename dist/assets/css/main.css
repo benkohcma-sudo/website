@@ -1477,7 +1477,38 @@ main > section.landing:last-child:has(> .container > .lp-block--logos:last-child
 /* ---------- About: the page rides up over the held globe hero ---------- */
 .globe-hero__space { height: 0; }
 .hero-pinned .globe-hero__space { height: 160svh; }                         /* the spin plays over this distance, then the next section climbs over the hero */
-.hero-pinned .pin-spacer, .hero-pinned .globe-hero { position: relative; z-index: 0; }
-.hero-pinned main > section:not(.globe-hero) { position: relative; z-index: 1; }
-:where(.hero-pinned) main > :where(section:not(.globe-hero)) { background-color: var(--bg); }
-.hero-pinned .globe-hero__space + section { border-radius: 32px 32px 0 0; box-shadow: 0 -18px 50px rgba(23,56,14,.16); }
+.hero-pinned main > section, .hero-pinned main > .pin-spacer > section { position: relative; z-index: 1; }
+:where(.hero-pinned) main > :where(section), :where(.hero-pinned) main > :where(.pin-spacer) > :where(section) { background-color: var(--bg); }
+.hero-pinned main > .pin-spacer:first-of-type, .hero-pinned .pin-spacer > section.globe-hero { position: relative; z-index: 0; }
+.hero-pinned .about-cover { border-radius: 32px 32px 0 0; box-shadow: 0 -18px 50px rgba(23,56,14,.16); }
+
+/* ---------- regional offices on a globe ---------- */
+.offices--globe .offices__layout { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: clamp(28px, 5vw, 80px); align-items: center; }
+.offices__globe { position: relative; }
+.offices__canvas { display: block; width: 100%; aspect-ratio: 1; cursor: grab; border-radius: 50%; }
+.offices__canvas:active { cursor: grabbing; }
+.offices__hint { margin: 14px 0 0; text-align: center; font-family: var(--font-head); font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.chip { font: inherit; font-family: var(--font-head); font-weight: 600; font-size: 14px; color: var(--ink); background: #fff; border: 1px solid var(--line); border-radius: 999px; padding: 9px 16px; cursor: pointer; transition: background .2s, color .2s, border-color .2s; }
+.chip:hover { border-color: var(--orange); }
+.chip.is-active { background: var(--orange); border-color: var(--orange); color: #fff; }
+.chip--place { background: var(--surface); border-color: transparent; font-weight: 500; padding: 7px 13px; font-size: 13.5px; }
+.chip--place.is-active { background: var(--green); border-color: var(--green); color: #fff; }
+.offices__regions, .offices__places { display: flex; flex-wrap: wrap; gap: 8px; }
+.offices__places { margin-top: 12px; }
+.offices__cards { margin-top: 22px; }
+.office--globe { background: #fff; border: 1px solid var(--line); border-radius: 22px; padding: 26px 26px 22px; }
+.office__region { margin: 0 0 6px; font-family: var(--font-head); font-size: 12.5px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--orange); }
+.office--globe .office__name { font-size: clamp(22px, 2vw, 28px); margin: 0 0 14px; }
+.office--globe .office__name svg { width: 20px; height: 20px; }
+.office--globe .office__row { grid-template-columns: 84px 1fr; }
+.office__map { display: inline-flex; margin-top: 16px; font-size: 14px; }
+.offices__nav { display: flex; align-items: center; gap: 14px; margin-top: 18px; }
+.offices__count { font-family: var(--font-head); font-size: 14px; color: var(--muted); }
+.offices__count b { color: var(--ink); }
+.offices__arrow { width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line); background: #fff; cursor: pointer; position: relative; transition: background .2s, border-color .2s; }
+.offices__arrow::before { content: ""; position: absolute; left: 50%; top: 50%; width: 10px; height: 10px; border-left: 2px solid var(--ink); border-bottom: 2px solid var(--ink); transform: translate(-30%, -50%) rotate(45deg); }
+.offices__arrow--next::before { transform: translate(-70%, -50%) rotate(-135deg); }
+.offices__arrow:hover { background: var(--orange); border-color: var(--orange); }
+.offices__arrow:hover::before { border-color: #fff; }
+@media (max-width: 900px) { .offices--globe .offices__layout { grid-template-columns: 1fr; } .offices__globe { max-width: 420px; margin: 0 auto; } }
+.prose a, .office__row a { overflow-wrap: anywhere; }   /* long web addresses and emails wrap instead of pushing past a phone screen */
