@@ -327,32 +327,6 @@ def about(page):
   </div>
 </section>
 
-<section class="section">
-  <div class="container split split--wide">
-    <div class="media-stack" data-reveal="scale">
-      <div class="media media--tall media--blob"><img src="{IMG}featured_image1/1/about-us-img-1.jpg" alt="" data-parallax="24"></div>
-      <div class="media media--square"><img src="{IMG}featured_image2/1/about-us-img-2.jpg" alt=""></div>
-      <div class="badge-float"><img src="{SITE}/public/twenty25/images/icon-company-experience.svg" alt="" width="40" height="40"><div><b>30+</b><span>years of experience</span></div></div>
-    </div>
-    <div>
-      <p data-reveal>“ We have always been driven by a mission to create profound shifts in coaching conversations through meaningful dialogue, facilitating more transformational change. ”</p>
-      <ul class="list-check" data-reveal style="margin-top:28px">
-        <li>goal setting and accountability</li>
-        <li>mindset and confidence building</li>
-      </ul>
-      <div data-reveal style="display:flex;align-items:center;gap:18px;margin-top:34px;flex-wrap:wrap">
-        <div style="display:flex">{''.join(f'<img src="{SITE}/public/twenty25/images/satisfy-client-img-{i}.jpg" alt="" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:3px solid var(--bg);margin-left:{-12 if i>1 else 0}px">' for i in range(1,6))}</div>
-        <p style="margin:0;font-family:var(--font-head);color:var(--ink)">Join our 5000+ satisfied client</p>
-      </div>
-      <div class="card" data-reveal style="margin-top:36px;display:flex;gap:18px;align-items:center;padding:22px 26px">
-        <div class="card__icon" style="margin:0;flex:none"><img src="{SITE}/public/twenty25/images/icon-company-result.svg" alt="" width="26" height="26"></div>
-        <div><h3 style="margin:0 0 2px">5200+ five star reviews</h3><p style="margin:0">Creative Result · Award wining</p></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-
 <section class="section section--green stand">
   <div class="container">
     <div class="section-head center" style="margin-inline:auto">

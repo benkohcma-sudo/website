@@ -20,7 +20,9 @@ for page in P:
     dst = norm(BeautifulSoup(open(out_path(page['url']), encoding='utf-8').read(), 'lxml').get_text(' '))
     BOILER = ('Your email address will not be published', 'Required fields are marked', 'Leave a Reply', 'Cancel reply', 'Save my name, email, and website',
               'Productivity & Efficiency Coaching',   # expertise chips removed at the client's request
-              'You can call our Global Office')   # call block + Schedule a Call removed at the client's request
+              'You can call our Global Office',   # call block + Schedule a Call removed at the client's request
+              'Join our 5000+ satisfied client', 'goal setting and accountability', 'mindset and confidence building',
+              'We have always been driven by a mission to create profound shifts')   # About Us photo section removed at the client's request
     missing = [s for s in set(sentences(src)) if s not in dst and not any(b in s for b in BOILER)]
     missing += [norm(s) for s in [page.get('h1','')] if s and norm(s) not in dst]
     checked += 1
