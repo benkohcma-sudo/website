@@ -1755,3 +1755,83 @@ def faq_page(page):
     return layout(page, body)
 
 RENDERERS['/faq'] = faq_page
+
+
+# ====================================================================== WHY CMA (open chapters, labs on a curve)
+def why_cma(page):
+    from build import strip_duplicate_heading
+    nodes = top_nodes(strip_duplicate_heading(page['content'], page.get('h1')))
+    lead = [n for n in nodes if getattr(n, 'name', None) in ('h2', 'p')]
+    h2 = next((_inner(n) for n in lead if n.name == 'h2'), '')
+    intro = next((_inner(n) for n in lead if n.name == 'p'), '')
+    dets = [n for n in nodes if getattr(n, 'name', None) == 'details']
+    if len(dets) != 5:
+        print('!! why-cma layout pattern changed'); return smart_page(page)
+    def parts(d):
+        out = {'title': _txt(d.summary) if d.summary else '', 'h3': [], 'p': [], 'ul': [], 'img': []}
+        for k in d.children:
+            nm = getattr(k, 'name', None)
+            if nm in (None, 'summary'): continue
+            if nm == 'img': out['img'].append(k.get('src', '')); continue
+            if nm == 'h3': out['h3'].append(_inner(k))
+            elif nm == 'p' and _txt(k): out['p'].append(_inner(k))
+            elif nm == 'ul': out['ul'].append(''.join('<li data-reveal>' + _inner(li) + '</li>' for li in k.find_all('li') if _txt(li)))
+            for im in (k.find_all('img') if hasattr(k, 'find_all') else []): out['img'].append(im.get('src', ''))
+        return out
+    P = [parts(d) for d in dets]
+    def num(i): return '<span class="chapter__num">0%d</span>' % (i + 1)
+    def ps(lst, cls=''):
+        return ''.join('<p' + (' class="%s"' % cls if cls else '') + ' data-reveal>' + x + '</p>' for x in lst)
+    def h3s(lst): return ''.join('<h3 data-reveal>' + x + '</h3>' for x in lst)
+    def logos(srcs):
+        return '<div class="chapter__logos">' + ''.join('<img src="' + esc(u) + '" alt="" loading="lazy" data-reveal="scale">' for u in srcs if u) + '</div>'
+
+    # 03 the labs: each "The X Lab…" paragraph becomes a circle on the curve with its text beside it
+    a, b, c, d, e = P
+    lab_re = re.compile(r'^\s*The\s+([A-Z][a-z]+ Lab)\b')
+    lab_ps = [x for x in c['p'] if lab_re.match(_plain(x))]
+    other_ps = [x for x in c['p'] if not lab_re.match(_plain(x))]
+    labs = ''.join(
+        '<li class="milestone lab" data-reveal="none">'
+        '<div class="lab__node" data-reveal="scale"><span>' + esc(lab_re.match(_plain(x)).group(1)) + '</span></div>'
+        '<p class="lab__text" data-reveal>' + x + '</p></li>' for x in lab_ps)
+
+    body = subnav(page) + page_hero(page) + (
+        '<section class="section why-intro"><div class="container split split--wide">'
+        '<div><h2 data-reveal>' + h2 + '</h2></div><div><p class="lead" data-reveal>' + intro + '</p></div>'
+        '</div></section>'
+
+        '<section class="section section--white chapter"><div class="container chapter__grid">'
+        '<div class="chapter__head">' + num(0) + '<p class="eyebrow" data-reveal>' + esc(a['title']) + '</p>' + h3s(a['h3']) + '</div>'
+        '<div class="chapter__body">' + ps(a['p']) + logos(a['img']) + '</div>'
+        '</div></section>'
+
+        '<section class="section chapter chapter--media"><div class="container chapter__grid chapter__grid--media">'
+        '<div class="chapter__head">' + num(1) + '<p class="eyebrow" data-reveal>' + esc(b['title']) + '</p>' + h3s(b['h3'][:1]) + ps(b['p'][:1]) + h3s(b['h3'][1:]) + ps(b['p'][1:]) + '</div>'
+        '<div class="chapter__media media" data-reveal="scale">' + ''.join('<img src="' + esc(u) + '" alt="" loading="lazy" data-parallax="18">' for u in b['img'][:1]) + '</div>'
+        '</div></section>'
+
+        '<section class="section section--white chapter"><div class="container">'
+        '<div class="chapter__grid">'
+        '<div class="chapter__head">' + num(2) + '<p class="eyebrow" data-reveal>' + esc(c['title']) + '</p>' + h3s(c['h3']) + '</div>'
+        '<div class="chapter__body">' + ps(other_ps) + '</div>'
+        '</div>'
+        '<div class="journey labs">'
+        '<svg class="journey__svg" aria-hidden="true"><path class="track" d=""/><path class="draw" d=""/><circle class="halo" r="14"/><circle class="dot" r="6"/></svg>'
+        '<ol class="journey__list">' + labs + '</ol>'
+        '</div>'
+        + logos([u for u in c['img'] if 'comprehensive' not in u]) +
+        '</div></section>'
+
+        '<section class="section chapter"><div class="container chapter__grid">'
+        '<div class="chapter__head">' + num(3) + '<p class="eyebrow" data-reveal>' + esc(d['title']) + '</p>' + h3s(d['h3']) + logos(d['img']) + '</div>'
+        '<div class="chapter__body">' + ps(d['p']) + '<ul class="list-check">' + ''.join(d['ul']) + '</ul></div>'
+        '</div></section>'
+
+        '<section class="section section--green chapter chapter--green"><div class="container chapter__grid">'
+        '<div class="chapter__head">' + num(4) + '<p class="eyebrow" data-reveal>' + esc(e['title']) + '</p>' + h3s(e['h3']) + '</div>'
+        '<div class="chapter__body">' + ps(e['p'][:1]) + '<ul class="list-check">' + ''.join(e['ul']) + '</ul>' + ps(e['p'][1:], 'chapter__close') + '</div>'
+        '</div></section>')
+    return layout(page, body)
+
+RENDERERS['/pages/why-cma'] = why_cma

@@ -89,6 +89,7 @@ GSAP 3 (cdnjs), ScrollTrigger and `main.js`.
 | Program Detail (5 pages) | Foundational / Competency / Mastery / Collective Advantage and Comparison Table share a photo hero and a five-tab row under it (`PROGRAM_TABS` in `src/pages_custom.py`). The run of tab links that opened each article on the live site is what became the row. Flattened credential pictures are swapped for the transparent seals (`BADGE_SWAP`). |
 | FAQ | Open divided list (no cards): the intro on the left, each question a `details` row with a plus/minus on the right. |
 | Our Unique Approach | The second step waits for its own scroll position (`[data-late]`), and the dashed link draws in as you scroll between the two. |
+| Why CMA | Five open chapters (no cards): numbered head on the left, copy on the right, the methodology picture as a feature row, the last chapter on green. The five training labs sit as orange circles on a curve that draws itself as you scroll (same `.journey` engine as Our Story); the flattened labs picture is not shown. |
 | Everywhere | Section entrances on `[data-reveal]`: headings and short copy arrive word by word with a soft blur, cards land as a shell first and then fill in, images scale in, buttons come last; items entering together are sequenced in DOM order. Hero headlines use `[data-split]`. Counters (`[data-count]`), marquees (`.marquee`). Add `?nomotion` to any URL to see the page without animation. |
 
 Add `?nomotion` to any URL to see a page with all motion switched off. Users with

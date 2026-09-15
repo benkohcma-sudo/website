@@ -424,6 +424,7 @@ HERO_IMAGES = {
     '/mastery-training-for-artful-coaching-for-mcc-credential': 'coaching-education',
     '/team-coaching-certification-program': 'workshop',
     '/pages/comparison-table': 'schedule',
+    '/pages/our-services': 'our-services',
 }
 
 def take_lead(page, content):

@@ -118,7 +118,9 @@
   var mobileMotion = win.matchMedia('(max-width: 760px)').matches;
   var BLUR = mobileMotion ? 'blur(0px)' : 'blur(7px)';
 
+  var wrapRoot = null;
   function wrapWords(node) {                                         // wrap every word in the text nodes below `node`
+    if (node.nodeType === 1 && node !== wrapRoot && (node.hasAttribute('data-reveal') || node.hasAttribute('data-reveal-late'))) return;   // nested pieces enter on their own
     if (node.nodeType === 3) {
       if (!/\S/.test(node.nodeValue)) return;
       var frag = doc.createDocumentFragment();
@@ -137,7 +139,7 @@
     Array.prototype.slice.call(node.childNodes).forEach(wrapWords);
   }
   function words(el) {
-    if (!el.dataset.split) { wrapWords(el); el.dataset.split = '1'; }
+    if (!el.dataset.split) { wrapRoot = el; wrapWords(el); wrapRoot = null; el.dataset.split = '1'; }
     return el.querySelectorAll('.w');
   }
   function wordCount(el) { return (el.textContent.match(/\S+/g) || []).length; }
@@ -145,6 +147,7 @@
   function kindOf(el) {
     if (el.matches('.marquee, .marquee__track, .logo-section, .logo-row, .partners')) return 'plain';   // moving bands come in whole
     if (el.matches(CARD_SEL)) return 'card';
+    if (el.querySelector('[data-reveal], [data-reveal-late]')) return 'block';                        // a wrapper whose children enter on their own
     if (/^H[1-4]$/.test(el.tagName)) return 'head';
     if (el.matches('img, video, figure, picture, .media, .media-stack, .card__media, .do-card__media, .icon-card__img, .globe-wrap, .split__media, iframe')) return 'media';
     if (el.matches('.btn, .link, .actions, .cta-full__actions, .hero__actions, .subnav, .badge-strip')) return 'action';
@@ -183,7 +186,7 @@
   function parts(root) {                                             // the pieces inside a card / block, outermost first
     var all = Array.prototype.slice.call(root.querySelectorAll(PART_SEL + ', ' + CARD_SEL)), out = [];
     all.forEach(function (el) {
-      if (el === root) return;
+      if (el === root || el.hasAttribute('data-reveal')) return;   // it enters on its own
       var p = el.parentElement, nested = false;
       while (p && p !== root) { if (p.hasAttribute('data-reveal') || p.matches(CARD_SEL) || (p !== root && p.matches(PART_SEL))) { nested = true; break; } p = p.parentElement; }
       if (!nested) out.push(el);
@@ -1024,7 +1027,8 @@
       if (staticOnly) return;
       gsap.to(state, { p: 1, ease: 'none', onUpdate: place, scrollTrigger: { trigger: root, start: 'top 70%', end: 'bottom 60%', scrub: 0.8 } });
       items.forEach(function (it, i) {
-        gsap.from(it.querySelector('.milestone__card'), { opacity: 0, x: i % 2 === 0 ? -40 : 40, duration: .9, ease: 'power3.out', scrollTrigger: { trigger: it, start: 'top 80%', once: true } });
+        var card = it.querySelector('.milestone__card');
+        if (card) gsap.from(card, { opacity: 0, x: i % 2 === 0 ? -40 : 40, duration: .9, ease: 'power3.out', scrollTrigger: { trigger: it, start: 'top 80%', once: true } });
       });
       ScrollTrigger.addEventListener('refreshInit', function () { len = build(); place(); });
       win.addEventListener('load', function () { ScrollTrigger.refresh(); });

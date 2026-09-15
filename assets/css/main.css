@@ -1543,3 +1543,42 @@ main > section.landing:last-child:has(> .container > .lp-block--logos:last-child
 .faq-item summary:focus { outline: none; }
 .faq-item summary:focus-visible { outline: 2px solid var(--orange); outline-offset: 4px; border-radius: 6px; }
 @media (max-width: 900px) { .faq__grid { grid-template-columns: 1fr; } .faq__side { position: static; } .faq-item__body { padding-right: 0; } }
+
+/* ---------- Why CMA: open chapters ---------- */
+.why-intro h2 { margin: 0; font-size: clamp(32px, 3.6vw, 52px); }
+.why-intro .lead { margin: 0; }
+.chapter__grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(32px, 6vw, 96px); align-items: start; }
+.chapter__grid--media { align-items: center; }
+.chapter__head { position: sticky; top: 110px; }
+.chapter--green .chapter__head, .chapter--media .chapter__head { position: static; }
+.chapter__num { display: block; font-family: var(--font-head); font-size: clamp(44px, 5vw, 72px); font-weight: 600; letter-spacing: -.04em; line-height: 1; color: var(--orange); margin-bottom: 18px; }
+.chapter__head .eyebrow { margin-bottom: 12px; }
+.chapter__head h3 { font-size: clamp(26px, 2.8vw, 40px); line-height: 1.12; letter-spacing: -.02em; margin: 0 0 16px; }
+.chapter__head h3 + h3 { margin-top: 26px; }
+.chapter__body p { margin: 0 0 18px; }
+.chapter__body .list-check { margin: 8px 0 18px; }
+.chapter__close { font-family: var(--font-head); font-weight: 600; color: var(--ink); font-size: 18px; line-height: 1.45; border-left: 3px solid var(--orange); padding-left: 18px; }
+.chapter__logos { display: flex; flex-wrap: wrap; align-items: center; gap: 22px 36px; margin-top: 22px; }
+.chapter__logos img { height: 64px; width: auto; max-width: 100%; mix-blend-mode: multiply; }
+.chapter__media.media { aspect-ratio: 4 / 3; }
+.chapter--green .chapter__num { color: #F3A77F; }
+.chapter--green .eyebrow { color: #F3A77F; }
+.chapter--green h3, .chapter--green .chapter__close { color: #fff; }
+.chapter--green .chapter__body p, .chapter--green .list-check li { color: #DDE7D6; }
+.chapter--green .chapter__close { border-color: var(--orange); }
+/* the labs on a curve */
+.labs { margin-top: clamp(40px, 6vw, 80px); }
+.labs .journey__list { gap: clamp(36px, 6vw, 90px); }
+.lab { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 0; min-height: 150px; align-items: center; }
+.lab__node { position: absolute; top: 50%; left: calc(50% - min(22%, 260px)); width: 136px; aspect-ratio: 1; border-radius: 50%; background: var(--orange); color: #fff; display: grid; place-items: center; text-align: center; padding: 14px; margin: -68px 0 0 -68px; box-shadow: 0 0 0 10px #fff, 0 22px 44px -18px rgba(235,100,34,.6); font-family: var(--font-head); font-weight: 600; font-size: 16px; line-height: 1.2; }
+.lab:nth-child(even) .lab__node { left: calc(50% + min(22%, 260px)); }
+.lab__text { margin: 0; grid-column: 2; padding-left: clamp(24px, 4vw, 60px); font-size: 16.5px; }
+.lab:nth-child(even) .lab__text { grid-column: 1; padding-left: 0; padding-right: clamp(24px, 4vw, 60px); }
+.lab__text strong { color: var(--ink); }
+@media (max-width: 860px) {
+  .chapter__grid { grid-template-columns: 1fr; }
+  .chapter__head { position: static; }
+  .lab { grid-template-columns: 1fr; padding-left: 0; min-height: 0; }
+  .lab__node, .lab:nth-child(even) .lab__node { position: absolute; left: 34px; top: 0; margin: 0 0 0 -44px; width: 88px; font-size: 12.5px; padding: 8px; box-shadow: 0 0 0 6px #fff; }
+  .lab__text, .lab:nth-child(even) .lab__text { grid-column: 1; padding: 0 0 0 104px; min-height: 96px; }
+}
