@@ -133,6 +133,7 @@
     }
     if (node.nodeType !== 1) return;
     if (/^(SVG|IMG|VIDEO|INPUT|SELECT|TEXTAREA|BUTTON|CODE|PRE|BR)$/.test(node.tagName)) return;
+    if (node.matches && node.matches('.link, .btn, .chip, .tabs button')) return;   // flex-laid controls keep their text in one piece
     if (node.hasAttribute('data-count') || node.classList.contains('w')) return;
     Array.prototype.slice.call(node.childNodes).forEach(wrapWords);
   }
