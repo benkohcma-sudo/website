@@ -84,6 +84,7 @@ GSAP 3 (cdnjs), ScrollTrigger and `main.js`.
 | Our Unique Approach | Layered, no boxes: intro split, green band with two large open quotes over an orange curve, two staggered sections joined by a dashed orange line, closing quote beside the ICF logo with arrow-bullet statements. |
 | Open/close cards (everywhere) | Orange edge bar that grows on hover and fills on open, warm gradient when closed, orange corner curve and glow when open, orange focus ring instead of the browser's blue outline. |
 | Proven Success (certification) | Curving orange ribbons at both sides; hidden below 1100px. |
+| Site rule | No colour blends anywhere (client). Photo overlays are single flat tints, orange shapes are flat #eb6422, icons are plain SVG. Keep it that way in the CMS. |
 | Everywhere | Section entrances on `[data-reveal]`: headings and short copy arrive word by word with a soft blur, cards land as a shell first and then fill in, images scale in, buttons come last; items entering together are sequenced in DOM order. Hero headlines use `[data-split]`. Counters (`[data-count]`), marquees (`.marquee`). Add `?nomotion` to any URL to see the page without animation. |
 
 Add `?nomotion` to any URL to see a page with all motion switched off. Users with

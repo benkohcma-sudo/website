@@ -252,12 +252,6 @@
     gsap.to(m, { y: (i % 2 ? -1 : 1) * 10, duration: 3.2 + i * .6, yoyo: true, repeat: -1, ease: 'sine.inOut', delay: 1.5 });
   });
 
-  /* ---------- cursor glow (desktop) ---------- */
-  if (win.matchMedia('(pointer:fine)').matches) {
-    var glow = doc.createElement('div'); glow.className = 'cursor-glow'; doc.body.appendChild(glow);
-    var qx = gsap.quickTo(glow, 'x', { duration: .6, ease: 'power3' }), qy = gsap.quickTo(glow, 'y', { duration: .6, ease: 'power3' });
-    win.addEventListener('mousemove', function (e) { glow.style.opacity = 1; qx(e.clientX); qy(e.clientY); }, { passive: true });
-  }
 
   initFaculty();
   initGlobe(false);
@@ -769,9 +763,7 @@
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, size, size);
       // sphere body
-      var g = ctx.createRadialGradient(size * 0.38, size * 0.36, R * 0.1, size / 2, size / 2, R);
-      g.addColorStop(0, 'rgba(255,255,255,0.9)'); g.addColorStop(1, 'rgba(244,239,231,0.95)');
-      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(size / 2, size / 2, R, 0, 6.283); ctx.fill();
+      ctx.fillStyle = 'rgba(244,239,231,0.95)';   // flat fill: the site uses no colour blends ctx.beginPath(); ctx.arc(size / 2, size / 2, R, 0, 6.283); ctx.fill();
       ctx.strokeStyle = 'rgba(23,56,14,0.10)'; ctx.lineWidth = 1; ctx.stroke();
       // graticule (a few latitude rings)
       ctx.strokeStyle = 'rgba(23,56,14,0.06)';

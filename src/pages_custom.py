@@ -1084,8 +1084,8 @@ def founder(page):
 </section>
 <section class="section section--tight flow-side">
   <svg class="flow-side__svg" viewBox="0 0 300 1000" preserveAspectRatio="none" aria-hidden="true">
-    <defs><linearGradient id="flowSideGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F08A4F"/><stop offset=".55" stop-color="#eb6422"/><stop offset="1" stop-color="#E55C00"/></linearGradient></defs>
-    <path fill="url(#flowSideGrad)" d="M0 0 H110 C30 170, 240 330, 160 520 C90 690, 250 830, 140 1000 H0 Z"/>
+    
+    <path fill="#eb6422" d="M0 0 H110 C30 170, 240 330, 160 520 C90 690, 250 830, 140 1000 H0 Z"/>
     <path class="flow-side__line" d="M150 0 C70 170, 280 330, 200 520 C130 690, 290 830, 180 1000"/>
   </svg>
   <div class="container"><div class="prose prose--wide" data-auto-reveal style="max-width:860px">{''.join(rest)}</div></div>
@@ -1532,15 +1532,26 @@ def _mc_packages(details):
     return intro, pkgs
 
 def _mc_price(pk, k):
+    """Pricing card. DOM keeps name, tier and price together (they are one line of copy); CSS orders the headline above the price row."""
     def feat(num, label, note):
         note_html = (' <span class="price__note">' + esc(note) + '</span>') if note else ''
         return '<li><b class="price__n">' + esc(num) + '</b> <span>' + esc(label) + note_html + '</span></li>'
-    desc = ''.join('<p class="price__desc">' + (d.replace('50 coaches', '<strong>50 coaches</strong>', 1) if k else d) + '</p>' for d in pk['desc'])
-    return ('<div class="price' + (' price--featured' if k else '') + '" data-reveal>'
-            '<div class="price__head"><span class="price__name">' + esc(pk['name']) + '</span> <span class="price__br" aria-hidden="true">[</span> '
+    descs = list(pk['desc'])
+    head, sub = '', ''
+    if descs:
+        parts = re.split(r'(?<=\.)\s+', descs[0], maxsplit=1)
+        head = parts[0]; sub = ' '.join(parts[1:] + descs[1:])
+    sub = sub.replace('50 coaches', '<strong>50 coaches</strong>', 1)
+    dark = bool(k)
+    return ('<div class="price ' + ('price--dark' if dark else 'price--light') + '" data-reveal>'
+            '<div class="price__top"><span class="price__name">' + esc(pk['name']) + '</span> <span class="price__br" aria-hidden="true">[</span> '
             '<span class="price__tier">' + esc(pk['tier']) + '</span> <span class="price__br" aria-hidden="true">]</span></div>'
-            '<div class="price__amount"><span class="price__br" aria-hidden="true">@</span> ' + esc(pk['price']) + '</div>'
-            + desc + '<ul class="price__list">' + ''.join(feat(*f) for f in pk['feats']) + '</ul></div>')
+            '<div class="price__bar"><div class="price__amount"><span class="price__br" aria-hidden="true">@</span> ' + esc(pk['price']) + '</div>'
+            '<a class="btn ' + ('btn--white' if dark else '') + '" href="/registration">Registration' + ARROW + '</a>'
+            '<div class="price__coach"><img src="/assets/img/ben-mentor.jpg" alt=""><span><b>Dr Ben Koh</b><small>Master Certified Coach</small></span></div></div>'
+            + (('<p class="price__headline">' + head + '</p>') if head else '')
+            + (('<p class="price__sub">' + sub + '</p>') if sub else '')
+            + '<ul class="price__list">' + ''.join(feat(*f) for f in pk['feats']) + '</ul></div>')
 
 def _mc_how(details):
     kids = [n for n in details.children if getattr(n, 'name', None) not in (None, 'summary')]
