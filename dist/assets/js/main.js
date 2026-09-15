@@ -574,7 +574,7 @@
     doc.querySelectorAll('[data-offices]').forEach(function (root) {
       var canvas = root.querySelector('.offices__canvas');
       var cards = Array.prototype.slice.call(root.querySelectorAll('.office--globe'));
-      var regions = Array.prototype.slice.call(root.querySelectorAll('.offices__regions .chip'));
+      var regions = Array.prototype.slice.call(root.querySelectorAll('.offices__regions button'));
       var placeSets = Array.prototype.slice.call(root.querySelectorAll('.offices__places'));
       var places = Array.prototype.slice.call(root.querySelectorAll('.chip--place'));
       var count = root.querySelector('.offices__count b');

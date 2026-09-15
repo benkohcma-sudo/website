@@ -1493,7 +1493,11 @@ main > section.landing:last-child:has(> .container > .lp-block--logos:last-child
 .chip.is-active { background: var(--orange); border-color: var(--orange); color: #fff; }
 .chip--place { background: var(--surface); border-color: transparent; font-weight: 500; padding: 7px 13px; font-size: 13.5px; }
 .chip--place.is-active { background: var(--green); border-color: var(--green); color: #fff; }
-.offices__regions, .offices__places { display: flex; flex-wrap: wrap; gap: 8px; }
+.offices__places { display: flex; flex-wrap: wrap; gap: 8px; }
+.tabs.offices__regions { flex-wrap: wrap; overflow: visible; gap: 0 4px; margin-bottom: 18px; }
+.tabs.offices__regions button { padding: 12px 14px; font-size: 15px; }
+.offices--globe .section-head { margin-bottom: clamp(28px, 4vw, 48px); }
+.offices--globe .section-head .lead { max-width: 60ch; margin-inline: auto; }
 .offices__places { margin-top: 12px; }
 .offices__cards { margin-top: 22px; }
 .office--globe { background: #fff; border: 1px solid var(--line); border-radius: 22px; padding: 26px 26px 22px; }

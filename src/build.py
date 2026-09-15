@@ -140,6 +140,7 @@ def footer():
 
 # key phrases that turn orange in section headings (copy unchanged, only colour)
 HEADING_HL = {
+    'Six regional offices. One Transformative EdgeTM pathway.': 'One Transformative EdgeTM pathway.',
     'Advancing Human Potential Through Global Coaching Certification': 'Global Coaching Certification',
     'ICF-Accredited Coaching Certification with Industry-leading Standards': 'Industry-leading Standards',
     'Coaching Methodology Grounded in Science for Sustainable Change': 'Sustainable Change',

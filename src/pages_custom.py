@@ -1090,7 +1090,7 @@ OFFICE_COORDS = {   # one point per office, for the globe pins
     'Philippines': (14.6, 120.98), 'Malaysia': (3.14, 101.69), 'Japan': (35.68, 139.69), 'Australia': (-33.87, 151.21), 'New Zealand': (-36.85, 174.76),
 }
 
-def offices_section():
+def offices_section(head_html='', intro_html=''):
     '''Regional offices on a spinning dotted globe: region chips, one office card at a time, pins you can tap,
     drag to spin. Data: src/content/offices.json, taken verbatim from the live page's tab block.'''
     import json, os, urllib.parse
@@ -1098,7 +1098,7 @@ def offices_section():
     def query(office):
         addr = next((r['value'] for r in office['rows'] if r['label'] == 'Office'), '')
         return urllib.parse.quote(addr or office['country'] + ' Coach Masters Academy')
-    regions = ''.join(f'<button type="button" role="tab" class="chip{" is-active" if i == 0 else ""}" data-region="{r["id"]}">{esc(r["label"])}</button>' for i, r in enumerate(data))
+    regions = ''.join(f'<button type="button" role="tab"{" class=is-active" if i == 0 else ""} data-region="{r["id"]}">{esc(r["label"])}</button>' for i, r in enumerate(data))
     places = ''; cards = ''; k = 0
     for i, r in enumerate(data):
         chips = ''
@@ -1115,15 +1115,20 @@ def offices_section():
                       f'<a class="office__map link" href="https://www.google.com/maps/search/?api=1&query={query(o)}" target="_blank" rel="noopener">Open in Google Maps{ARROW}</a></div>')
             k += 1
         places += f'<div class="offices__places" data-region="{r["id"]}"{"" if i == 0 else " hidden"}>{chips}</div>'
+    head = ''
+    if head_html or intro_html:
+        head = ('<div class="container"><div class="section-head center" style="margin-inline:auto">'
+                + (f'<h2 data-reveal>{head_html}</h2>' if head_html else '') + (f'<p class="lead" data-reveal>{intro_html}</p>' if intro_html else '') + '</div></div>')
     return globe_scripts() + f'''
 <section class="section offices offices--globe" data-offices>
+  {head}
   <div class="container offices__layout">
     <div class="offices__globe" data-reveal="scale">
       <canvas class="offices__canvas" aria-hidden="true"></canvas>
       <p class="offices__hint" aria-hidden="true">Drag to spin · tap a pin</p>
     </div>
     <div class="offices__side">
-      <div class="offices__regions" role="tablist" data-reveal="none">{regions}</div>
+      <div class="tabs offices__regions" role="tablist" data-reveal="none">{regions}</div>
       {places}
       <div class="offices__cards" data-reveal="none">{cards}</div>
       <div class="offices__nav" data-reveal="none">
@@ -1137,7 +1142,20 @@ def offices_section():
 
 
 def coaching_education(page):
-    return smart_page(page, extra=offices_section())
+    """The office list and the flat map picture come out of the article; their heading and the
+    'With presence across…' line head the globe section instead (all copy kept)."""
+    page = dict(page); c = page['content']
+    j = c.find('<h4>North America</h4>')
+    i = c.find('<img', c.find('take the next step')) if j > 0 else -1
+    head = intro = ''
+    if i > 0 and j > i:
+        m = re.search(r'<p>\s*(With presence across.*?)\s*</p>', c[i:j], re.S)
+        if m: intro = m.group(1)
+        h = re.search(r'<h2>\s*(Six regional offices.*?)\s*</h2>', c, re.S)
+        if h: head = h.group(1); c = c.replace(h.group(0), '', 1)
+        c = c[:c.find('<img', c.find('take the next step'))]
+        page['content'] = c
+    return smart_page(page, extra=offices_section(head, intro))
 
 RENDERERS['/pages/coaching-education'] = coaching_education
 
