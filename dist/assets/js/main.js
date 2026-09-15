@@ -1066,31 +1066,54 @@
         if (mobile) {
           d = 'M20 0 V' + H;
         } else {
-          // one continuous staircase: down from a card, round a corner, across the gap, round a corner, down into the next
+          // winding curve through each milestone card's centre, alternating sides
           items = Array.prototype.slice.call(items);
-          var cx = W / 2, amp = Math.min(W * 0.22, 260), rr = root.getBoundingClientRect();
-          var ys = items.map(function (it) { var r = it.getBoundingClientRect(); return r.top - rr.top + r.height / 2; });
-          var xs = items.map(function (it, i) { return cx + (i % 2 === 0 ? -amp : amp); });
-          d = 'M' + xs[0] + ' 0 V' + ys[0];
-          for (var k = 0; k < items.length - 1; k++) {
-            var x0 = xs[k], x1 = xs[k + 1], y0 = ys[k], y1 = ys[k + 1], m = (y0 + y1) / 2, sx = x1 > x0 ? 1 : -1;
-            var rad = Math.max(0, Math.min(70, Math.abs(x1 - x0) / 2, (y1 - y0) / 2 - 4));
-            d += ' V' + (m - rad) + ' Q' + x0 + ' ' + m + ' ' + (x0 + sx * rad) + ' ' + m +
-                 ' H' + (x1 - sx * rad) + ' Q' + x1 + ' ' + m + ' ' + x1 + ' ' + (m + rad) + ' V' + y1;
-          }
-          d += ' V' + H;
+          var cx = W / 2, amp = Math.min(W * 0.22, 260);
+          d = 'M' + cx + ' 0';
+          var prevY = 0, prevX = cx;
+          items.forEach(function (it, i) {
+            var r = it.getBoundingClientRect(), rr = root.getBoundingClientRect();
+            var y = r.top - rr.top + r.height / 2;
+            var x = cx + (i % 2 === 0 ? -amp : amp);
+            var c1y = prevY + (y - prevY) * 0.5, c2y = y - (y - prevY) * 0.5;
+            d += ' C' + prevX + ' ' + c1y + ', ' + x + ' ' + c2y + ', ' + x + ' ' + y;
+            prevY = y; prevX = x;
+          });
+          d += ' C' + prevX + ' ' + (prevY + (H - prevY) * 0.5) + ', ' + cx + ' ' + (H - (H - prevY) * 0.5) + ', ' + cx + ' ' + H;
         }
         track.setAttribute('d', d); draw.setAttribute('d', d);
         var len = draw.getTotalLength();
         draw.style.strokeDasharray = len; draw.style.strokeDashoffset = len;
+        // stair treads across the curve, widening as it descends; grey ahead, orange once the line reaches them
+        var ns = 'http://www.w3.org/2000/svg', g = svg.querySelector('.treads');
+        if (!g) { g = doc.createElementNS(ns, 'g'); g.setAttribute('class', 'treads'); svg.insertBefore(g, draw); }
+        while (g.firstChild) g.removeChild(g.firstChild);
+        treads = [];
+        var gap = mobile ? 30 : 38;
+        for (var l = gap / 2; l < len; l += gap) {
+          var p0 = draw.getPointAtLength(Math.max(0, l - 2)), p1 = draw.getPointAtLength(Math.min(len, l + 2)), c = draw.getPointAtLength(l);
+          var tx = p1.x - p0.x, ty = p1.y - p0.y, tl = Math.sqrt(tx * tx + ty * ty) || 1, nx = -ty / tl, ny = tx / tl, t = l / len;
+          var half = mobile ? 7 + 5 * t : 10 + 16 * t;
+          var ln = doc.createElementNS(ns, 'line');
+          ln.setAttribute('x1', c.x - nx * half); ln.setAttribute('y1', c.y - ny * half);
+          ln.setAttribute('x2', c.x + nx * half); ln.setAttribute('y2', c.y + ny * half);
+          ln.setAttribute('class', 'tread'); ln.style.strokeWidth = (mobile ? 3 : 3 + 3 * t).toFixed(2);
+          g.appendChild(ln); treads.push({ el: ln, at: l, on: false });
+        }
         return len;
       }
+      var treads = [];
       var len = build();
       var state = { p: staticOnly ? 1 : 0 };
       function place() {
         var pt = draw.getPointAtLength(state.p * len);
         dot.setAttribute('cx', pt.x); dot.setAttribute('cy', pt.y); halo.setAttribute('cx', pt.x); halo.setAttribute('cy', pt.y);
         draw.style.strokeDashoffset = len * (1 - state.p);
+        var cut = state.p * len;
+        for (var q = 0; q < treads.length; q++) {
+          var on = treads[q].at <= cut;
+          if (on !== treads[q].on) { treads[q].on = on; treads[q].el.classList.toggle('is-on', on); }
+        }
       }
       place();
       if (staticOnly) return;

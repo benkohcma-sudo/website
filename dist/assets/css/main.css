@@ -615,8 +615,10 @@ html.is-locked, html.is-locked body { overflow: hidden; height: 100%; overscroll
 /* ---------- journey (curved orange timeline) ---------- */
 .journey { position: relative; }
 .journey__svg { position: absolute; left: 50%; top: 0; transform: translateX(-50%); width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: visible; }
-.journey__svg .track { fill: none; stroke: var(--line); stroke-width: 4; stroke-linecap: round; }
-.journey__svg .draw { fill: none; stroke: var(--orange); stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+.journey__svg .track { fill: none; stroke: var(--line); stroke-width: 6; stroke-linecap: round; }
+.journey__svg .draw { fill: none; stroke: var(--orange); stroke-width: 8; stroke-linecap: round; stroke-linejoin: round; }
+.journey__svg .tread { stroke: #E2D9CC; stroke-linecap: round; transition: stroke .35s; }
+.journey__svg .tread.is-on { stroke: var(--orange); }
 .journey__svg .dot { fill: var(--orange); stroke: #fff; stroke-width: 3; }
 .journey__svg .halo { fill: rgba(235,100,34,.18); }
 .journey__list { position: relative; z-index: 1; list-style: none; margin: 0; padding: 0; display: grid; gap: clamp(40px, 8vw, 120px); }
