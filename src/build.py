@@ -13,6 +13,19 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DIST = os.path.join(ROOT, 'dist')
 CONTENT = json.load(open(os.path.join(ROOT, 'src', 'content', 'pages.json')))
 PAGES = {p['url']: p for p in CONTENT}
+
+def _share_section_subnavs():
+    """A section's sub-navigation belongs to every page it lists (and that page's ?page=N listings),
+    even when the live site's template for that page left the bar out (e.g. Gallery)."""
+    sets = {}
+    for p in CONTENT:
+        if p.get('subnav'): sets.setdefault(tuple((x['text'], x['href']) for x in p['subnav']), p['subnav'])
+    for nav in sets.values():
+        members = {x['href'].rstrip('/') for x in nav if x['href'].startswith('/')}
+        for p in CONTENT:
+            base = p['url'].split('?')[0].rstrip('/') or '/'
+            if base in members and not p.get('subnav'): p['subnav'] = nav
+_share_section_subnavs()
 SITE = 'https://www.coachmastersacademy.com'
 
 # ---------------------------------------------------------------- site data (verbatim from live header/footer)
@@ -304,8 +317,10 @@ def awards_band():
 # ---------------------------------------------------------------- generic building blocks
 def subnav(page):
     if not page.get('subnav'): return ''
+    # an item with no destination on the live site (href "#") is shown muted, not as a dead link
     return '<nav class="subnav" aria-label="Section"><div class="container">' + ''.join(
-        f'<a href="{esc(s["href"])}">{esc(s["text"])}</a>' for s in page['subnav']) + '</div></nav>'
+        (f'<span class="subnav__soon" title="Coming soon">{esc(s["text"])}</span>' if s['href'] in ('#', '') else f'<a href="{esc(s["href"])}">{esc(s["text"])}</a>')
+        for s in page['subnav']) + '</div></nav>'
 
 def crumbs(page, label=None):
     return ''   # breadcrumb trails removed from every hero (design decision; section sub-navigation remains)

@@ -1023,3 +1023,9 @@ main > section:last-child:not(.cta-full) { padding-bottom: clamp(72px, 9vw, 140p
 .logo-section__intro .eyebrow, .logo-section__intro > h3:first-child { display: block; font-family: var(--font-head); font-size: 12.5px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--orange); margin: 0 0 12px; }
 .logo-section__intro h2 { font-size: clamp(28px, 3.4vw, 44px); }
 .logo-section { margin-top: clamp(28px, 4vw, 48px); }
+
+/* sub-navigation item with no page yet */
+.subnav__soon { flex: 0 0 auto; padding: 16px 14px; font-size: 14.5px; font-weight: 500; color: var(--muted); opacity: .5; white-space: nowrap; cursor: default; }
+/* home partners: one white section, the logo band inside it has no edge of its own */
+.section--white { background: #fff; }
+.section--white .logo-section--flush { margin-top: 36px; padding-top: 0; padding-bottom: 0; }

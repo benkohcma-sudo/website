@@ -183,7 +183,7 @@ def home(page):
   </div>
 </section>
 
-<section class="section section--tight">
+<section class="section section--tight section--white">
   <div class="container center">
     <p class="eyebrow" data-reveal>STRATEGIC ALLIANCES WITH GLOBAL COACHING INSTITUTIONS</p>
     <h2 data-reveal>Trusted Partnerships with Leading Coaching Experts &amp; Organizations</h2>
