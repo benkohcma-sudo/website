@@ -52,6 +52,7 @@
   /* ---------- step-by-step forms, open/close cards ---------- */
   initSteps();
   initAccordions();
+  initTabs();
   initOffices();
 
   /* ---------- marquee: duplicate track content for seamless loop ---------- */
@@ -385,6 +386,25 @@
       panels.forEach(function (p) {
         p.addEventListener('click', function () { activate(p); });
         if (win.matchMedia('(pointer:fine)').matches) p.addEventListener('mouseenter', function () { activate(p); });
+      });
+    });
+  }
+
+  /* ============================================================
+     Simple tabs: [data-tabs] buttons switch the .tab-panel siblings that follow
+     ============================================================ */
+  function initTabs() {
+    doc.querySelectorAll('[data-tabs]').forEach(function (bar) {
+      var btns = Array.prototype.slice.call(bar.querySelectorAll('button'));
+      var wrap = bar.nextElementSibling; if (!wrap) return;
+      var panels = Array.prototype.slice.call(wrap.querySelectorAll('.tab-panel'));
+      btns.forEach(function (b, i) {
+        b.addEventListener('click', function () {
+          btns.forEach(function (x, j) { x.classList.toggle('is-active', j === i); x.setAttribute('aria-selected', j === i ? 'true' : 'false'); });
+          panels.forEach(function (p, j) { p.hidden = j !== i; p.classList.toggle('is-active', j === i); });
+          if (hasGsap && !reduce && panels[i]) gsap.from(panels[i].children, { opacity: 0, y: 16, duration: .55, ease: 'power3.out', clearProps: 'all' });
+          if (win.ScrollTrigger) setTimeout(function () { ScrollTrigger.refresh(); }, 400);
+        });
       });
     });
   }

@@ -1029,3 +1029,16 @@ main > section:last-child:not(.cta-full) { padding-bottom: clamp(72px, 9vw, 140p
 /* home partners: one white section, the logo band inside it has no edge of its own */
 .section--white { background: #fff; }
 .section--white .logo-section--flush { margin-top: 36px; padding-top: 0; padding-bottom: 0; }
+
+/* ---------- tabbed section (About: Vision / Mission / Approach) ---------- */
+.tabs--center { justify-content: center; margin-bottom: clamp(36px, 5vw, 56px); }
+.tab-panel[hidden] { display: none; }
+.tab-panel__grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(28px, 5vw, 80px); align-items: start; max-width: var(--max); margin: 0 auto; }
+.tab-panel__grid h2 { font-size: clamp(28px, 3.2vw, 44px); margin: 0 0 14px; }
+.tab-panel__grid .prose { max-width: none; font-size: 17px; }
+.tab-panel__grid .lead { margin: 0; }
+@media (max-width: 900px) { .tab-panel__grid { grid-template-columns: 1fr; } }
+.cta-full__inner--stack { grid-template-columns: 1fr; text-align: center; justify-items: center; }
+.cta-full__inner--stack h2, .cta-full__inner--stack p { margin-left: auto; margin-right: auto; max-width: 30ch; }
+.cta-full__inner--stack p { max-width: 62ch; }
+.cta-full__actions--three { justify-content: center; }

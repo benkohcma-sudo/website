@@ -308,22 +308,60 @@ def about(page):
   </div>
 </section>
 
-<section class="section section--green">
-  <div class="container split">
-    <div>
-      <p class="eyebrow" data-reveal style="color:#F3A77F">Mission</p>
-      <h2 data-reveal>Our  Mission</h2>
-      <p class="lead" data-reveal style="color:#C7D4BF">Empower You To Be an Effective Change Agent By delivering high-quality coaching education and coaching service</p>
+<section class="section section--surface">
+  <div class="container">
+    <div class="tabs tabs--center" role="tablist" data-tabs data-reveal="none">
+      <button type="button" class="is-active" role="tab" aria-selected="true">Our Vision</button>
+      <button type="button" role="tab" aria-selected="false">Our Mission</button>
+      <button type="button" role="tab" aria-selected="false">Our Approach</button>
     </div>
-    <ul class="list-check" data-reveal style="color:#DDE7D6">
-      <li>Our coaching program empowers you with the skills and knowledge to drive impactful change.</li>
-      <li>Grounded in scientific research and best practices, our approach facilitates profound learning.</li>
-      <li>It enables significant transformations that resonate well beyond individual sessions, ensuring lasting results in your personal and professional life.</li>
-    </ul>
+    <div class="tab-panels">
+      <div class="tab-panel is-active" role="tabpanel">
+        <div class="tab-panel__grid">
+          <div><p class="eyebrow">Our Vision</p><h2>We see every conversation holds the power to make a real difference.</h2></div>
+          <div class="prose">
+            <p>Some conversations change what we know. Others change how we see ourselves, our circumstances and what may be possible.</p>
+            <p>We believe those moments matter, because they can influence the choices we make and the way we move forward.</p>
+          </div>
+        </div>
+      </div>
+      <div class="tab-panel" role="tabpanel" hidden>
+        <div class="tab-panel__grid">
+          <div><p class="eyebrow">Mission</p><h2>Our  Mission</h2><p class="lead">Empower You To Be an Effective Change Agent By delivering high-quality coaching education and coaching service</p></div>
+          <ul class="list-check">
+            <li>Our coaching program empowers you with the skills and knowledge to drive impactful change.</li>
+            <li>Grounded in scientific research and best practices, our approach facilitates profound learning.</li>
+            <li>It enables significant transformations that resonate well beyond individual sessions, ensuring lasting results in your personal and professional life.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="tab-panel" role="tabpanel" hidden>
+        <div class="tab-panel__grid">
+          <div><p class="eyebrow">Our Approach</p><h2>Changing how change happens.</h2></div>
+          <div class="prose">
+            <p>For more than a decade, our founder, Dr Ben Koh, has pursued research and fieldwork into how people think, learn and change. That body of work led to CMA’s proprietary transformational approach to coaching — grounded in science, refined through practice, and now taught and applied across the globe.</p>
+            <p>It goes beyond solving the immediate problem by working with how people make sense of what they are facing — helping them think differently, choose with greater ownership and strengthen their capacity to adapt as circumstances change.</p>
+            <p>This is the foundation of our Transformative Edge™ — shaping how we educate coach practitioners, build coaching capability in organisations and work directly with people through coaching.</p>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
-{faculty_section(PAGES['/our-faculty'], compact=True)}
+<section class="cta-full">
+  <div class="container cta-full__inner cta-full__inner--stack">
+    <div>
+      <h2 data-reveal>Where do you want to make a difference?</h2>
+      <p data-reveal>Whether you want to develop professionally as a coach, strengthen coaching capability in your organisation, or work through an important challenge with a coach, there is a place to begin.</p>
+    </div>
+    <div class="cta-full__actions cta-full__actions--three" data-reveal>
+      {btn('Explore Coaching Certification', '/icf-coaching-training-program', 'btn--white')}
+      {btn('Build Coaching Capability', '/coaching-skill-training-course-and-workshop', 'btn--ghost btn--ghost-light')}
+      {btn('Engage Coaching Services', '/executive-leadership-coaching-service-for-managers-and-leaders', 'btn--ghost btn--ghost-light')}
+    </div>
+  </div>
+</section>
 '''
     return layout(page, body, extra_js=globe_scripts())
 

@@ -318,8 +318,9 @@ def awards_band():
 def subnav(page):
     if not page.get('subnav'): return ''
     # an item with no destination on the live site (href "#") is shown muted, not as a dead link
+    RENAME = {'Our Vision': 'Who We Are'}     # sub-navigation labels the client asked to change
     return '<nav class="subnav" aria-label="Section"><div class="container">' + ''.join(
-        (f'<span class="subnav__soon" title="Coming soon">{esc(s["text"])}</span>' if s['href'] in ('#', '') else f'<a href="{esc(s["href"])}">{esc(s["text"])}</a>')
+        (f'<span class="subnav__soon" title="Coming soon">{esc(s["text"])}</span>' if s['href'] in ('#', '') else f'<a href="{esc(s["href"])}">{esc(RENAME.get(s["text"], s["text"]))}</a>')
         for s in page['subnav']) + '</div></nav>'
 
 def crumbs(page, label=None):
