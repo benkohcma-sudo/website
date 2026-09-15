@@ -615,9 +615,9 @@ html.is-locked, html.is-locked body { overflow: hidden; height: 100%; overscroll
 /* ---------- journey (curved orange timeline) ---------- */
 .journey { position: relative; }
 .journey__svg { position: absolute; left: 50%; top: 0; transform: translateX(-50%); width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: visible; }
-.journey__svg .track { fill: none; stroke: var(--line); stroke-width: 2; }
-.journey__svg .draw { fill: none; stroke: var(--orange); stroke-width: 3; stroke-linecap: round; }
-.journey__svg .dot { fill: var(--orange); }
+.journey__svg .track { fill: none; stroke: var(--line); stroke-width: 4; stroke-linecap: round; }
+.journey__svg .draw { fill: none; stroke: var(--orange); stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+.journey__svg .dot { fill: var(--orange); stroke: #fff; stroke-width: 3; }
 .journey__svg .halo { fill: rgba(235,100,34,.18); }
 .journey__list { position: relative; z-index: 1; list-style: none; margin: 0; padding: 0; display: grid; gap: clamp(40px, 8vw, 120px); }
 .milestone { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
@@ -1235,10 +1235,6 @@ main > section.landing:last-child:has(> .container > .lp-block--logos:last-child
 /* ---------- Proven Success: curving orange ribbons at both sides ---------- */
 .proof { position: relative; overflow: hidden; }
 .proof > .container { position: relative; z-index: 1; }
-.proof::before, .proof::after { content: ""; position: absolute; top: 0; bottom: 0; width: min(220px, calc((100vw - 900px) / 2 - 72px)); background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 600' preserveAspectRatio='none'%3E%3Cpath fill='%23eb6422' d='M0 0 H90 C190 110 20 230 120 330 C200 410 60 500 110 600 H0 Z'/%3E%3Cpath fill='none' stroke='%23eb6422' stroke-opacity='.5' stroke-width='2' d='M132 0 C232 110 62 230 162 330 C242 410 102 500 152 600'/%3E%3C/svg%3E") center / 100% 100% no-repeat; pointer-events: none; }
-.proof::before { left: 0; }
-.proof::after { right: 0; transform: scaleX(-1); }
-@media (max-width: 1100px) { .proof::before, .proof::after { display: none; } }
 
 /* ---------- side curve used in open layouts ---------- */
 .has-curve { position: relative; overflow: hidden; }

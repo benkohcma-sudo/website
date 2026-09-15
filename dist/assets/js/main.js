@@ -997,19 +997,19 @@
         if (mobile) {
           d = 'M20 0 V' + H;
         } else {
-          // winding curve through each milestone card's centre, alternating sides
-          var cx = W / 2, amp = Math.min(W * 0.22, 260);
-          d = 'M' + cx + ' 0';
-          var prevY = 0, prevX = cx;
-          items.forEach(function (it, i) {
-            var r = it.getBoundingClientRect(), rr = root.getBoundingClientRect();
-            var y = r.top - rr.top + r.height / 2;
-            var x = cx + (i % 2 === 0 ? -amp : amp);
-            var c1y = prevY + (y - prevY) * 0.5, c2y = y - (y - prevY) * 0.5;
-            d += ' C' + prevX + ' ' + c1y + ', ' + x + ' ' + c2y + ', ' + x + ' ' + y;
-            prevY = y; prevX = x;
-          });
-          d += ' C' + prevX + ' ' + (prevY + (H - prevY) * 0.5) + ', ' + cx + ' ' + (H - (H - prevY) * 0.5) + ', ' + cx + ' ' + H;
+          // one continuous staircase: down from a card, round a corner, across the gap, round a corner, down into the next
+          items = Array.prototype.slice.call(items);
+          var cx = W / 2, amp = Math.min(W * 0.22, 260), rr = root.getBoundingClientRect();
+          var ys = items.map(function (it) { var r = it.getBoundingClientRect(); return r.top - rr.top + r.height / 2; });
+          var xs = items.map(function (it, i) { return cx + (i % 2 === 0 ? -amp : amp); });
+          d = 'M' + xs[0] + ' 0 V' + ys[0];
+          for (var k = 0; k < items.length - 1; k++) {
+            var x0 = xs[k], x1 = xs[k + 1], y0 = ys[k], y1 = ys[k + 1], m = (y0 + y1) / 2, sx = x1 > x0 ? 1 : -1;
+            var rad = Math.max(0, Math.min(70, Math.abs(x1 - x0) / 2, (y1 - y0) / 2 - 4));
+            d += ' V' + (m - rad) + ' Q' + x0 + ' ' + m + ' ' + (x0 + sx * rad) + ' ' + m +
+                 ' H' + (x1 - sx * rad) + ' Q' + x1 + ' ' + m + ' ' + x1 + ' ' + (m + rad) + ' V' + y1;
+          }
+          d += ' V' + H;
         }
         track.setAttribute('d', d); draw.setAttribute('d', d);
         var len = draw.getTotalLength();
