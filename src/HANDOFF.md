@@ -89,6 +89,9 @@ GSAP 3 (cdnjs), ScrollTrigger and `main.js`.
 | FAQ | Open divided list (no cards): the intro on the left, each question a `details` row with a plus/minus on the right. |
 | Our Unique Approach | The second step waits for its own scroll position (`[data-late]`), and the dashed link draws in as you scroll between the two. |
 | Why CMA | Five open chapters (no cards): numbered head on the left, copy on the right, the methodology picture as a feature row, the last chapter on green. The five training labs sit as orange circles on a curve that draws itself as you scroll (same `.journey` engine as Our Story); the flattened labs picture is not shown. |
+| Foundational / Competency / Mastery Advantage | Intro text beside the program video (poster + popup, `PROGRAM_VIDEOS`), benefit lines as three columns, a surface band with the Program Snapshot facts and small transparent seals (`PROGRAM_SEALS`) next to Program Structure drawn as session bars (bar width = sessions / most sessions), then the modules as an open numbered list. |
+| Collective Advantage | The two large seal pictures are a small transparent pair beside their closing line; the ATC graphic is shown whole (not cropped). |
+| Comparison Table | One colour lane per program: orange Core, mid green Advanced, deep green Mastery, with rounded headers and a tinted column under each. |
 | Everywhere | Section entrances on `[data-reveal]`: headings and short copy arrive word by word with a soft blur, cards land as a shell first and then fill in, images scale in, buttons come last; items entering together are sequenced in DOM order. Hero headlines use `[data-split]`. Counters (`[data-count]`), marquees (`.marquee`). Add `?nomotion` to any URL to see the page without animation. |
 
 Add `?nomotion` to any URL to see a page with all motion switched off. Users with

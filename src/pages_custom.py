@@ -1723,11 +1723,18 @@ def program_page(page):
     run = re.compile(r'(?:\s*<a [^>]*>\s*(?:' + '|'.join(re.escape(t) for t, _ in PROGRAM_TABS) + r')\s*</a>\s*){3,}')
     c = run.sub(' ', c, count=1)
     page['content'] = c
-    html_text = smart_page(page)
     tabs = ''.join(f'<a href="{u}"{" class=is-active" if u == page["url"] else ""}>{esc(t)}</a>' for t, u in PROGRAM_TABS)
     row = f'<nav class="program-tabs" aria-label="Program Detail"><div class="container"><div class="tabs program-tabs__row">{tabs}</div></div></nav>'
+    detail = program_detail_body(page, top_nodes(c))
+    if detail:                                                     # Foundational / Competency / Mastery: dedicated layout
+        return layout(page, subnav(page) + page_hero(page) + row + detail)
+    html_text = smart_page(page)
     i = html_text.find('</section>', html_text.find('class="page-hero'))
     html_text = html_text[:i + len('</section>')] + row + html_text[i + len('</section>'):]
+    if page['url'] == '/team-coaching-certification-program':
+        html_text = _team_seals(html_text)
+    if page['url'] == '/pages/comparison-table':
+        html_text = html_text.replace('<table>', '<table class="compare">', 1)   # three programs, one colour lane each
     for name, badge in BADGE_SWAP.items():
         html_text = re.sub(r'<div class="feature-row__media media" data-reveal="scale"><img src="[^"]*' + re.escape(name) + r'[^"]*"',
                            f'<div class="feature-row__media media media--badge" data-reveal="scale"><img src="/assets/img/badges/{badge}.png"', html_text)
@@ -1835,3 +1842,144 @@ def why_cma(page):
     return layout(page, body)
 
 RENDERERS['/pages/why-cma'] = why_cma
+
+
+# ====================================================================== Program Detail: intro + video, snapshot panel, session bars, module list
+PROGRAM_VIDEOS = {   # from the live pages' poster + play button (they open a YouTube popup)
+    '/icf-coaching-certification-training-level-1-foundational-advantage': ('M5e6p1QCMQ4', SITE + '/public/twenty25/images/cma-1.jpg'),
+    '/advance-and-mastery-coaching-certification-training-for-pcc-and-mcc': ('B9dWIaSJlm4', SITE + '/public/twenty25/images/cma-2.png'),
+}
+PROGRAM_SEALS = {    # level badge, ICF credential, CMA seal (transparent files in assets/img/badges)
+    '/icf-coaching-certification-training-level-1-foundational-advantage': [('icf-level-1', 'ICF Level 1'), ('icf-acc', 'ICF Associate Certified Coach'), ('cma-certified-professional-coach', 'CMA Certified Professional Coach')],
+    '/advance-and-mastery-coaching-certification-training-for-pcc-and-mcc': [('icf-level-2', 'ICF Level 2'), ('icf-pcc', 'ICF Professional Certified Coach'), ('cma-advanced-practitioner-cpc', 'CMA Advanced Practitioner Certified Professional Coach')],
+    '/mastery-training-for-artful-coaching-for-mcc-credential': [('icf-level-3', 'ICF Level 3'), ('icf-mcc', 'ICF Master Certified Coach')],
+}
+_BENEFIT_RE = re.compile(r'^\s*([A-Z][A-Za-z ]{2,30}?)\s+-\s+\S')
+_FACT_RE = re.compile(r"(Who it(?:'|&#39;|’)s for:|Time commitment:|Certification Pathway:)")
+
+def _program_facts(p):
+    inner = re.sub(r'<br\s*/?>', ' ', _inner(p))
+    inner = re.sub(r'</?(?:b|strong)>', '', inner)
+    parts = _FACT_RE.split(inner)
+    if len(parts) < 5: return '<p>' + _inner(p) + '</p>'
+    out = ''
+    lead = parts[0].strip()
+    if lead: out += '<p>' + lead + '</p>'
+    for k in range(1, len(parts) - 1, 2):
+        out += ('<div class="pd-fact" data-reveal><dt>' + parts[k].strip() + '</dt><dd>' + re.sub(r'\s+', ' ', parts[k + 1]).strip() + '</dd></div>')
+    return '<dl class="pd-facts__list">' + out + '</dl>'
+
+def program_detail_body(page, nodes):
+    tags = [getattr(n, 'name', None) for n in nodes]
+    texts = [_txt(n) for n in nodes]
+    try:
+        i_snap = next(i for i, n in enumerate(nodes) if tags[i] == 'h2' and texts[i] == 'Program Snapshot')
+        i_struct = next(i for i, n in enumerate(nodes) if tags[i] == 'h2' and texts[i] == 'Program Structure')
+        i_ul = next(i for i in range(i_struct + 1, len(nodes)) if tags[i] == 'ul')
+    except StopIteration:
+        return None
+    url = page['url']
+    intro = nodes[:i_snap]
+    if not intro or tags[0] != 'h2': return None
+
+    # ---- intro: title, sub-lines and opening paragraphs beside the video; everything else below
+    title = texts[0]
+    k = 1; subs = []
+    while k < len(intro) and tags[k] == 'h4': subs.append(_inner(intro[k])); k += 1
+    paras = []
+    while k < len(intro) and tags[k] == 'p' and not _BENEFIT_RE.match(texts[k]): paras.append(_inner(intro[k])); k += 1
+    rest = intro[k:]
+    rest_html = ''; j = 0
+    while j < len(rest):
+        n = rest[j]; nm = getattr(n, 'name', None)
+        if nm == 'p' and _BENEFIT_RE.match(_txt(n)):
+            items = ''
+            while j < len(rest) and getattr(rest[j], 'name', None) == 'p' and _BENEFIT_RE.match(_txt(rest[j])):
+                m = _BENEFIT_RE.match(_txt(rest[j])); body = _inner(rest[j])
+                label = m.group(1)
+                body = body.replace(label, '<strong>' + label + '</strong>', 1) if body.lstrip().startswith(label) else body
+                items += '<p class="pd-benefit" data-reveal>' + body + '</p>'; j += 1
+            rest_html += '<div class="pd-benefits">' + items + '</div>'; continue
+        if nm == 'h4': rest_html += '<p class="pd-statement" data-reveal>' + _inner(n) + '</p>'
+        elif nm == 'ul': rest_html += '<ul class="list-check">' + ''.join('<li data-reveal>' + _inner(li) + '</li>' for li in n.find_all('li') if _txt(li)) + '</ul>'
+        elif nm == 'p' and _txt(n): rest_html += '<p data-reveal>' + _inner(n) + '</p>'
+        j += 1
+    video = PROGRAM_VIDEOS.get(url)
+    video_html = ''
+    if video:
+        yid, poster = video
+        video_html = ('<div class="pd-intro__media"><div class="video-card pd-video" data-reveal="scale"><img src="' + esc(poster) + '" alt="" loading="lazy">'
+                      '<a class="video-card__play" href="https://www.youtube.com/watch?v=' + yid + '" data-video aria-label="Play video">'
+                      '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></a></div></div>')
+    intro_html = ('<section class="section pd-intro"><div class="container">'
+                  '<div class="pd-intro__grid' + ('' if video else ' pd-intro__grid--solo') + '"><div class="pd-intro__text">'
+                  '<h2 data-reveal>' + esc(title) + '</h2>'
+                  + ''.join('<p class="pd-sub" data-reveal>' + x + '</p>' for x in subs)
+                  + ''.join('<p data-reveal>' + x + '</p>' for x in paras)
+                  + '</div>' + video_html + '</div>'
+                  + (('<div class="pd-intro__rest">' + rest_html + '</div>') if rest_html else '')
+                  + '</div></section>')
+
+    # ---- snapshot facts + seals, and the program structure as session bars
+    snap_p = next((n for n in nodes[i_snap + 1:i_struct] if getattr(n, 'name', None) == 'p' and _txt(n)), None)
+    seals = ''.join('<img src="/assets/img/badges/' + f + '.png" alt="' + esc(a) + '" loading="lazy">' for f, a in PROGRAM_SEALS.get(url, []))
+    lis = [li for li in nodes[i_ul].find_all('li') if _txt(li)]
+    counts = [int(m.group(1)) if (m := re.search(r'(\d+)\s*Sessions?', _txt(li))) else 0 for li in lis]
+    top = max(counts) if counts and max(counts) else 1
+    bars = ''.join('<li class="pd-bar" style="--w:' + ('%.3f' % (c / top)) + '" data-reveal>' + _inner(li) + '</li>' for li, c in zip(lis, counts))
+    facts_html = ('<section class="section section--surface pd-facts"><div class="container pd-facts__grid">'
+                  '<div class="pd-facts__snap"><h2 data-reveal>' + esc(texts[i_snap]) + '</h2>' + (_program_facts(snap_p) if snap_p else '')
+                  + (('<div class="pd-seals" data-reveal>' + seals + '</div>') if seals else '') + '</div>'
+                  '<div class="pd-facts__struct"><h2 data-reveal>' + esc(texts[i_struct]) + '</h2><ul class="pd-bars">' + bars + '</ul></div>'
+                  '</div></section>')
+
+    # ---- description: heading and lead on the left, the modules as an open numbered list on the right
+    after = nodes[i_ul + 1:]
+    left = ''; items = ''; trail = ''; num = 0; heading_done = False
+    for n in after:
+        nm = getattr(n, 'name', None)
+        if nm == 'details':
+            num += 1
+            for im in n.find_all('img'): im.decompose()                     # the 13px bullet icons from the old page
+            q = _inner(n.summary) if n.summary else ''
+            body = ''.join(str(c) for c in n.children if getattr(c, 'name', None) != 'summary')
+            items += ('<details class="faq-item pd-module"' + (' open' if num == 1 else '') + '><summary><span class="pd-module__num">' + ('%02d' % num) + '</span>'
+                      '<span class="pd-module__q">' + q + '</span><span class="faq-item__icon" aria-hidden="true"></span></summary>'
+                      '<div class="faq-item__body prose">' + body + '</div></details>')
+            continue
+        if not _txt(n): continue
+        target = 'left' if not items else 'trail'
+        if nm in ('h2', 'h4') and not heading_done and target == 'left':
+            left += '<h2 data-reveal>' + _inner(n) + '</h2>'; heading_done = True
+        elif nm in ('h2', 'h3', 'h4'):
+            html_ = '<h3 data-reveal>' + _inner(n) + '</h3>'
+            if target == 'left': left += html_
+            else: trail += html_
+        elif nm == 'ul':
+            html_ = '<ul class="list-check">' + ''.join('<li data-reveal>' + _inner(li) + '</li>' for li in n.find_all('li') if _txt(li)) + '</ul>'
+            if target == 'left': left += html_
+            else: trail += html_
+        else:
+            html_ = '<p data-reveal>' + _inner(n) + '</p>'
+            if target == 'left': left += html_
+            else: trail += html_
+    modules_html = ''
+    if items or left:
+        modules_html = ('<section class="section pd-modules"><div class="container pd-modules__grid">'
+                        '<div class="pd-modules__side">' + left + '</div>'
+                        '<div class="faq__list pd-modules__list" data-reveal="none">' + items + trail + '</div>'
+                        '</div></section>')
+    return intro_html + facts_html + modules_html
+
+def _team_seals(html_text):
+    """Collective Advantage: the two large seal pictures become a small transparent pair beside their line."""
+    m = re.search(r'<div class="lp-block lp-block--feature"><div class="feature-row"><div class="feature-row__media media" data-reveal="scale"><img src="[^"]*Media\.jpeg[^"]*"[^>]*></div>'
+                  r'(<div class="prose" data-auto-reveal>.*?</div>)</div></div>\s*<div class="lp-block lp-block--media"><div class="media media--wide"[^>]*><img src="[^"]*ICF ACTC\.png[^"]*"[^>]*></div></div>', html_text, re.S)
+    if not m:
+        print('!! team coaching seal pattern not found'); return html_text
+    pair = ('<div class="lp-block lp-block--seals"><div class="seal-pair">' + m.group(1).replace('<div class="prose"', '<div class="prose seal-pair__text"', 1) +
+            '<div class="seal-pair__imgs" data-reveal="scale"><img src="/assets/img/badges/cma-certified-team-coach.png" alt="CMA Certified Team Coach" loading="lazy">'
+            '<img src="/assets/img/badges/icf-team-coaching.png" alt="ICF Team Coaching Advanced Certification" loading="lazy"></div></div></div>')
+    html_text = html_text[:m.start()] + pair + html_text[m.end():]
+    return html_text.replace('<div class="feature-row__media media" data-reveal="scale"><img src="https://www.coachmastersacademy.com/public/storage/featured_image1/Team Coaching Certification.png',
+                             '<div class="feature-row__media media media--contain" data-reveal="scale"><img src="https://www.coachmastersacademy.com/public/storage/featured_image1/Team Coaching Certification.png', 1)

@@ -139,8 +139,11 @@
     Array.prototype.slice.call(node.childNodes).forEach(wrapWords);
   }
   function words(el) {
-    if (!el.dataset.split) { wrapRoot = el; wrapWords(el); wrapRoot = null; el.dataset.split = '1'; }
-    return el.querySelectorAll('.w');
+    if (!el.dataset.split) {
+      if (/flex|grid/.test(getComputedStyle(el).display)) { el.dataset.split = 'none'; return []; }   // a flex/grid row would drop the spaces between word pieces
+      wrapRoot = el; wrapWords(el); wrapRoot = null; el.dataset.split = '1';
+    }
+    return el.dataset.split === 'none' ? [] : el.querySelectorAll('.w');
   }
   function wordCount(el) { return (el.textContent.match(/\S+/g) || []).length; }
 
