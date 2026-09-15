@@ -510,7 +510,6 @@ def feature_card(d):
     <p class="role role--cred" data-f-cred>{esc(d['cred'])}</p>
     <p class="role" data-f-role>{esc(d['role'])}</p>
     <div class="loc" data-f-locwrap>{PIN}<span data-f-loc>{esc(d['loc'])}</span></div>
-    {link('View profile', '/our-faculty')}
   </div>
 </article>'''
 
