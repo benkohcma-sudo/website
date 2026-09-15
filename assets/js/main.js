@@ -86,6 +86,7 @@
   initAccordions();
   initTabs();
   initOffices();
+  initSchedule();
   initVideoModal();
   initLightbox();
 
@@ -484,6 +485,71 @@
     doc.body.appendChild(wrap);
     doc.documentElement.classList.add('modal-open');
     requestAnimationFrame(function () { wrap.classList.add('is-open'); wrap.querySelector('.video-modal__close').focus(); });
+  }
+
+  /* Schedule: sliding toggle between the two views (?type= still works), and the table filters work in place */
+  function initSchedule() {
+    var root = doc.querySelector('[data-schedule]');
+    if (!root) return;
+    var btns = Array.prototype.slice.call(root.querySelectorAll('.sched-toggle__btn'));
+    var panels = Array.prototype.slice.call(root.querySelectorAll('.sched-panel'));
+    var pill = root.querySelector('.sched-toggle__pill');
+    function movePill(b) { if (!pill || !b) return; pill.style.width = b.offsetWidth + 'px'; pill.style.transform = 'translateX(' + b.offsetLeft + 'px)'; }
+    function show(name, fromClick) {
+      btns.forEach(function (b) {
+        var on = b.dataset.panel === name;
+        b.classList.toggle('is-active', on); b.setAttribute('aria-selected', on ? 'true' : 'false');
+        if (on) movePill(b);
+      });
+      panels.forEach(function (p) {
+        var on = p.dataset.panel === name;
+        p.hidden = !on;
+        if (on && fromClick) { p.classList.remove('is-in'); void p.offsetWidth; p.classList.add('is-in'); }
+      });
+      if (fromClick) {
+        var a = btns.filter(function (b) { return b.dataset.panel === name; })[0];
+        try { if (a) history.replaceState(null, '', a.getAttribute('href')); } catch (e) {}
+      }
+      if (win.ScrollTrigger) ScrollTrigger.refresh();
+    }
+    btns.forEach(function (b) { b.addEventListener('click', function (e) { e.preventDefault(); show(b.dataset.panel, true); }); });
+    var type = '';
+    try { type = new URLSearchParams(location.search).get('type') || ''; } catch (e) {}
+    show(/enrich/i.test(type) ? 'enrichment' : 'training', false);
+    if (pill) requestAnimationFrame(function () { pill.classList.add('is-ready'); });
+    win.addEventListener('resize', function () { movePill(root.querySelector('.sched-toggle__btn.is-active')); });
+
+    root.querySelectorAll('.sched-panel form').forEach(function (form) {
+      var table = form.querySelector('table');
+      if (!table) return;
+      var ths = Array.prototype.slice.call(table.querySelectorAll('thead th'));
+      var sels = Array.prototype.slice.call(form.querySelectorAll('thead select'));
+      var rows = Array.prototype.slice.call(table.querySelectorAll('tbody tr'));
+      var cols = sels.map(function (s) { return ths.indexOf(s.closest('th')); });
+      var norm = function (t) { return (t || '').replace(/\s+/g, ' ').trim().toLowerCase(); };
+      var empty = doc.createElement('tr');
+      empty.className = 'sched-empty'; empty.hidden = true;
+      empty.innerHTML = '<td colspan="' + ths.length + '"><button type="button" class="link">Reset</button></td>';
+      table.querySelector('tbody').appendChild(empty);
+      function apply() {
+        var shown = 0;
+        rows.forEach(function (r) {
+          var ok = sels.every(function (s, i) {
+            if (!s.value) return true;
+            var cell = r.children[cols[i]];
+            if (!cell) return true;
+            var want = norm(s.options[s.selectedIndex].text), have = norm(cell.textContent);
+            return s.name === 'month' ? have.slice(0, 3) === want.slice(0, 3) : have === want;
+          });
+          r.hidden = !ok; if (ok) shown++;
+        });
+        empty.hidden = shown > 0;
+        form.classList.toggle('is-filtered', sels.some(function (s) { return !!s.value; }));
+      }
+      sels.forEach(function (s) { s.addEventListener('change', apply); });
+      form.addEventListener('submit', function (e) { e.preventDefault(); });
+      empty.querySelector('button').addEventListener('click', function () { sels.forEach(function (s) { s.value = ''; }); apply(); });
+    });
   }
 
   function initStrips() {

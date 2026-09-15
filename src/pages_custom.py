@@ -576,6 +576,9 @@ PREFIX_RENDERERS = []
 def top_nodes(content):
     soup = BeautifulSoup(content, 'lxml')
     root = soup.body or soup
+    for a in root.find_all('a', recursive=False):                    # an image wrapped in a dead link (href "#!") is just an image
+        kids = [k for k in a.children if getattr(k, 'name', None) or str(k).strip()]
+        if (a.get('href') or '').strip() in ('#!', '#', '') and len(kids) == 1 and getattr(kids[0], 'name', None) == 'img': a.unwrap()
     return [n for n in root.children if getattr(n, 'name', None) or (str(n).strip())]
 
 def card_groups(content):
@@ -980,6 +983,9 @@ def render_blocks(blocks):
         elif t == 'cards':
             cards = ''
             for c in b['items']:
+                if c['img'] and 'circle' in c['img'].rsplit('/', 1)[-1].lower():   # round photos: a photo card, not an icon
+                    cards += f'<article class="card card--round" data-reveal><div class="card__round"><img src="{esc(c["img"])}" alt="" loading="lazy"></div><h3>{esc(c["title"])}</h3><p>{c["body"]}</p></article>'
+                    continue
                 icon = f'<div class="icon-card__img"><img src="{esc(c["img"])}" alt="" loading="lazy"></div>' if c['img'] else ''
                 cards += f'<article class="card icon-card" data-reveal>{icon}<h3>{esc(c["title"])}</h3><p>{c["body"]}</p></article>'
             out.append(f'<div class="grid grid-3">{cards}</div>')
@@ -990,6 +996,8 @@ def render_blocks(blocks):
     return '\n'.join(f'<div class="lp-block lp-block--{b["t"]}">{h}</div>' for b, h in zip(blocks, out))
 
 def smart_page(page, extra=''):
+    global _RENDER_URL
+    _RENDER_URL = page['url']
     """Generic pages: plain text keeps the article + aside; anything with image
     runs, stat numbers or card patterns gets the landing layout. `extra` is a
     hand-built section slotted in before the registration band."""
@@ -1311,6 +1319,10 @@ def _split_prose_for_feature(html_, max_words=150):
     if not take: return '', html_
     return ''.join(take), ''.join(str(n) for n in nodes[i:])
 
+# pages where a photo closes the section before it (checked against the live page order and the photo subject)
+PAIR_WITH_PREVIOUS = {'/executive-leadership-coaching-service-for-managers-and-leaders', '/team-coaching-certification-program', '/professional-coaching-training'}
+_RENDER_URL = ''
+
 def pair_media(blocks):
     """A lone image beside plain text becomes one side-by-side row (alternating sides)."""
     out = []; i = 0; flip = False
@@ -1319,6 +1331,17 @@ def pair_media(blocks):
         if b['t'] == 'media':
             nxt = blocks[i + 1] if i + 1 < len(blocks) else None
             prv = out[-1] if out else None
+            # an image that closes a section (the next block opens a new h2) belongs with the text before it
+            if _RENDER_URL in PAIR_WITH_PREVIOUS and nxt and nxt['t'] == 'prose' and re.match(r'\s*<h2', nxt['html']) and prv and prv['t'] == 'prose':
+                soup = BeautifulSoup(prv['html'], 'lxml'); root = soup.body or soup
+                nodes = [n for n in root.children if getattr(n, 'name', None) or str(n).strip()]
+                hi = max((k for k, n in enumerate(nodes) if getattr(n, 'name', None) in ('h2', 'h3', 'h4')), default=-1)
+                if hi >= 0 and len(nodes) - hi <= 6:
+                    text = ''.join(str(n) for n in nodes[hi:]); rest = ''.join(str(n) for n in nodes[:hi])
+                    if rest.strip(): out[-1] = dict(prv, html=rest)
+                    else: out.pop()
+                    out.append({'t': 'feature', 'img': b['src'], 'alt': b['alt'], 'html': text, 'flip': flip}); flip = not flip
+                    i += 1; continue
             if nxt and nxt['t'] == 'prose':
                 text, rest = _split_prose_for_feature(nxt['html'])
                 if text:
@@ -1983,3 +2006,65 @@ def _team_seals(html_text):
     html_text = html_text[:m.start()] + pair + html_text[m.end():]
     return html_text.replace('<div class="feature-row__media media" data-reveal="scale"><img src="https://www.coachmastersacademy.com/public/storage/featured_image1/Team Coaching Certification.png',
                              '<div class="feature-row__media media media--contain" data-reveal="scale"><img src="https://www.coachmastersacademy.com/public/storage/featured_image1/Team Coaching Certification.png', 1)
+
+
+# ====================================================================== SCHEDULE: two-way toggle, filterable tables
+_MONTH_NUM = {'jan': '01', 'feb': '02', 'mar': '03', 'apr': '04', 'may': '05', 'jun': '06', 'jul': '07', 'aug': '08', 'sep': '09', 'oct': '10', 'nov': '11', 'dec': '12'}
+
+def calendar_page(page):
+    """Training Schedule and Complimentary Enrichment Learning as one page with a sliding toggle.
+    The live site switches with ?type=…; the same links still work (the script reads ?type on load).
+    Enrichment rows come from src/content/calendar_enrichment.json (the live ?type=Enrichment%20Learning view)."""
+    import json, os
+    nodes = top_nodes(page['content'])
+    tab_ul = next((n for n in nodes if getattr(n, 'name', None) == 'ul' and n.find('a', href=re.compile(r'type='))), None)
+    links = [(_txt(a), a.get('href', '')) for a in tab_ul.find_all('a')] if tab_ul else []
+    # the live page carries a hidden twin of the enrichment table under the training view (blank names): it is left out here
+    enrich_form = next((n for n in nodes if getattr(n, 'name', None) == 'form' and n.find('select', attrs={'name': 'event_type'})), None)
+    enrich_head = None
+    if enrich_form is not None:
+        k = nodes.index(enrich_form)
+        if k and getattr(nodes[k - 1], 'name', None) == 'h2': enrich_head = nodes[k - 1]
+    training = ''.join(str(n) for n in nodes if n is not tab_ul and n is not enrich_form and n is not enrich_head)
+
+    data = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'content', 'calendar_enrichment.json')))
+    def options(name, placeholder, values, month=False):
+        opts = '<option value="">' + esc(placeholder) + '</option>'
+        for v in values:
+            val = _MONTH_NUM.get(v[:3].lower(), v) if month else v
+            opts += '<option value="' + esc(val) + '">' + esc(v) + '</option>'
+        return '<select name="' + name + '">' + opts + '</select>'
+    ph = lambda lst: lst[0] if lst else ''
+    rows = ''
+    for r in data['rows']:
+        c = r['cells']; href = esc(r['href'])
+        rows += ('<tr><td><a href="' + href + '">' + esc(c[0]) + '</a></td><td>' + esc(c[1]) + '</td><td>' + esc(c[2]) + '</td>'
+                 '<td>' + esc(c[3]) + '</td><td>' + esc(c[4]) + '</td><td><a href="' + href + '">' + esc(c[5]) + '</a></td></tr>')
+    intro = ''
+    for tag, text in data['intro']:
+        intro += ('<h2>' + esc(text) + '</h2>') if tag == 'h2' else ('<p>' + esc(text) + '</p>')
+    enrich_title = _inner(enrich_head) if enrich_head is not None else 'Complimentary Enrichment Learning'
+    enrichment = (intro + '<h2>' + enrich_title + '</h2>'
+                  '<form><table><thead><tr>'
+                  '<th>' + options('event_type', ph(data['event_type']), data['event_type'][1:]) + '</th>'
+                  '<th>' + options('event_name', ph(data['event_name']), data['event_name'][1:]) + '</th>'
+                  '<th>Date</th>'
+                  '<th><input name="type" type="hidden" value="Enrichment Learning"/>' + options('month', ph(data['month']), data['month'][1:], month=True) + '</th>'
+                  '<th>Time</th><th></th></tr></thead><tbody>' + rows + '</tbody></table></form>')
+
+    names = ['training', 'enrichment']
+    toggle = ''
+    if len(links) == 2:
+        toggle = ('<div class="sched-toggle__wrap"><div class="sched-toggle" role="tablist" aria-label="Schedule">'
+                  '<span class="sched-toggle__pill" aria-hidden="true"></span>'
+                  + ''.join('<a class="sched-toggle__btn' + (' is-active' if i == 0 else '') + '" role="tab" aria-selected="' + ('true' if i == 0 else 'false') + '"'
+                            ' href="' + esc(h) + '" data-panel="' + names[i] + '">' + esc(t) + '</a>' for i, (t, h) in enumerate(links))
+                  + '</div></div>')
+    body = subnav(page) + page_hero(page, 'Schedule') + (
+        '<section class="section section--tight schedule" data-schedule><div class="container">' + toggle +
+        '<div class="prose prose--wide sched-panel is-in" data-panel="training">' + training + '</div>'
+        '<div class="prose prose--wide sched-panel" data-panel="enrichment" hidden>' + enrichment + '</div>'
+        '</div></section>')
+    return layout(page, body)
+
+RENDERERS['/events/calendar'] = calendar_page
