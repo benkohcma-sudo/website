@@ -1438,7 +1438,7 @@ def render_blocks(blocks):
             cards = ''
             for k, c in enumerate(b['items']):
                 op = k == 0
-                icon = f'<span class="acc-card__icon"><img src="{esc(c["img"])}" alt="" loading="lazy"></span>' if c['img'] else '<span class="acc-card__icon"></span>'
+                icon = f'<span class="acc-card__icon"><img src="{esc(c["img"])}" alt="" loading="lazy"></span>' if c['img'] else '<span class="acc-card__icon acc-card__icon--none" aria-hidden="true"></span>'
                 cards += (f'<article class="acc-card{" is-open" if op else ""}" data-reveal><button class="acc-card__head" type="button" aria-expanded="{"true" if op else "false"}">'
                           f'{icon}<span class="acc-card__title">{esc(c["title"])}</span><span class="acc-card__chev" aria-hidden="true"></span></button>'
                           f'<div class="acc-card__body"><div class="acc-card__inner"><div class="prose"><p>{c["body"]}</p></div></div></div></article>')

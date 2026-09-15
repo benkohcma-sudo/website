@@ -1582,3 +1582,5 @@ main > section.landing:last-child:has(> .container > .lp-block--logos:last-child
   .lab__node, .lab:nth-child(even) .lab__node { position: absolute; left: 34px; top: 0; margin: 0 0 0 -44px; width: 88px; font-size: 12.5px; padding: 8px; box-shadow: 0 0 0 6px #fff; }
   .lab__text, .lab:nth-child(even) .lab__text { grid-column: 1; padding: 0 0 0 104px; min-height: 96px; }
 }
+
+.acc-card__icon--none { background: none; visibility: hidden; }   /* no icon: nothing shows, the title stays centred */
