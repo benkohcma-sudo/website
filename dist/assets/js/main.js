@@ -78,7 +78,7 @@
      Elements that enter the viewport together are sequenced in DOM
      order, so a section reads: heading -> copy -> cards left to right.
      ============================================================ */
-  var CARD_SEL = '.card, .icon-card, .service, .acc-card, .stand__card, .do-card, .stat, .quote-card, .pull, .proof__item, .news-card, .person, .feature-card, .office, .step-card, .track-card, .badge-float, .tab-panel__grid > *, .cta-full__inner';
+  var CARD_SEL = '.card, .icon-card, .photo-card, .service, .acc-card, .stand__card, .do-card, .stat, .quote-card, .pull, .proof__item, .news-card, .person, .feature-card, .office, .step-card, .track-card, .badge-float, .tab-panel__grid > *, .cta-full__inner';
   var PART_SEL = 'h1, h2, h3, h4, p, li, .lead, .btn, .link, img, video, figure, .eyebrow, .stat__num, .stat__label, .acc-card__head, .card__media, .do-card__media, .icon-card__img, .actions';
   var TEXT_SEL = 'p, li, .lead, .eyebrow, .stat__label, .acc-card__title, .acc-card__sub, blockquote';
   var mobileMotion = win.matchMedia('(max-width: 760px)').matches;

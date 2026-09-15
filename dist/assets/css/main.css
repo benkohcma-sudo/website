@@ -1064,3 +1064,18 @@ main > section:last-child:not(.cta-full) { padding-bottom: clamp(72px, 9vw, 140p
 .do-card__body h3 { font-size: 21px; margin: 0; }
 .do-card__body p { font-size: 15px; color: var(--body); margin: 0; }
 .do-card__body .link { margin-top: auto; padding-top: 8px; }
+
+/* ---------- service showcase: heading + button row, full-photo cards ---------- */
+.showcase__row { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px 40px; flex-wrap: wrap; margin-bottom: 18px; }
+.landing .showcase__row .section-head { margin: 0; max-width: none !important; }
+.showcase__row .section-head h2 { margin-bottom: 0; }
+.showcase__row .actions { padding-bottom: 6px; }
+.showcase__intro { max-width: 76ch; margin: 0 0 clamp(28px, 4vw, 44px); }
+.photo-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.photo-card { position: relative; display: block; aspect-ratio: 4 / 4.7; border-radius: 26px; overflow: hidden; color: #fff; isolation: isolate; background: var(--green); }
+.photo-card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 1s var(--ease); }
+.photo-card:hover img { transform: scale(1.05); }
+.photo-card__scrim { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(23,56,14,.6) 0%, rgba(23,56,14,.08) 38%, rgba(23,56,14,.12) 58%, rgba(23,56,14,.86) 100%); }
+.photo-card h3 { position: absolute; left: 26px; right: 26px; top: 24px; margin: 0; color: #fff; font-size: clamp(24px, 2.2vw, 34px); line-height: 1.08; letter-spacing: -.02em; }
+.photo-card p { position: absolute; left: 26px; right: 26px; bottom: 24px; margin: 0; color: rgba(255,255,255,.94); font-size: 15.5px; line-height: 1.5; }
+@media (max-width: 900px) { .photo-cards { grid-template-columns: 1fr; } .photo-card { aspect-ratio: 4 / 3; } }

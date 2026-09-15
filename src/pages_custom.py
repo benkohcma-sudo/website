@@ -1374,13 +1374,51 @@ def sectionize(blocks):
             out.append({'t': 'section2', 'left': left, 'right': right})
     return out
 
+SERVICE_PHOTOS = {   # the three service cards become full-photo cards (client photos, Sep 2026)
+    'Coaching Education': ('/assets/img/service-education.jpg', '/icf-coaching-training-program'),
+    'Coaching Workshop': ('/assets/img/service-workshop.jpg', '/coaching-skill-training-course-and-workshop'),
+    'Coaching Service': ('/assets/img/service-service.jpg', '/executive-leadership-coaching-service-for-managers-and-leaders'),
+}
+
+def showcase(blocks):
+    """A heading, its intro and its button followed by the three service cards fold into one
+    showcase block: heading and button on one row, intro beneath, photo cards under that."""
+    out = []; i = 0
+    while i < len(blocks):
+        b = blocks[i]
+        if b['t'] == 'cards' and b['items'] and all(c['title'].strip() in SERVICE_PHOTOS for c in b['items']):
+            head = prose = None; acts = []
+            k = len(out) - 1
+            while k >= 0 and out[k]['t'] in ('prose', 'actions', 'head') and head is None:
+                if out[k]['t'] == 'actions': acts = out[k]['items'] + acts
+                elif out[k]['t'] == 'prose': prose = out[k]['html'] + (prose or '')
+                else: head = out[k]
+                k -= 1
+            if head is not None:
+                del out[k + 1:]
+                out.append({'t': 'showcase', 'head': head, 'prose': prose, 'actions': acts, 'items': b['items']}); i += 1; continue
+        out.append(b); i += 1
+    return out
+
 _orig_render_blocks = render_blocks
 def render_blocks(blocks):
     # whole-list passes first (they look at neighbouring blocks), then the layout passes
-    blocks = sectionize(lift_actions(pair_media(attach_logo_intros(merge_stat_rows(blocks)))))
+    blocks = showcase(sectionize(lift_actions(pair_media(attach_logo_intros(merge_stat_rows(blocks))))))
     out = []
     for b in blocks:
-        if b['t'] == 'feature':
+        if b['t'] == 'showcase':
+            btns = ''.join(btn(t, h, '' if k == 0 else 'btn--ghost') for k, (t, h) in enumerate(b['actions']))
+            acts = f'<div class="actions" data-reveal>{btns}</div>' if btns else ''
+            intro = f'<div class="prose showcase__intro" data-auto-reveal>{b["prose"]}</div>' if b['prose'] else ''
+            cards = ''
+            for c in b['items']:
+                src, href = SERVICE_PHOTOS[c['title'].strip()]
+                cards += (f'<a class="photo-card" href="{href}" data-reveal><img src="{src}" alt="" loading="lazy"><span class="photo-card__scrim"></span>'
+                          f'<h3>{esc(c["title"])}</h3><p>{c["body"]}</p></a>')
+            out.append(f'<div class="lp-block lp-block--showcase"><div class="showcase__row"><div class="section-head">'
+                       f'<p class="eyebrow" data-reveal>{esc(b["head"]["eyebrow"])}</p><h2 data-reveal>{b["head"]["h2"]}</h2></div>{acts}</div>'
+                       f'{intro}<div class="photo-cards">{cards}</div></div>')
+        elif b['t'] == 'feature':
             out.append(f'<div class="lp-block lp-block--feature"><div class="feature-row{" feature-row--flip" if b["flip"] else ""}">'
                        f'<div class="feature-row__media media" data-reveal="scale"><img src="{esc(b["img"])}" alt="{esc(b["alt"])}" loading="lazy" data-parallax="18"></div>'
                        f'<div class="prose" data-auto-reveal>{b["html"]}</div></div></div>')
