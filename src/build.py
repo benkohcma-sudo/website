@@ -406,6 +406,10 @@ HERO_IMAGES = {
     '/coaching-skill-training-course-and-workshop': 'workshop',
     '/pages/coaching-education': 'coaching-education',
     '/registration': 'registration',
+    '/icf-coaching-certification-training-level-1-foundational-advantage': 'core-training',
+    '/pages/why-cma': 'why-cma',
+    '/pages/our-unique-approach': 'unique-approach',
+    '/faq': 'faq',
 }
 
 def take_lead(page, content):
