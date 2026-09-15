@@ -553,6 +553,8 @@ p { margin: 0 0 1.1em; }
 html.is-locked, html.is-locked body { overflow: hidden; height: 100%; overscroll-behavior: none; }
 .globe-hint.is-playing span { opacity: 0; transition: opacity .3s; }
 .globe-hint.is-done { opacity: 0; transition: opacity .5s; }
+.reduce-motion .globe-hint, .no-js .globe-hint { display: none; }
+@media (max-width: 960px) { .globe-hint { display: none; } }
 .globe-hero--video .globe-video__el {
   position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; object-position: 100% 50%;
   mix-blend-mode: normal; pointer-events: none;
