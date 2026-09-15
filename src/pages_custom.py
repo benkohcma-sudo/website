@@ -270,9 +270,8 @@ def about(page):
   </div>
   <div class="globe-hint"><i></i><span>Scroll to spin</span></div>
 </section>
-<div class="globe-hero__space" aria-hidden="true"></div>
 
-<section class="section section--surface about-cover">
+<section class="section section--surface">
   <div class="container">
     <div class="tabs tabs--center" role="tablist" data-tabs data-reveal="none">
       <button type="button" class="is-active" role="tab" aria-selected="true">Our Vision</button>
@@ -1692,11 +1691,11 @@ def unique_approach(page):
         '<section class="section section--white ua-steps"><div class="container ua-steps__grid">'
           '<svg class="ua-steps__link" viewBox="0 0 400 300" preserveAspectRatio="none" aria-hidden="true"><path d="M0 30 C170 30 190 270 400 262" fill="none" stroke="#eb6422" stroke-width="2" stroke-dasharray="6 9" vector-effect="non-scaling-stroke"/></svg>'
           '<div class="ua-step"><h3 data-reveal>' + _inner(h3a) + '</h3><p data-reveal>' + _inner(pa) + '</p></div>'
-          '<div class="ua-step ua-step--low"><h3 data-reveal>' + _inner(h3b) + '</h3><p class="ua-step__lead" data-reveal>' + _inner(pb) + '</p><ul class="list-check">' + lis(ul1) + '</ul></div>'
+          '<div class="ua-step ua-step--low" data-late><h3 data-reveal-late>' + _inner(h3b) + '</h3><p class="ua-step__lead" data-reveal-late>' + _inner(pb) + '</p><ul class="list-check">' + lis(ul1).replace('data-reveal', 'data-reveal-late') + '</ul></div>'
         '</div></section>'
 
         '<section class="section section--surface ua-close has-curve">' + _mc_curve('left') + '<div class="container ua-close__grid">'
-          '<div><div class="ua-close__logo" data-reveal="scale"><img src="' + esc(logo.get('src', '')) + '" alt="ICF Coaching Education" loading="lazy"></div>'
+          '<div><div class="ua-close__logo" data-reveal="scale"><img src="/assets/img/badges/icf-coaching-education.png" alt="ICF Coaching Education" loading="lazy"></div>'
           '<blockquote class="ua-quote ua-quote--ink" data-reveal><div>' + _inner(q3) + '</div></blockquote></div>'
           '<ul class="ua-close__list">' + lis(ul2) + '</ul>'
         '</div></section>')
@@ -1704,3 +1703,55 @@ def unique_approach(page):
 
 RENDERERS['/pages/mentor-coaching'] = mentor_coaching
 RENDERERS['/pages/our-unique-approach'] = unique_approach
+
+
+# ====================================================================== Program Detail sub-pages (five tabs, shared hero style)
+PROGRAM_TABS = [
+    ('Foundational Advantage', '/icf-coaching-certification-training-level-1-foundational-advantage'),
+    ('Competency Advantage', '/advance-and-mastery-coaching-certification-training-for-pcc-and-mcc'),
+    ('Mastery Advantage', '/mastery-training-for-artful-coaching-for-mcc-credential'),
+    ('Collective Advantage', '/team-coaching-certification-program'),
+    ('Comparison Table', '/pages/comparison-table'),
+]
+BADGE_SWAP = {   # the live pages' flattened credential pictures -> the transparent seals
+    'Picture5.png': 'icf-acc', 'icf-2.png': 'icf-pcc', 'Picture7.png': 'icf-mcc', 'ICF ACTC.png': 'icf-team-coaching',
+}
+
+def program_page(page):
+    """The five Program Detail pages: the run of tab links at the top of the article becomes a tab row under the hero."""
+    page = dict(page); c = page['content']
+    run = re.compile(r'(?:\s*<a [^>]*>\s*(?:' + '|'.join(re.escape(t) for t, _ in PROGRAM_TABS) + r')\s*</a>\s*){3,}')
+    c = run.sub(' ', c, count=1)
+    page['content'] = c
+    html_text = smart_page(page)
+    tabs = ''.join(f'<a href="{u}"{" class=is-active" if u == page["url"] else ""}>{esc(t)}</a>' for t, u in PROGRAM_TABS)
+    row = f'<nav class="program-tabs" aria-label="Program Detail"><div class="container"><div class="tabs program-tabs__row">{tabs}</div></div></nav>'
+    i = html_text.find('</section>', html_text.find('class="page-hero'))
+    html_text = html_text[:i + len('</section>')] + row + html_text[i + len('</section>'):]
+    for name, badge in BADGE_SWAP.items():
+        html_text = re.sub(r'<div class="feature-row__media media" data-reveal="scale"><img src="[^"]*' + re.escape(name) + r'[^"]*"',
+                           f'<div class="feature-row__media media media--badge" data-reveal="scale"><img src="/assets/img/badges/{badge}.png"', html_text)
+    return html_text
+
+for _t, _u in PROGRAM_TABS: RENDERERS[_u] = program_page
+
+# ====================================================================== FAQ: an open divided list, group text on the left
+def faq_page(page):
+    from build import strip_duplicate_heading
+    c = strip_duplicate_heading(page['content'], page.get('h1'))
+    nodes = top_nodes(c)
+    intro = ''.join(_inner(n) for n in nodes if getattr(n, 'name', None) == 'p' and _txt(n))
+    items = ''
+    for d in nodes:
+        if getattr(d, 'name', None) != 'details': continue
+        q = _inner(d.summary) if d.summary else ''
+        body = ''.join(str(n) for n in d.children if getattr(n, 'name', None) != 'summary')
+        items += f'<details class="faq-item"><summary>{q}<span class="faq-item__icon" aria-hidden="true"></span></summary><div class="faq-item__body prose">{body}</div></details>'
+    body = subnav(page) + page_hero(page) + (
+        '<section class="section faq"><div class="container faq__grid">'
+        '<div class="faq__side"><h2 data-reveal>' + esc(page.get('h1') or 'FAQ') + '</h2>' + (('<p data-reveal>' + intro + '</p>') if intro else '') + '</div>'
+        '<div class="faq__list" data-reveal="none">' + items + '</div>'
+        '</div></section>')
+    return layout(page, body)
+
+RENDERERS['/faq'] = faq_page

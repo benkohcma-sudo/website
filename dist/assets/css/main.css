@@ -1474,14 +1474,6 @@ main > section.landing:last-child:has(> .container > .lp-block--logos:last-child
 
 /* Site rule (client, Sep 2026): no colour blends anywhere. Overlays, shapes and accents use flat solid colours only. */
 
-/* ---------- About: the page rides up over the held globe hero ---------- */
-.globe-hero__space { height: 0; }
-.hero-pinned .globe-hero__space { height: 160svh; }                         /* the spin plays over this distance, then the next section climbs over the hero */
-.hero-pinned main > section, .hero-pinned main > .pin-spacer > section { position: relative; z-index: 1; }
-:where(.hero-pinned) main > :where(section), :where(.hero-pinned) main > :where(.pin-spacer) > :where(section) { background-color: var(--bg); }
-.hero-pinned main > .pin-spacer:first-of-type, .hero-pinned .pin-spacer > section.globe-hero { position: relative; z-index: 0; }
-.hero-pinned .about-cover { border-radius: 32px 32px 0 0; box-shadow: 0 -18px 50px rgba(23,56,14,.16); }
-
 /* ---------- regional offices on a globe ---------- */
 .offices--globe .offices__layout { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: clamp(28px, 5vw, 80px); align-items: center; }
 .offices__globe { position: relative; }
@@ -1517,3 +1509,37 @@ main > section.landing:last-child:has(> .container > .lp-block--logos:last-child
 @media (max-width: 900px) { .offices--globe .offices__layout { grid-template-columns: 1fr; } .offices__globe { max-width: 420px; margin: 0 auto; } }
 .prose a, .office__row a { overflow-wrap: anywhere; }   /* long web addresses and emails wrap instead of pushing past a phone screen */
 .link { white-space: nowrap; flex-shrink: 0; }   /* arrow links stay on one line inside heading rows */
+
+/* ---------- steps that wait for their own scroll position ---------- */
+[data-reveal-late] { opacity: 0; }
+[data-reveal-late][data-entered], .reduce-motion [data-reveal-late], .no-js [data-reveal-late] { opacity: 1; }
+.ua-close__logo img { mix-blend-mode: normal; }
+
+/* ---------- Program Detail tab row under the hero ---------- */
+.program-tabs { background: var(--bg); border-bottom: 1px solid var(--line); }
+.program-tabs__row { margin-bottom: 0; border-bottom: 0; justify-content: center; }
+.program-tabs__row a { flex: 0 0 auto; padding: 18px 20px; font-family: var(--font-head); font-size: 15.5px; font-weight: 600; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; transition: color .2s, border-color .2s; }
+.program-tabs__row a:hover { color: var(--ink); }
+.program-tabs__row a.is-active { color: var(--orange); border-color: var(--orange); }
+.media--badge { aspect-ratio: auto !important; background: none !important; border: 0; box-shadow: none; display: grid; place-items: center; }
+.media--badge img { position: static; width: min(300px, 70%); height: auto; object-fit: contain; }
+@media (max-width: 760px) { .program-tabs__row { justify-content: flex-start; } .program-tabs__row a { padding: 14px 12px; font-size: 14px; } }
+
+/* ---------- FAQ: open divided list ---------- */
+.faq__grid { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: clamp(32px, 6vw, 96px); align-items: start; }
+.faq__side { position: sticky; top: 110px; }
+.faq__side h2 { margin: 0 0 14px; }
+.faq__side p { color: var(--body); max-width: 40ch; }
+.faq__list { border-top: 1px solid var(--line); }
+.faq-item { border-bottom: 1px solid var(--line); }
+.faq-item summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 22px 0; font-family: var(--font-head); font-weight: 600; font-size: clamp(17px, 1.4vw, 20px); color: var(--ink); line-height: 1.35; transition: color .2s; }
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary:hover, .faq-item[open] summary { color: var(--orange-deep); }
+.faq-item__icon { flex: 0 0 auto; width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid var(--orange); background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M6 1v10M1 6h10' stroke='%23eb6422' stroke-width='1.6' fill='none'/%3E%3C/svg%3E") center / 12px 12px no-repeat; transition: transform .35s var(--ease); }
+.faq-item[open] .faq-item__icon { transform: rotate(45deg); }
+.faq-item__body { padding: 0 48px 26px 0; }
+.faq-item__body p:last-child { margin-bottom: 0; }
+.faq-item__body img { max-width: 100%; height: auto; }
+.faq-item summary:focus { outline: none; }
+.faq-item summary:focus-visible { outline: 2px solid var(--orange); outline-offset: 4px; border-radius: 6px; }
+@media (max-width: 900px) { .faq__grid { grid-template-columns: 1fr; } .faq__side { position: static; } .faq-item__body { padding-right: 0; } }

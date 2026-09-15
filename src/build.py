@@ -420,6 +420,10 @@ HERO_IMAGES = {
     '/pages/why-cma': 'why-cma',
     '/pages/our-unique-approach': 'unique-approach',
     '/faq': 'faq',
+    '/advance-and-mastery-coaching-certification-training-for-pcc-and-mcc': 'certification',
+    '/mastery-training-for-artful-coaching-for-mcc-credential': 'coaching-education',
+    '/team-coaching-certification-program': 'workshop',
+    '/pages/comparison-table': 'schedule',
 }
 
 def take_lead(page, content):

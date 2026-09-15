@@ -51,7 +51,6 @@
   function onScroll() {
     var y = win.scrollY;
     if (!header) return;
-    if (doc.documentElement.classList.contains('keep-header')) { header.classList.add('is-scrolled'); header.classList.remove('is-hidden'); lastY = y; return; }   // a pinned section sits under the compact header
     header.classList.toggle('is-scrolled', y > 10);
     if (y > 320 && y > lastY + 4) header.classList.add('is-hidden');
     else if (y < lastY - 4) header.classList.remove('is-hidden');
@@ -262,6 +261,7 @@
   initHomeHero(false);
   initStrips();
   initFlowSide();
+  initLateSteps();
   win.addEventListener('load', function () { ScrollTrigger.refresh(); });
   // safety net: anything still hidden 4s after load is shown (e.g. if ScrollTrigger never fires)
   afterPreloader(function () { setTimeout(function () { doc.querySelectorAll('[data-reveal]').forEach(function (el) { if (el.closest('.globe-hero')) return; if (getComputedStyle(el).opacity === '0' && el.getBoundingClientRect().top < win.innerHeight) enter(el, 0); }); }, 4000); });
@@ -371,6 +371,19 @@
      whole row drifts sideways a little as you keep scrolling.
      ============================================================ */
   /* orange ribbon in a side margin that pours down as its section scrolls past */
+  /* [data-late]: a block that waits for its own scroll position, after the block before it; its dashed link draws in between */
+  function initLateSteps() {
+    doc.querySelectorAll('[data-late]').forEach(function (block) {
+      var items = Array.prototype.slice.call(block.querySelectorAll('[data-reveal-late]'));
+      var link = block.parentElement.querySelector('.ua-steps__link');
+      if (link) gsap.fromTo(link, { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', ease: 'none',
+        scrollTrigger: { trigger: block, start: 'top 95%', end: 'top 55%', scrub: 0.5 } });
+      ScrollTrigger.create({ trigger: block, start: 'top 62%', once: true, onEnter: function () {
+        items.forEach(function (el, i) { el.setAttribute('data-reveal', ''); enter(el, i * .14); });
+      } });
+    });
+  }
+
   function initFlowSide() {
     doc.querySelectorAll('.flow-side__svg').forEach(function (svg) {
       if (getComputedStyle(svg).display === 'none') return;
@@ -949,10 +962,8 @@
     }
     video.addEventListener('loadedmetadata', function () { dur = video.duration || 6; seek(); });
 
-    doc.documentElement.classList.add('hero-pinned');   // the next section rides up over the held hero
     var tl = gsap.timeline({ paused: true });
     tl.to(vs, { t: 1, duration: 1, ease: 'none', onUpdate: seek }, 0);
-    tl.to({}, { duration: .625 }, 1);                       // hold the last frame while the page covers it
     if (hint) tl.to(hint, { opacity: 0, duration: .08 }, 0);
     tl.to(lead, { opacity: 0, y: -14, duration: .18, ease: 'power2.in' }, 0.02);
     stats.forEach(function (st, i) {
@@ -962,17 +973,9 @@
       if (num) tl.to(obj, { v: target, duration: .3, ease: 'power2.out', onUpdate: function () { num.textContent = Math.round(obj.v).toLocaleString(); } }, at);
     });
 
-    var cover = doc.querySelector('.about-cover');
     ScrollTrigger.create({
-      trigger: hero, start: 'top top', end: '+=260%', pin: true, pinSpacing: false, scrub: 0.6, animation: tl, anticipatePin: 1
+      trigger: hero, start: 'top top', end: '+=160%', pin: true, pinSpacing: true, scrub: 0.6, animation: tl, anticipatePin: 1
     });
-    if (cover && header) {                                           // once it has risen, the Vision / Mission / Approach section holds under the compact header
-      var hdrH = function () { var had = header.classList.contains('is-scrolled'); header.classList.add('is-scrolled'); var h = header.offsetHeight; if (!had) header.classList.remove('is-scrolled'); return h; };
-      ScrollTrigger.create({
-        trigger: cover, start: function () { return 'top ' + hdrH(); }, end: '+=90%', pin: true, pinSpacing: true, anticipatePin: 1,
-        onToggle: function (st) { doc.documentElement.classList.toggle('keep-header', st.isActive); if (st.isActive) { header.classList.add('is-scrolled'); header.classList.remove('is-hidden'); } }
-      });
-    }
     video.load();
   }
 
