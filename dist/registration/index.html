@@ -38,7 +38,7 @@
   <div class="page-hero__scrim"></div>
   <div class="container"><div class="page-hero__narrow">
     
-    <h1 data-split><em class="hl">Registration</em></h1>
+    <h1 data-split>Registration</h1>
     
   </div></div>
 </section>
@@ -48,84 +48,40 @@
 <p>Remember, our state-of-the-art coach training integrates the science of EQ with the power of positive psychology meaning you and your clients will create sustainable change.</p>
 <p>We'd love you to register for our next program in your region. You can do this by completing the registration form below.</p>
 <p>If you have any further questions you would like answered, please get in touch at <a href="mailto:info@coachmastersacademy.com">info@coachmastersacademy.com</a></p>
-<form action="/setregsession" method="post">
-<input name="_token" type="hidden" value="55umZ4gjsqP6MyfyPuMpv5KeLhaQq1I2W5oiEg9z"/>
-<label>Program Type*</label>
-<select name="cma_program_id" required="">
+<form action="/setregsession" method="post"><input name="_token" type="hidden" value="55umZ4gjsqP6MyfyPuMpv5KeLhaQq1I2W5oiEg9z"/><div class="field"><label>Program Type*</label><select name="cma_program_id" required="">
 <option value="">Select Program Type</option>
 <option value="2">Blended: In-Person + Online</option>
 <option value="3">Online Training</option>
 <option value="4">Mentor Coaching</option>
 <option value="5">Mastery Retreat</option>
-</select>
-<label>Select Program Name*</label>
-<select name="cma_program_name_id" required="">
+</select></div><div class="field"><label>Select Program Name*</label><select name="cma_program_name_id" required="">
 <option value=""> Select </option>
-<!-- CMS: full option list supplied by backend --></select>
-<label>Mentor Coaching Package*</label>
-<select name="mentor_coaching_package_id" required="">
+<!-- CMS: full option list supplied by backend --></select></div><div class="field"><label>Mentor Coaching Package*</label><select name="mentor_coaching_package_id" required="">
 <option>Select</option>
-</select>
-<label>City you are attending*</label>
-<select name="cma_city_attending_id">
+</select></div><div class="field"><label>City you are attending*</label><select name="cma_city_attending_id">
 <option value=""> Select Program City </option>
-<!-- CMS: full option list supplied by backend --></select>
-<label>Program Start Date*</label>
-<select name="program_start_date" required="">
+<!-- CMS: full option list supplied by backend --></select></div><div class="field"><label>Program Start Date*</label><select name="program_start_date" required="">
 <option value="">Select</option>
-</select>
-<label>Option*</label>
-<select name="option_id">
+</select></div><div class="field"><label>Option*</label><select name="option_id">
 <option value="">Select</option>
-</select>
-<label>Your Name*</label>
-<input name="full_name" required="" type="text" value=""/>
-<label>Your Email*</label>
-<input name="email" required="" type="email" value=""/>
-<label>Skype</label>
-<input name="cma_skype" type="text" value=""/>
-<label>Contact No *</label>
-<input name="phone" required="" type="text" value=""/>
-<label>Profession </label>
-<input name="cma_profession" type="text" value=""/>
-<label>Company *</label>
-<input name="cma_company" required="" type="text" value=""/>
-<label>Country of Residence*</label>
-<select name="area_code_id" required="">
+</select></div><div class="field"><label>Your Name*</label><input name="full_name" required="" type="text" value=""/></div><div class="field"><label>Your Email*</label><input name="email" required="" type="email" value=""/></div><div class="field"><label>Skype</label><input name="cma_skype" type="text" value=""/></div><div class="field"><label>Contact No *</label><input name="phone" required="" type="text" value=""/></div><div class="field"><label>Profession </label><input name="cma_profession" type="text" value=""/></div><div class="field"><label>Company *</label><input name="cma_company" required="" type="text" value=""/></div><div class="field"><label>Country of Residence*</label><select name="area_code_id" required="">
 <option value="">Country</option>
-<!-- CMS: full option list supplied by backend --></select>
-<label>How did you find out about our program*</label>
-<select name="cma_how_find_out_program_id" required="">
+<!-- CMS: full option list supplied by backend --></select></div><div class="field"><label>How did you find out about our program*</label><select name="cma_how_find_out_program_id" required="">
 <option value="">Select</option>
 <option value="1">Internet Search</option>
 <option value="2">Email Advertisement</option>
 <option value="3">Referral by Friends</option>
 <option value="4">Others: Marketing Representatives</option>
-</select>
-<label>Name of Referral *</label>
-<input name="cma_name_of_referral" type="text" value=""/>
-<label>Others*</label>
-<input name="cma_others" type="text" value=""/>
-<label>Have you attended any coach training previously?
-*</label>
-<label>
+</select></div><div class="field"><label>Name of Referral *</label><input name="cma_name_of_referral" type="text" value=""/></div><div class="field"><label>Others*</label><input name="cma_others" type="text" value=""/></div><div class="field field--full field--choices"><label>Have you attended any coach training previously?
+*</label><div class="choices"><label>
 <input name="cma_attend_tac" required="" type="radio" value="0"/>No
-</label>
-<label>
+</label><label>
 <input name="cma_attend_tac" required="" type="radio" value="1"/>Yes
-</label>
-<label>What do you expect of me as your Mentor Coach?*</label>
-<input name="expect_mentor" type="text" value=""/>
-<label>What works and does not work in having someone provide feedback for you?*</label>
-<input name="provive_feedback_work" type="text" value=""/>
-<label>Payment Mode*</label>
-<select name="cma_payment_method">
+</label></div></div><div class="field"><label>What do you expect of me as your Mentor Coach?*</label><input name="expect_mentor" type="text" value=""/></div><div class="field"><label>What works and does not work in having someone provide feedback for you?*</label><input name="provive_feedback_work" type="text" value=""/></div><div class="field"><label>Payment Mode*</label><select name="cma_payment_method">
 <option value="1">Bank Transfer</option>
 <option value="2">Online Payment</option>
 <option value="3">Special Handling</option>
-</select>
-<br/>
-</form></div></div>
+</select></div><br/></form></div></div>
 </section>
 </main>
 

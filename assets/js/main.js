@@ -204,7 +204,15 @@
     ScrollTrigger.batch('[data-reveal]', {
       start: 'top 92%',
       once: true,
-      onEnter: function (els) { els.forEach(function (el, i) { enter(el, Math.min(i, 6) * .11); }); }
+      onEnter: function (els) {
+      els.forEach(function (el, i) {
+        var seq = el.parentElement && el.parentElement.closest('[data-seq]');   // [data-seq]: children land one after another, 1-2-3-4
+        if (seq) {
+          var idx = Array.prototype.indexOf.call(seq.querySelectorAll(':scope > [data-reveal]'), el);
+          enter(el, .1 + Math.max(0, idx) * .42);
+        } else enter(el, Math.min(i, 6) * .11);
+      });
+    }
     });
   });
 
@@ -221,10 +229,11 @@
     if (el.closest('.globe-stats--reveal')) return;
     var target = parseFloat(el.dataset.count), suffix = el.dataset.suffix || '';
     var obj = { v: 0 };
+    var ring = el.closest('.ring-stat'), bar = ring ? ring.querySelector('.ring-stat__bar') : null;   // orange ring fills in step with the number
     ScrollTrigger.create({
       trigger: el, start: 'top 88%', once: true,
       onEnter: function () {
-        gsap.to(obj, { v: target, duration: 1.8, ease: 'power2.out', onUpdate: function () { el.textContent = Math.round(obj.v).toLocaleString() + suffix; } });
+        gsap.to(obj, { v: target, duration: 1.8, ease: 'power2.out', onUpdate: function () { el.textContent = Math.round(obj.v).toLocaleString() + suffix; if (bar) bar.style.strokeDashoffset = 100 - 100 * (target ? obj.v / target : 1); } });
       }
     });
   });

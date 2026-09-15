@@ -159,7 +159,7 @@ def home(page):
       <h2 data-reveal>Download Full Program Brochure &amp; Curriculum Guide</h2>
       <p class="lead" data-reveal>Receive the brochure, schedule of training by completing the form below</p>
     </div>
-    <div class="prose prose--wide" data-reveal>
+    <div class="prose prose--wide form-stage" data-reveal>
       <!-- CMS: brochure form posts to backend (download_programpack); country list supplied by backend -->
       <form action="" method="post" name="download_programpack">
         <input name="down_username" placeholder="Name *" type="text">
@@ -255,7 +255,7 @@ def about(page):
   <div class="container globe-hero__inner">
     <div class="globe-hero__stage">
       <div class="globe-hero__copy">
-        <h1 data-split>Inspiring Positive Change Through mastery of coaching.</h1>
+        <h1 data-split>Inspiring Positive Change <em class="hl">Through mastery of coaching.</em></h1>
         <div class="globe-hero__swap">
           <p class="lead globe-hero__lead">At Coach Masters Academy, we take great pride in our unwavering dedication to enhancing professional coaching standards and empowering coaches and leaders to drive transformative change and deliver impactful results.</p>
           <div class="globe-stats globe-stats--reveal" aria-live="polite">
@@ -360,7 +360,7 @@ def about(page):
     <div class="section-head center" style="margin-inline:auto">
       <h2 data-reveal>What We <em class="hl">Stand For</em></h2>
     </div>
-    <div class="grid grid-4 stand__grid">
+    <div class="grid grid-4 stand__grid" data-seq>
       <div class="stand__card" data-reveal><span class="stand__num">01</span><h3>Conversation</h3><p>Conversation opens the possibility of seeing differently.</p></div>
       <div class="stand__card" data-reveal><span class="stand__num">02</span><h3>Meaning</h3><p>Meaning shapes how we make sense of what is happening.</p></div>
       <div class="stand__card" data-reveal><span class="stand__num">03</span><h3>Agency</h3><p>Agency is the capacity to respond with choice and ownership.</p></div>
@@ -979,7 +979,7 @@ def render_blocks(blocks):
         elif t == 'statrow':
             groups = ''
             for g in b['groups']:
-                cards = ''.join(f'<div class="stat" data-reveal><div class="stat__num" data-count="{re.sub(r"[^0-9.]", "", v) or 0}">0</div><div class="stat__label">{esc(l)}</div></div>' for v, l in g['items'])
+                cards = ''.join(f'<div class="ring-stat" data-reveal><div class="ring-stat__ring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="ring-stat__disc" cx="60" cy="60" r="48"/><circle class="ring-stat__track" cx="60" cy="60" r="57"/><circle class="ring-stat__bar" cx="60" cy="60" r="57" pathLength="100"/></svg><div class="stat__num" data-count="{re.sub(r"[^0-9.]", "", v) or 0}">0</div></div><div class="stat__label">{esc(l)}</div></div>' for v, l in g['items'])
                 title = f'<h3 data-reveal>{esc(g["title"])}</h3>' if g['title'] else ''
                 groups += f'<div class="stats-group">{title}<div class="stats" style="grid-template-columns:repeat({min(4, len(g["items"]))},1fr)">{cards}</div></div>'
             out.append(f'<div class="stats-row" style="grid-template-columns:repeat({min(3, len(b["groups"]))},1fr)">{groups}</div>')
@@ -1400,13 +1400,38 @@ def showcase(blocks):
         out.append(b); i += 1
     return out
 
+def program_accordions(blocks):
+    """A card row that follows a stat-group row becomes centred open/close cards."""
+    out = []
+    for b in blocks:
+        prev = [x for x in out if x['t'] != 'chips']
+        if b['t'] == 'cards' and prev and prev[-1]['t'] == 'statrow':
+            out.append({'t': 'acc', 'items': b['items']}); continue
+        out.append(b)
+    return out
+
 _orig_render_blocks = render_blocks
 def render_blocks(blocks):
     # whole-list passes first (they look at neighbouring blocks), then the layout passes
-    blocks = showcase(sectionize(lift_actions(pair_media(attach_logo_intros(merge_stat_rows(blocks))))))
+    blocks = program_accordions(showcase(sectionize(lift_actions(pair_media(attach_logo_intros(merge_stat_rows(blocks)))))))
+    centre_idx = set()   # the heading and intro that introduce a stat-group row are centred over it
+    for i, b in enumerate(blocks):
+        if b['t'] == 'statrow':
+            j = i - 1
+            while j >= 0 and blocks[j]['t'] in ('prose', 'chips'): j -= 1
+            if j >= 0 and blocks[j]['t'] == 'head': centre_idx.update(range(j, i))
     out = []
     for b in blocks:
-        if b['t'] == 'showcase':
+        if b['t'] == 'acc':
+            cards = ''
+            for k, c in enumerate(b['items']):
+                op = k == 0
+                icon = f'<span class="acc-card__icon"><img src="{esc(c["img"])}" alt="" loading="lazy"></span>' if c['img'] else '<span class="acc-card__icon"></span>'
+                cards += (f'<article class="acc-card{" is-open" if op else ""}" data-reveal><button class="acc-card__head" type="button" aria-expanded="{"true" if op else "false"}">'
+                          f'{icon}<span class="acc-card__title">{esc(c["title"])}</span><span class="acc-card__chev" aria-hidden="true"></span></button>'
+                          f'<div class="acc-card__body"><div class="acc-card__inner"><div class="prose"><p>{c["body"]}</p></div></div></div></article>')
+            out.append(f'<div class="lp-block lp-block--acc"><div class="acc-cards acc-cards--center" data-accordion>{cards}</div></div>')
+        elif b['t'] == 'showcase':
             btns = ''.join(btn(t, h, '' if k == 0 else 'btn--ghost') for k, (t, h) in enumerate(b['actions']))
             acts = f'<div class="actions" data-reveal>{btns}</div>' if btns else ''
             intro = f'<div class="prose showcase__intro" data-auto-reveal>{b["prose"]}</div>' if b['prose'] else ''
@@ -1430,6 +1455,8 @@ def render_blocks(blocks):
                        f'<div class="split-sticky__right"><div class="prose prose--wide" data-auto-reveal>{b["right"]}</div></div></div></div>')
         else:
             out.append(_orig_render_blocks([b]))
+    for i in centre_idx:
+        out[i] = out[i].replace('class="lp-block lp-block--', 'class="lp-block lp-block--center lp-block--', 1)
     return '\n'.join(out)
 
 # text-only pages go through the same layout pass instead of the plain article template

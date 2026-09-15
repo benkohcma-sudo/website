@@ -1,3 +1,4 @@
+import re
 #!/usr/bin/env python3
 """Static site generator for the Coach Masters Academy redesign.
 
@@ -257,8 +258,45 @@ PRELOADER = (
     '<div class="preloader__steps">' + '<i class="preloader__step"></i>' * 8 + '</div></div>'
 )
 
+def group_form_fields(body):
+    """Forms that arrive as a flat run of <label> + field siblings get each label wrapped with its
+    field (.field), and radio/checkbox option labels gathered under their question (.field--choices).
+    Nothing is renamed, reworded or removed; stepper forms and table forms are left alone."""
+    from bs4 import BeautifulSoup, Comment
+    def one(m):
+        html_ = m.group(0)
+        if 'js-steps' in html_[:300] or '<table' in html_ or '<label' not in html_:
+            return html_
+        soup = BeautifulSoup(html_, 'html.parser'); form = soup.find('form')
+        kids = [c for c in form.contents if getattr(c, 'name', None) or isinstance(c, Comment)]
+        if not any(getattr(k, 'name', None) == 'label' and not k.find('input') for k in kids):
+            return html_
+        is_choice = lambda t: getattr(t, 'name', None) == 'label' and t.find('input', attrs={'type': re.compile('^(radio|checkbox)$')}) is not None
+        is_field = lambda t: getattr(t, 'name', None) in ('input', 'select', 'textarea') and t.get('type') != 'hidden'
+        new = []; i = 0
+        while i < len(kids):
+            k = kids[i]; nxt = kids[i + 1] if i + 1 < len(kids) else None
+            if getattr(k, 'name', None) == 'label' and not k.find('input') and nxt is not None:
+                if is_choice(nxt):
+                    j = i + 1; opts = []
+                    while j < len(kids) and is_choice(kids[j]): opts.append(kids[j]); j += 1
+                    wrap = soup.new_tag('div', attrs={'class': 'field field--full field--choices'}); wrap.append(k.extract())
+                    box = soup.new_tag('div', attrs={'class': 'choices'})
+                    for o in opts: box.append(o.extract())
+                    wrap.append(box); new.append(wrap); i = j; continue
+                if is_field(nxt):
+                    cls = 'field field--full' if nxt.name == 'textarea' else 'field'
+                    wrap = soup.new_tag('div', attrs={'class': cls}); wrap.append(k.extract()); wrap.append(nxt.extract())
+                    new.append(wrap); i += 2; continue
+            new.append(k.extract()); i += 1
+        form.clear()
+        for n in new: form.append(n)
+        return str(form)
+    if '<form' not in body: return body
+    return re.sub(r'<form\b[^>]*>.*?</form>', one, body, flags=re.S)
+
 def layout(page, body, extra_head='', extra_js='', body_class=''):
-    body = fix_links(emphasize(body))
+    body = fix_links(group_form_fields(emphasize(body)))
     title = page.get('title') or 'Coach Masters Academy'
     desc = page.get('description', '')
     return f'''<!doctype html>
@@ -388,7 +426,7 @@ def page_hero(page, label=None, lead=''):
     if img:
         phrase = _hl_phrase(h)
         h_html = esc(h)
-        if phrase and h.endswith(phrase) and (len(h) == len(phrase) or h[-len(phrase) - 1].isspace()):
+        if phrase and len(phrase) < len(h) and h.endswith(phrase) and h[-len(phrase) - 1].isspace():   # a one-word title stays white
             h_html = esc(h[:-len(phrase)]) + '<em class="hl">' + esc(phrase) + '</em>'
         return f'''
 <section class="page-hero page-hero--image">
