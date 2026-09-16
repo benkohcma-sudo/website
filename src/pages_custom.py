@@ -1781,7 +1781,16 @@ def faq_page(page):
         '<section class="section faq"><div class="container faq__grid">'
         '<div class="faq__side"><h2 data-reveal>' + esc(page.get('h1') or 'FAQ') + '</h2>' + (('<p data-reveal>' + intro + '</p>') if intro else '') + '</div>'
         '<div class="faq__list" data-reveal="none">' + items + '</div>'
-        '</div></section>')
+        '</div></section>'
+        # a way out at the end of the list: anything the questions did not answer goes to a person
+        '<section class="cta-full"><div class="container cta-full__inner">'
+        '<div><h2 data-reveal>Still have a question?</h2>'
+        '<p data-reveal>Our Program Consultants are happy to talk it through and point you to the right next step. '
+        'Call the Global Office at +65-8299-8170, send us an email, or book a 30-minute call at a time that suits you.</p></div>'
+        '<div class="cta-full__actions" data-reveal>'
+        + btn('Email Us', 'mailto:' + EMAIL, 'btn--white')
+        + btn('Schedule a Call', 'https://calendly.com/coachmastersacademyglobaloffice/30min-phone-call-appointment', 'btn--ghost btn--ghost-light')
+        + '</div></div></section>')
     return layout(page, body)
 
 RENDERERS['/faq'] = faq_page
