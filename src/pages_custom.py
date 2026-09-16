@@ -1858,7 +1858,7 @@ def why_cma(page):
         '<div class="chapter__body">' + ps(d['p']) + '<ul class="list-check">' + ''.join(d['ul']) + '</ul></div>'
         '</div></section>'
 
-        '<section class="section section--green chapter chapter--green"><div class="container chapter__grid">'
+        '<section class="section section--white chapter"><div class="container chapter__grid">'
         '<div class="chapter__head">' + num(4) + '<p class="eyebrow" data-reveal>' + esc(e['title']) + '</p>' + h3s(e['h3']) + '</div>'
         '<div class="chapter__body">' + ps(e['p'][:1]) + '<ul class="list-check">' + ''.join(e['ul']) + '</ul>' + ps(e['p'][1:], 'chapter__close') + '</div>'
         '</div></section>')
