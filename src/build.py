@@ -425,6 +425,7 @@ HERO_IMAGES = {
     '/team-coaching-certification-program': 'workshop',
     '/pages/comparison-table': 'schedule',
     '/pages/our-services': 'our-services',
+    '/pages/business-development': 'business-development',
 }
 
 def take_lead(page, content):

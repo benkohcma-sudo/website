@@ -2099,3 +2099,18 @@ def workshop_page(page):
     return html_text[:m.start()] + block + html_text[m.end():]
 
 RENDERERS['/coaching-skill-training-course-and-workshop'] = workshop_page
+
+
+# ====================================================================== Business Development: client photos in place of the stock ones
+BD_PHOTOS = {
+    '/public/storage/featured_image1/8/one-day.jpg': '/assets/img/bd-one-day.jpg',
+    '/public/storage/featured_image1/29/our-potential-img.jpg': '/assets/img/bd-walk-away.jpg',
+}
+
+def business_development_page(page):
+    page = dict(page); c = page['content']
+    for old, new in BD_PHOTOS.items(): c = c.replace(SITE + old, new)
+    page['content'] = c
+    return smart_page(page)
+
+RENDERERS['/pages/business-development'] = business_development_page
