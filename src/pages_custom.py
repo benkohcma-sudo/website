@@ -1847,7 +1847,7 @@ def why_cma(page):
 
         '<section class="section chapter chapter--media"><div class="container chapter__grid chapter__grid--media">'
         '<div class="chapter__head">' + num(1) + '<p class="eyebrow" data-reveal>' + esc(b['title']) + '</p>' + h3s(b['h3'][:1]) + ps(b['p'][:1]) + h3s(b['h3'][1:]) + ps(b['p'][1:]) + '</div>'
-        '<div class="chapter__media media" data-reveal="scale">' + ''.join('<img src="' + esc(u) + '" alt="" loading="lazy" data-parallax="18">' for u in b['img'][:1]) + '</div>'
+        '<div class="chapter__media media" data-reveal="scale"><img src="/assets/img/why-cma-methodology.jpg" alt="" loading="lazy" data-parallax="18"></div>'
         '</div></section>'
 
         '<section class="section section--white chapter"><div class="container">'
