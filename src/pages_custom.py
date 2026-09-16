@@ -1852,14 +1852,14 @@ def why_cma(page):
 
         '<section class="section section--white chapter"><div class="container">'
         '<div class="chapter__grid">'
-        '<div class="chapter__head">' + num(2) + '<p class="eyebrow" data-reveal>' + esc(c['title']) + '</p>' + h3s(c['h3']) + '</div>'
+        '<div class="chapter__head">' + num(2) + '<p class="eyebrow" data-reveal>' + esc(c['title']) + '</p>' + h3s(c['h3'])
+        + logos([u for u in c['img'] if 'comprehensive' not in u]) + '</div>'
         '<div class="chapter__body">' + ps(other_ps) + '</div>'
         '</div>'
         '<div class="journey labs">'
         '<svg class="journey__svg" aria-hidden="true"><path class="track" d=""/><path class="draw" d=""/><circle class="halo" r="14"/><circle class="dot" r="6"/></svg>'
         '<ol class="journey__list">' + labs + '</ol>'
         '</div>'
-        + logos([u for u in c['img'] if 'comprehensive' not in u]) +
         '</div></section>'
 
         '<section class="section chapter"><div class="container chapter__grid">'
