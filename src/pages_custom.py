@@ -2071,3 +2071,31 @@ def calendar_page(page):
     return layout(page, body)
 
 RENDERERS['/events/calendar'] = calendar_page
+
+
+# ====================================================================== Coaching Workshop: the culture section (photo + text + Jack Welch quote)
+def workshop_page(page):
+    """The 'Strengthen Your Organization's Coaching Culture' section: heading and the two paragraphs beside the
+    photo, then the quote across the full width with the closing line under it."""
+    page = dict(page)
+    page['content'] = page['content'].replace(
+        SITE + '/public/storage/featured_image1/26/video-gallery-img-4.jpg', '/assets/img/workshop-culture.jpg')
+    html_text = smart_page(page)
+    m = re.search(r'<div class="lp-block lp-block--feature"><div class="feature-row([^"]*)">'
+                  r'<div class="feature-row__media media" data-reveal="scale"><img src="/assets/img/workshop-culture\.jpg"[^>]*></div>'
+                  r'<div class="prose" data-auto-reveal>(.*?)</div></div></div>', html_text, re.S)
+    if not m:
+        print('!! workshop culture section not found'); return html_text
+    inner = m.group(2)
+    q = re.search(r'<div class="pull[^"]*"[^>]*>.*?</div>', inner, re.S)
+    if not q:
+        print('!! workshop quote not found'); return html_text
+    before, after = inner[:q.start()], inner[q.end():]
+    block = ('<div class="lp-block lp-block--feature"><div class="feature-row' + m.group(1) + '">'
+             '<div class="feature-row__media media" data-reveal="scale"><img src="/assets/img/workshop-culture.jpg" alt="" loading="lazy" data-parallax="18"></div>'
+             '<div class="prose" data-auto-reveal>' + before + '</div></div>'
+             '<div class="culture-quote">' + q.group(0) + '</div>'
+             + (('<div class="prose prose--wide culture-close" data-auto-reveal>' + after + '</div>') if after.strip() else '') + '</div>')
+    return html_text[:m.start()] + block + html_text[m.end():]
+
+RENDERERS['/coaching-skill-training-course-and-workshop'] = workshop_page

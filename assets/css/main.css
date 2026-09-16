@@ -1700,3 +1700,10 @@ main > section.landing:last-child:has(> .container > .lp-block--logos:last-child
 .acc-card__head:focus-visible .acc-card__title { text-decoration: underline; text-decoration-color: var(--orange); text-underline-offset: 4px; }
 /* faculty portraits: anchor near the top so faces are never cropped out */
 .person__photo img, .person--sm img { object-position: 50% 12%; }
+
+/* Coaching Workshop culture section: quote pulled out under the photo row */
+.culture-quote { max-width: var(--max); margin: clamp(32px, 4vw, 56px) auto 0; }
+.culture-quote .pull { max-width: none; padding: clamp(28px, 4vw, 48px) clamp(26px, 4vw, 56px); }
+.culture-quote .pull__text { max-width: none; }
+.culture-quote .pull__lead { font-size: 1.05em; }
+.culture-close { margin: clamp(24px, 3vw, 36px) auto 0; }
