@@ -983,8 +983,14 @@ def render_blocks(blocks):
         elif t == 'cards':
             cards = ''
             for c in b['items']:
-                if c['img'] and 'circle' in c['img'].rsplit('/', 1)[-1].lower():   # round photos: a photo card, not an icon
-                    cards += f'<article class="card card--round" data-reveal><div class="card__round"><img src="{esc(c["img"])}" alt="" loading="lazy"></div><h3>{esc(c["title"])}</h3><p>{c["body"]}</p></article>'
+                name = c['img'].rsplit('/', 1)[-1].lower() if c['img'] else ''
+                if name.startswith('exec-') or 'circle' in name:   # a photo card: the picture and title show, the text is on the back
+                    cards += (f'<article class="flip" data-reveal tabindex="0">'
+                              f'<div class="flip__inner">'
+                              f'<div class="flip__face flip__front"><img src="{esc(c["img"])}" alt="" loading="lazy">'
+                              f'<div class="flip__cap"><h3>{esc(c["title"])}</h3></div></div>'
+                              f'<div class="flip__face flip__back"><h3>{esc(c["title"])}</h3><p>{c["body"]}</p></div>'
+                              f'</div></article>')
                     continue
                 icon = f'<div class="icon-card__img"><img src="{esc(c["img"])}" alt="" loading="lazy"></div>' if c['img'] else ''
                 cards += f'<article class="card icon-card" data-reveal>{icon}<h3>{esc(c["title"])}</h3><p>{c["body"]}</p></article>'
@@ -2123,3 +2129,22 @@ def business_development_page(page):
     return smart_page(page)
 
 RENDERERS['/pages/business-development'] = business_development_page
+
+
+# ====================================================================== Executive Coaching Service: the client's own photos
+EXEC_PHOTOS = {   # live-site stock -> the photos the client supplied (Sep 2026)
+    '/public/storage/image_item/15/circle1.png': '/assets/img/exec-measurable.jpg',
+    '/public/storage/image_item/16/circle2.png': '/assets/img/exec-realworld.jpg',
+    '/public/storage/image_item/17/circle3.png': '/assets/img/exec-transformational.jpg',
+    '/public/storage/featured_image1/21/bg-circle.png': '/assets/img/exec-roi.jpg',
+    '/public/storage/featured_image1/tranfomational4 (1).jpg_1741682194': '/assets/img/exec-evidence.jpg',
+    '/public/storage/featured_image1/25/tranfomational1 (1).jpg': '/assets/img/exec-engagements.jpg',
+}
+
+def exec_coaching_page(page):
+    page = dict(page); c = page['content']
+    for old, new in EXEC_PHOTOS.items(): c = c.replace(SITE + old, new)
+    page['content'] = c
+    return smart_page(page)
+
+RENDERERS['/executive-leadership-coaching-service-for-managers-and-leaders'] = exec_coaching_page

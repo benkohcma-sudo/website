@@ -1707,3 +1707,24 @@ main > section.landing:last-child:has(> .container > .lp-block--logos:last-child
 .culture-quote .pull__text { max-width: none; }
 .culture-quote .pull__lead { font-size: 1.05em; }
 .culture-close { margin: clamp(24px, 3vw, 36px) auto 0; }
+
+/* Schedule: the welcome quote runs on the page, no panel */
+.sched-panel .pull { background: none; border: 0; border-radius: 0; padding-left: 0; padding-right: 0; }
+
+/* ---------- Flip cards: picture and title in front, the detail on the back ---------- */
+.flip { position: relative; perspective: 1200px; background: none; border: 0; padding: 0; box-shadow: none; border-radius: var(--radius); }
+.flip:hover { transform: none; box-shadow: none; }
+.flip:focus { outline: none; }
+.flip:focus-visible { outline: 2px solid var(--orange); outline-offset: 4px; }
+.flip__inner { position: relative; width: 100%; min-height: 420px; transition: transform .7s var(--ease); transform-style: preserve-3d; }
+.flip:hover .flip__inner, .flip:focus-visible .flip__inner, .flip.is-flipped .flip__inner { transform: rotateY(180deg); }
+.flip__face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: var(--radius); overflow: hidden; }
+.flip__front { background: var(--green); }
+.flip__front img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.flip__cap { position: absolute; left: 0; right: 0; bottom: 0; padding: 22px 22px 20px; background: rgba(23,56,14,.82); }
+.flip__cap h3 { margin: 0; color: #fff; font-size: clamp(17px, 1.5vw, 20px); line-height: 1.25; }
+.flip__back { transform: rotateY(180deg); background: var(--orange); color: #fff; padding: clamp(24px, 2.4vw, 32px); display: flex; flex-direction: column; justify-content: center; }
+.flip__back h3 { margin: 0 0 12px; color: #fff; font-size: clamp(17px, 1.5vw, 20px); line-height: 1.25; }
+.flip__back p { margin: 0; color: #fff; font-size: 15.5px; line-height: 1.55; }
+.reduce-motion .flip__inner { transition: none; }
+@media (max-width: 900px) { .flip__inner { min-height: 380px; } }
