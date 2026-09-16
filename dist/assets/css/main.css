@@ -617,8 +617,6 @@ html.is-locked, html.is-locked body { overflow: hidden; height: 100%; overscroll
 .journey__svg { position: absolute; left: 50%; top: 0; transform: translateX(-50%); width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: visible; }
 .journey__svg .track { fill: none; stroke: var(--line); stroke-width: 6; stroke-linecap: round; }
 .journey__svg .draw { fill: none; stroke: var(--orange); stroke-width: 8; stroke-linecap: round; stroke-linejoin: round; }
-.journey__svg .tread { stroke: #E2D9CC; stroke-linecap: round; transition: stroke .35s; }
-.journey__svg .tread.is-on { stroke: var(--orange); }
 .journey__svg .dot { fill: var(--orange); stroke: #fff; stroke-width: 3; }
 .journey__svg .halo { fill: rgba(235,100,34,.18); }
 .journey__list { position: relative; z-index: 1; list-style: none; margin: 0; padding: 0; display: grid; gap: clamp(40px, 8vw, 120px); }
@@ -1689,3 +1687,16 @@ main > section.landing:last-child:has(> .container > .lp-block--logos:last-child
 .schedule table select { width: 100%; max-width: 230px; text-overflow: ellipsis; }
 .schedule thead th:nth-child(2) select { max-width: 260px; }
 .schedule td:nth-child(3), .schedule td:nth-child(5) { white-space: nowrap; }
+
+/* tabs: panels slide sideways, orange focus ring instead of the browser's blue */
+.tab-panels { overflow: hidden; }
+.tabs button:focus { outline: none; }
+.tabs button:focus-visible { outline: 2px solid var(--orange); outline-offset: 4px; border-radius: 8px; }
+
+/* open/close cards: no left accent bar, and no orange ring around a card on hover or click */
+.acc-card::before { display: none; }
+.acc-card:hover { border-color: rgba(235,100,34,.2); }
+.acc-card__head:focus-visible { outline: none; }
+.acc-card__head:focus-visible .acc-card__title { text-decoration: underline; text-decoration-color: var(--orange); text-underline-offset: 4px; }
+/* faculty portraits: anchor near the top so faces are never cropped out */
+.person__photo img, .person--sm img { object-position: 50% 12%; }

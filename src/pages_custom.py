@@ -281,7 +281,7 @@ def about(page):
     <div class="tab-panels">
       <div class="tab-panel is-active" role="tabpanel">
         <div class="tab-panel__grid">
-          <div><p class="eyebrow">Our Vision</p><h2>We see every conversation holds the power to make a real difference.</h2></div>
+          <div><h2>We see every conversation holds the power to make a real difference.</h2></div>
           <div class="prose">
             <p>Some conversations change what we know. Others change how we see ourselves, our circumstances and what may be possible.</p>
             <p>We believe those moments matter, because they can influence the choices we make and the way we move forward.</p>
@@ -290,7 +290,7 @@ def about(page):
       </div>
       <div class="tab-panel" role="tabpanel" hidden>
         <div class="tab-panel__grid">
-          <div><p class="eyebrow">Mission</p><h2>Our  Mission</h2><p class="lead">Empower You To Be an Effective Change Agent By delivering high-quality coaching education and coaching service</p></div>
+          <div><h2>Our  Mission</h2><p class="lead">Empower You To Be an Effective Change Agent By delivering high-quality coaching education and coaching service</p></div>
           <ul class="list-check">
             <li>Our coaching program empowers you with the skills and knowledge to drive impactful change.</li>
             <li>Grounded in scientific research and best practices, our approach facilitates profound learning.</li>
@@ -300,7 +300,7 @@ def about(page):
       </div>
       <div class="tab-panel" role="tabpanel" hidden>
         <div class="tab-panel__grid">
-          <div><p class="eyebrow">Our Approach</p><h2>Changing how change happens.</h2></div>
+          <div><h2>Changing how change happens.</h2></div>
           <div class="prose">
             <p>For more than a decade, our founder, Dr Ben Koh, has pursued research and fieldwork into how people think, learn and change. That body of work led to CMA’s proprietary transformational approach to coaching — grounded in science, refined through practice, and now taught and applied across the globe.</p>
             <p>It goes beyond solving the immediate problem by working with how people make sense of what they are facing — helping them think differently, choose with greater ownership and strengthen their capacity to adapt as circumstances change.</p>
@@ -316,7 +316,7 @@ def about(page):
   <img class="cma-photo__img" src="/assets/img/about-conversation.jpg" alt="" data-parallax="30">
   <div class="container cma-photo__grid">
     <div class="cma-photo__intro">
-      <p class="eyebrow" data-reveal>CMA</p>
+      <p class="eyebrow" data-reveal>Who we are</p>
       <h2 class="cma-words" data-reveal><span class="cma-words__w">Conversation.</span> <span class="cma-words__w cma-words__w--alt">Meaning.</span> <span class="cma-words__w">Agency.</span></h2>
       <p class="cma-photo__lead" data-reveal>We are a global coaching organisation with more than a decade of work across professional coaching certification, organisational coaching capability and coaching services.</p>
       <p data-reveal>At the heart of our work, one question has continued to guide us:</p>

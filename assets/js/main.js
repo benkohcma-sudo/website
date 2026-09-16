@@ -795,11 +795,18 @@
       var btns = Array.prototype.slice.call(bar.querySelectorAll('button'));
       var wrap = bar.nextElementSibling; if (!wrap) return;
       var panels = Array.prototype.slice.call(wrap.querySelectorAll('.tab-panel'));
+      var at = Math.max(0, btns.findIndex(function (x) { return x.classList.contains('is-active'); }));
       btns.forEach(function (b, i) {
         b.addEventListener('click', function () {
+          var dir = i > at ? 1 : (i < at ? -1 : 0);                       // the panel slides in from the side you moved towards
+          at = i;
           btns.forEach(function (x, j) { x.classList.toggle('is-active', j === i); x.setAttribute('aria-selected', j === i ? 'true' : 'false'); });
           panels.forEach(function (p, j) { p.hidden = j !== i; p.classList.toggle('is-active', j === i); });
-          if (hasGsap && !reduce && panels[i]) gsap.from(panels[i].children, { opacity: 0, y: 16, duration: .55, ease: 'power3.out', clearProps: 'all' });
+          if (hasGsap && !reduce && panels[i]) {
+            gsap.killTweensOf(panels[i]);
+            gsap.fromTo(panels[i], { opacity: 0, x: (dir || 1) * 70 }, { opacity: 1, x: 0, duration: .55, ease: 'power3.out', clearProps: 'transform,opacity' });
+            gsap.from(panels[i].children, { opacity: 0, y: 14, duration: .5, stagger: .07, ease: 'power3.out', delay: .06, clearProps: 'all' });
+          }
           if (win.ScrollTrigger) setTimeout(function () { ScrollTrigger.refresh(); }, 400);
         });
       });
@@ -1084,36 +1091,14 @@
         track.setAttribute('d', d); draw.setAttribute('d', d);
         var len = draw.getTotalLength();
         draw.style.strokeDasharray = len; draw.style.strokeDashoffset = len;
-        // stair treads across the curve, widening as it descends; grey ahead, orange once the line reaches them
-        var ns = 'http://www.w3.org/2000/svg', g = svg.querySelector('.treads');
-        if (!g) { g = doc.createElementNS(ns, 'g'); g.setAttribute('class', 'treads'); svg.insertBefore(g, draw); }
-        while (g.firstChild) g.removeChild(g.firstChild);
-        treads = [];
-        var gap = mobile ? 30 : 38;
-        for (var l = gap / 2; l < len; l += gap) {
-          var p0 = draw.getPointAtLength(Math.max(0, l - 2)), p1 = draw.getPointAtLength(Math.min(len, l + 2)), c = draw.getPointAtLength(l);
-          var tx = p1.x - p0.x, ty = p1.y - p0.y, tl = Math.sqrt(tx * tx + ty * ty) || 1, nx = -ty / tl, ny = tx / tl, t = l / len;
-          var half = mobile ? 7 + 5 * t : 10 + 16 * t;
-          var ln = doc.createElementNS(ns, 'line');
-          ln.setAttribute('x1', c.x - nx * half); ln.setAttribute('y1', c.y - ny * half);
-          ln.setAttribute('x2', c.x + nx * half); ln.setAttribute('y2', c.y + ny * half);
-          ln.setAttribute('class', 'tread'); ln.style.strokeWidth = (mobile ? 3 : 3 + 3 * t).toFixed(2);
-          g.appendChild(ln); treads.push({ el: ln, at: l, on: false });
-        }
         return len;
       }
-      var treads = [];
       var len = build();
       var state = { p: staticOnly ? 1 : 0 };
       function place() {
         var pt = draw.getPointAtLength(state.p * len);
         dot.setAttribute('cx', pt.x); dot.setAttribute('cy', pt.y); halo.setAttribute('cx', pt.x); halo.setAttribute('cy', pt.y);
         draw.style.strokeDashoffset = len * (1 - state.p);
-        var cut = state.p * len;
-        for (var q = 0; q < treads.length; q++) {
-          var on = treads[q].at <= cut;
-          if (on !== treads[q].on) { treads[q].on = on; treads[q].el.classList.toggle('is-on', on); }
-        }
       }
       place();
       if (staticOnly) return;
