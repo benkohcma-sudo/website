@@ -25,9 +25,18 @@ If someone told you this was React, they were looking at something else.
 
 ---
 
+## Which guide do you need?
+
+| Your back end | Read this |
+|---|---|
+| **The whole site in WordPress** | **[`src/WORDPRESS.md`](src/WORDPRESS.md)** — theme skeleton, which pages become Pages / Posts / custom post types, forms, assets, and the Schedule page |
+| **Laravel/Blade** (main site) **+ WordPress** (blog only) | **[`src/HANDOFF.md`](src/HANDOFF.md)** |
+
+Both start from the same `dist/` folder. The notes below are the Blade version.
+
 ## Converting to Laravel Blade
 
-The full step-by-step is in **[`src/HANDOFF.md`](src/HANDOFF.md)** — read that next.
+The full step-by-step is in **[`src/HANDOFF.md`](src/HANDOFF.md)**.
 The short version:
 
 1. **Assets** — copy `assets/` into `public/` (e.g. `public/twenty26/`). Every path in
