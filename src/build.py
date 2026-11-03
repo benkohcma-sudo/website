@@ -379,8 +379,9 @@ def subnav(page):
     if not page.get('subnav'): return ''
     # an item with no destination on the live site (href "#") is shown muted, not as a dead link
     RENAME = {'Our Vision': 'Who We Are'}     # sub-navigation labels the client asked to change
+    HREFS = {'Our Social Foundation': '/pages/our-social-foundation'}   # was '#' on the live site; the page exists now
     return '<nav class="subnav" aria-label="Section"><div class="container">' + ''.join(
-        (f'<span class="subnav__soon" title="Coming soon">{esc(s["text"])}</span>' if s['href'] in ('#', '') else f'<a href="{esc(s["href"])}">{esc(RENAME.get(s["text"], s["text"]))}</a>')
+        (lambda h: f'<span class="subnav__soon" title="Coming soon">{esc(s["text"])}</span>' if h in ('#', '') else f'<a href="{esc(h)}">{esc(RENAME.get(s["text"], s["text"]))}</a>')(HREFS.get(s['text'], s['href']))
         for s in page['subnav']) + '</div></nav>'
 
 def crumbs(page, label=None):
@@ -553,6 +554,17 @@ def insert_videos(url, html_text):
         j = i + len(anchor)
         return html_text[:j] + VIDEO_CARD + html_text[j:]
 
+PHOTO_SWAPS = {   # client-supplied replacements for live-site photos
+    'https://www.coachmastersacademy.com/siteimages/ourfaculty/34/8344501341582001023_34_azadeh.jpg': '/assets/img/azadeh-entezami.jpg',
+}
+
+def swap_photos(page):
+    c = page['content']
+    for old, new in PHOTO_SWAPS.items(): c = c.replace(old, new)
+    if c == page['content']: return page
+    page = dict(page); page['content'] = c
+    return page
+
 def build():
     if os.path.exists(DIST): shutil.rmtree(DIST)
     os.makedirs(DIST)
@@ -565,7 +577,7 @@ def build():
         url = page['url']
         fn = custom.get(url) or next((f for k, f in pages_custom.PREFIX_RENDERERS if url.startswith(k)), None) or pages_custom.smart_page
         try:
-            html_text = fn(strip_call_block(page))
+            html_text = fn(swap_photos(strip_call_block(page)))
         except Exception as e:
             print('!! failed', url, e); html_text = generic_page(page)
         write(url, rewrite_pagination(insert_videos(url, html_text))); n += 1

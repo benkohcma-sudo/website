@@ -2148,3 +2148,82 @@ def exec_coaching_page(page):
     return smart_page(page)
 
 RENDERERS['/executive-leadership-coaching-service-for-managers-and-leaders'] = exec_coaching_page
+
+
+# ====================================================================== OUR SOCIAL FOUNDATION
+def _sf_quote(text, closing=False):
+    """A quoted line from the document: the quotation, then whoever said it.
+    Both halves stay in the page text exactly as written, so the copy check still passes."""
+    t = text.strip()
+    i = t.rfind('”')
+    quote, cite = (t[:i + 1], t[i + 1:].strip()) if i > 0 else (t, '')
+    cls = 'sf-quote sf-quote--closing' if closing else 'sf-quote'
+    out = '<figure class="' + cls + '" data-reveal><i class="sf-quote__rule" aria-hidden="true"></i>'
+    out += '<blockquote class="sf-quote__text">' + quote + '</blockquote>'
+    if cite:
+        out += '<figcaption class="sf-quote__cite">' + cite + '</figcaption>'
+    return out + '</figure>'
+
+
+def social_foundation(page):
+    """Three chapters from the client's document, each closing on a quotation.
+    The last quotation is Azadeh's, so her portrait sits beside it."""
+    from build import strip_duplicate_heading
+    nodes = top_nodes(strip_duplicate_heading(page['content'], page.get('h1')))
+
+    chapters = []
+    for n in nodes:
+        nm = getattr(n, 'name', None)
+        if not _txt(n):
+            continue
+        if nm == 'h2':
+            chapters.append({'head': _inner(n), 'paras': [], 'quote': ''})
+            continue
+        if not chapters:
+            continue
+        inner = _inner(n)
+        if _txt(n).lstrip().startswith('“'):
+            chapters[-1]['quote'] = inner
+        else:
+            chapters[-1]['paras'].append(inner)
+
+    if len(chapters) != 3:
+        print('!! social foundation: expected 3 sections, got', len(chapters))
+        return smart_page(page)
+
+    body = subnav(page) + page_hero(page)
+
+    for k, ch in enumerate(chapters):
+        last = (k == len(chapters) - 1)
+        surface = ' section--surface' if k == 1 else ''
+        paras = ch['paras']
+        lead = ''
+        if k == 0 and paras:
+            lead = '<p class="lead" data-reveal>' + paras[0] + '</p>'
+            paras = paras[1:]
+        rest = ''.join('<p data-reveal>' + x + '</p>' for x in paras)
+
+        body += '<section class="section' + surface + ' sf-chapter"><div class="container">'
+        body += '<div class="sf-chapter__grid">'
+        body += '<div class="sf-chapter__head"><h2 data-reveal>' + ch['head'] + '</h2></div>'
+        body += '<div class="sf-chapter__body">' + lead + rest + '</div>'
+        body += '</div>'
+
+        if ch['quote'] and not last:
+            body += _sf_quote(ch['quote'])
+
+        if last and ch['quote']:
+            # the closing word is Azadeh's, so her picture belongs with it
+            body += ('<div class="sf-closing">'
+                     '<div class="sf-portrait" data-reveal="scale">'
+                     '<img src="/assets/img/azadeh-entezami.jpg" alt="Azadeh Entezami" loading="lazy">'
+                     '</div>'
+                     '<div class="sf-closing__words">' + _sf_quote(ch['quote'], closing=True) + '</div>'
+                     '</div>')
+
+        body += '</div></section>'
+
+    return layout(page, body)
+
+
+RENDERERS['/pages/our-social-foundation'] = social_foundation
