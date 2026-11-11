@@ -2222,21 +2222,23 @@ def social_foundation(page):
              '</div></section>')
     body += '<section class="section section--white sf-band"><div class="container">' + _sf_quote(b['quote']) + '</div></section>'
 
-    # 3. why it matters: the three changes named in the document become three numbered cards
-    changes = [s for s in re.split(r'(?<=[.!?])\s+', c['paras'][1].strip()) if s]
+    # 3. why it matters: the three changes named in the document sit on the same numbered cards
+    #    as What We Stand For on About Us (green band, small spaced number, centred)
+    changes = [x for x in re.split(r'(?<=[.!?])\s+', c['paras'][1].strip()) if x]
     if len(changes) == 3 and '<' not in c['paras'][1]:
-        impact = ('<ol class="sf-impact" data-seq>' + ''.join(
-            '<li class="sf-impact__item" data-reveal><span class="sf-impact__num" aria-hidden="true">0' + str(k + 1) + '</span>'
-            '<p>' + s + '</p></li>' for k, s in enumerate(changes)) + '</ol>')
+        impact = ('<div class="grid grid-3 stand__grid" data-seq>' + ''.join(
+            '<div class="stand__card" data-reveal><span class="stand__num">0' + str(k + 1) + '</span>'
+            '<p class="stand__say">' + x + '</p></div>' for k, x in enumerate(changes)) + '</div>')
     else:
         impact = ps([c['paras'][1]])
-    body += ('<section class="section sf-chapter"><div class="container">'
-             '<div class="sf-head"><h2 data-reveal>' + c['head'] + '</h2>' + ps(c['paras'][:1]) + '</div>'
+    body += ('<section class="section section--green stand"><div class="container">'
+             '<div class="section-head center" style="margin-inline:auto"><h2 data-reveal>' + c['head'] + '</h2>'
+             + ps(c['paras'][:1]) + '</div>'
              + impact +
-             '<div class="sf-split sf-split--flip sf-split--after">'
+             '</div></section>')
+    body += ('<section class="section sf-chapter"><div class="container sf-split sf-split--flip">'
              + _sf_photo('sf-forward') +
              '<div class="sf-split__text">' + ps(c['paras'][2:-1]) + statement(c['paras'][-1]) + '</div>'
-             '</div>'
              '</div></section>')
 
     # the closing word, on green

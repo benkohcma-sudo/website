@@ -175,6 +175,40 @@ current site the rows, the country list and the timezone list come from the serv
 
 ---
 
+## 6b. Our Social Foundation — front end done, back end to do
+
+This page is new (it did not exist on the old site). The front end is finished:
+`dist/pages/our-social-foundation/index.html`, live at `/pages/our-social-foundation`.
+What is left is the back end, so the client can edit it in WordPress.
+
+1. **Create the Page** — title "Our Social Foundation", slug `our-social-foundation`
+   (the preview URL is `/pages/our-social-foundation`; keep that path or redirect to it).
+2. **Template** — `page-templates/social-foundation.php`, built from everything inside
+   `<main>` of the file above. It uses the shared header, footer and About sub-navigation.
+3. **Menu** — the About sub-navigation item "Our Social Foundation" had no link on the old
+   site. It must now point at this page (it already does in every delivered page).
+4. **Editable fields** (ACF or similar) — the page is fixed in shape, so plain fields are enough:
+
+   | Field | On the page |
+   |---|---|
+   | Hero image | `assets/img/hero/social-foundation.jpg` |
+   | Chapter 1: heading, opening line, paragraphs, photo | "Inspiring Positive Change", `sf-coaches.jpg` |
+   | Quote 1: text + name | Martin Luther King Jr. |
+   | Chapter 2: heading, paragraphs, closing statement, photo | "Equipping The Next Generation…", `sf-mentor.jpg` |
+   | Quote 2: text + name | Franklin D. Roosevelt |
+   | Chapter 3: heading, intro line, three card lines | green band, same cards as "What We Stand For" on About Us (`.stand__card`) |
+   | Chapter 3 continued: paragraphs, closing statement, photo | `sf-forward.jpg` |
+   | Closing quote: text + name | Azadeh Entezami |
+
+5. **Classes to keep** — `sf-split`, `sf-split--flip`, `sf-lead`, `sf-statement`, `sf-band`,
+   `sf-quote`, and the shared `stand__card` / `stand__num`. The `data-reveal` and `data-seq`
+   attributes drive the entrances; keep them on the same elements.
+6. **Photos** — the four photographs were generated to match the site and show no real CMA
+   event. When the client supplies real boot camp photos, swap them in through the image
+   fields (5:4 for the chapters, 16:9 for the hero).
+7. **No forms, no data** — nothing on this page posts anywhere; the only form is the footer
+   newsletter that every page shares.
+
 ## 7. Dynamic lists
 
 These are rendered as static examples of content you already have. Each maps to a
