@@ -89,6 +89,7 @@
   initSchedule();
   initVideoModal();
   initLightbox();
+  initPortraits();
 
   /* ---------- marquee: duplicate track content for seamless loop ---------- */
   doc.querySelectorAll('.marquee__track').forEach(function (t) {
@@ -439,6 +440,14 @@
   }
 
   /* [data-lightbox="group"] links open their image large, with previous / next through the group */
+  /* Tall portraits in a wide photo row are anchored near the top, so the crop keeps the face */
+  function initPortraits() {
+    doc.querySelectorAll('.feature-row__media img').forEach(function (img) {
+      function mark() { if (img.naturalHeight > img.naturalWidth * 1.02) img.parentNode.classList.add('is-portrait'); }
+      if (img.complete && img.naturalWidth) mark(); else img.addEventListener('load', mark);
+    });
+  }
+
   function initLightbox() {
     doc.addEventListener('click', function (e) {
       var a = e.target.closest ? e.target.closest('[data-lightbox]') : null;

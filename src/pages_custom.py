@@ -2151,23 +2151,28 @@ RENDERERS['/executive-leadership-coaching-service-for-managers-and-leaders'] = e
 
 
 # ====================================================================== OUR SOCIAL FOUNDATION
-def _sf_quote(text, closing=False):
+def _sf_quote(text, cls=''):
     """A quoted line from the document: the quotation, then whoever said it.
     Both halves stay in the page text exactly as written, so the copy check still passes."""
     t = text.strip()
     i = t.rfind('”')
     quote, cite = (t[:i + 1], t[i + 1:].strip()) if i > 0 else (t, '')
-    cls = 'sf-quote sf-quote--closing' if closing else 'sf-quote'
-    out = '<figure class="' + cls + '" data-reveal><i class="sf-quote__rule" aria-hidden="true"></i>'
+    out = '<figure class="sf-quote' + (' ' + cls if cls else '') + '" data-reveal><i class="sf-quote__rule" aria-hidden="true"></i>'
     out += '<blockquote class="sf-quote__text">' + quote + '</blockquote>'
     if cite:
         out += '<figcaption class="sf-quote__cite">' + cite + '</figcaption>'
     return out + '</figure>'
 
 
+def _sf_photo(name):
+    return ('<div class="sf-split__media media" data-reveal="scale">'
+            '<img src="/assets/img/' + name + '.jpg" alt="" loading="lazy" data-parallax="18"></div>')
+
+
 def social_foundation(page):
-    """Three chapters from the client's document, each closing on a quotation.
-    The last quotation is Azadeh's, so her portrait sits beside it."""
+    """The client's document as a full page: photo hero, three chapters with photographs,
+    a quotation between each, and the closing quotation on a green band.
+    The wording is the document's own; only the arrangement is designed."""
     from build import strip_duplicate_heading
     nodes = top_nodes(strip_duplicate_heading(page['content'], page.get('h1')))
 
@@ -2181,47 +2186,62 @@ def social_foundation(page):
             continue
         if not chapters:
             continue
-        inner = _inner(n)
         if _txt(n).lstrip().startswith('“'):
-            chapters[-1]['quote'] = inner
+            chapters[-1]['quote'] = _inner(n)
         else:
-            chapters[-1]['paras'].append(inner)
+            chapters[-1]['paras'].append(_inner(n))
 
-    if len(chapters) != 3:
-        print('!! social foundation: expected 3 sections, got', len(chapters))
+    ok = (len(chapters) == 3 and len(chapters[0]['paras']) >= 2 and len(chapters[1]['paras']) >= 2
+          and len(chapters[2]['paras']) >= 4 and all(c['quote'] for c in chapters))
+    if not ok:
+        print('!! social foundation: the document no longer has the expected shape')
         return smart_page(page)
+    a, b, c = chapters
+
+    def ps(lst):
+        return ''.join('<p data-reveal>' + x + '</p>' for x in lst)
+
+    def statement(x):
+        return '<p class="sf-statement" data-reveal>' + x + '</p>'
 
     body = subnav(page) + page_hero(page)
 
-    for k, ch in enumerate(chapters):
-        last = (k == len(chapters) - 1)
-        surface = ' section--surface' if k == 1 else ''
-        paras = ch['paras']
-        lead = ''
-        if k == 0 and paras:
-            lead = '<p class="lead" data-reveal>' + paras[0] + '</p>'
-            paras = paras[1:]
-        rest = ''.join('<p data-reveal>' + x + '</p>' for x in paras)
+    # 1. what it is: the opening line large, the rest beside a photograph of coaches at work with young adults
+    body += ('<section class="section sf-chapter"><div class="container sf-split">'
+             '<div class="sf-split__text"><h2 data-reveal>' + a['head'] + '</h2>'
+             '<p class="sf-lead" data-reveal>' + a['paras'][0] + '</p>' + ps(a['paras'][1:]) + '</div>'
+             + _sf_photo('sf-coaches') +
+             '</div></section>')
+    body += '<section class="section section--white sf-band"><div class="container">' + _sf_quote(a['quote']) + '</div></section>'
 
-        body += '<section class="section' + surface + ' sf-chapter"><div class="container">'
-        body += '<div class="sf-chapter__grid">'
-        body += '<div class="sf-chapter__head"><h2 data-reveal>' + ch['head'] + '</h2></div>'
-        body += '<div class="sf-chapter__body">' + lead + rest + '</div>'
-        body += '</div>'
+    # 2. who it is for: photograph first, the last line set apart as the point of the chapter
+    body += ('<section class="section section--surface sf-chapter"><div class="container sf-split sf-split--flip">'
+             + _sf_photo('sf-mentor') +
+             '<div class="sf-split__text"><h2 data-reveal>' + b['head'] + '</h2>'
+             + ps(b['paras'][:-1]) + statement(b['paras'][-1]) + '</div>'
+             '</div></section>')
+    body += '<section class="section section--white sf-band"><div class="container">' + _sf_quote(b['quote']) + '</div></section>'
 
-        if ch['quote'] and not last:
-            body += _sf_quote(ch['quote'])
+    # 3. why it matters: the three changes named in the document become three numbered cards
+    changes = [s for s in re.split(r'(?<=[.!?])\s+', c['paras'][1].strip()) if s]
+    if len(changes) == 3 and '<' not in c['paras'][1]:
+        impact = ('<ol class="sf-impact" data-seq>' + ''.join(
+            '<li class="sf-impact__item" data-reveal><span class="sf-impact__num" aria-hidden="true">0' + str(k + 1) + '</span>'
+            '<p>' + s + '</p></li>' for k, s in enumerate(changes)) + '</ol>')
+    else:
+        impact = ps([c['paras'][1]])
+    body += ('<section class="section sf-chapter"><div class="container">'
+             '<div class="sf-head"><h2 data-reveal>' + c['head'] + '</h2>' + ps(c['paras'][:1]) + '</div>'
+             + impact +
+             '<div class="sf-split sf-split--flip sf-split--after">'
+             + _sf_photo('sf-forward') +
+             '<div class="sf-split__text">' + ps(c['paras'][2:-1]) + statement(c['paras'][-1]) + '</div>'
+             '</div>'
+             '</div></section>')
 
-        if last and ch['quote']:
-            # the closing word is Azadeh's, so her picture belongs with it
-            body += ('<div class="sf-closing">'
-                     '<div class="sf-portrait" data-reveal="scale">'
-                     '<img src="/assets/img/azadeh-entezami.jpg" alt="Azadeh Entezami" loading="lazy">'
-                     '</div>'
-                     '<div class="sf-closing__words">' + _sf_quote(ch['quote'], closing=True) + '</div>'
-                     '</div>')
-
-        body += '</div></section>'
+    # the closing word, on green
+    body += ('<section class="section section--green sf-band sf-band--closing"><div class="container">'
+             + _sf_quote(c['quote'], 'sf-quote--light') + '</div></section>')
 
     return layout(page, body)
 

@@ -427,6 +427,7 @@ HERO_IMAGES = {
     '/pages/comparison-table': 'schedule',
     '/pages/our-services': 'our-services',
     '/pages/business-development': 'business-development',
+    '/pages/our-social-foundation': 'social-foundation',
 }
 
 def take_lead(page, content):
@@ -556,6 +557,8 @@ def insert_videos(url, html_text):
 
 PHOTO_SWAPS = {   # client-supplied replacements for live-site photos
     'https://www.coachmastersacademy.com/siteimages/ourfaculty/34/8344501341582001023_34_azadeh.jpg': '/assets/img/azadeh-entezami.jpg',
+    'https://www.coachmastersacademy.com/assets/new-images/our-team/Azadeh-min.jpg': '/assets/img/azadeh-entezami.jpg',          # core-training team
+    'https://www.coachmastersacademy.com/ckFiles/userfiles/images/Azadeh%20Small.png': '/assets/img/azadeh-entezami-sm.jpg',     # her webinar pages
 }
 
 def swap_photos(page):
