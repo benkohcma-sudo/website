@@ -31,6 +31,9 @@ the layout from any `dist/*/index.html`).
    assets/img/sf-coaches.jpg                 (new)
    assets/img/sf-mentor.jpg                  (new)
    assets/img/sf-forward.jpg                 (new)
+   assets/img/hero/sf-i-am-not-afraid.jpg    (new)
+   assets/img/hero/sf-dare-to-dream.jpg      (new)
+   assets/img/sf-i-am-not-afraid-video.jpg   (new: cover of the video card)
    ```
 
    The views call `asset('assets/...')`. If your assets live elsewhere
@@ -84,12 +87,12 @@ Keep the class names and the `data-*` attributes exactly as they are.
 
 * **Wording.** The text is exactly what the client sent ("Social Foundation.docx"
   and "CMA Social Works.docx"). Please do not edit it.
-* **Photos.** The four photographs on Our Social Foundation were generated to match
-  the site. They show a global group of people and no identifiable city, at the
-  client's request. They are not photos of real CMA events.
-* **Event pages have no photographs yet.** We did not want to invent pictures of
-  real camps. When the client sends real photos from Cambodia and Colombo, send them
-  to the designer and the views will be regenerated with them.
+* **Photos.** Every photograph on these three pages was generated to match the site.
+  None is a photo of a real CMA event. On Our Social Foundation they show a global group
+  of people and no identifiable city, at the client's request. On the two event pages the
+  hero photo and the video cover are illustrations of that kind of camp, set in Cambodia
+  and Sri Lanka. When the client sends real photos from the camps, send them to the
+  designer and the views will be regenerated with them.
 * **URLs.** If nested URLs are awkward in your routing, tell the designer the URLs
   you prefer and the links inside the pages will be regenerated to match.
 * **Regenerating.** These views are produced by `src/tools/blade_export.py` from the

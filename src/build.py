@@ -428,6 +428,8 @@ HERO_IMAGES = {
     '/pages/our-services': 'our-services',
     '/pages/business-development': 'business-development',
     '/pages/our-social-foundation': 'social-foundation',
+    '/pages/our-social-foundation/i-am-not-afraid': 'sf-i-am-not-afraid',
+    '/pages/our-social-foundation/dare-to-dream': 'sf-dare-to-dream',
 }
 
 def take_lead(page, content):

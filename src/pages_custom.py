@@ -2155,7 +2155,8 @@ SF_URL = '/pages/our-social-foundation'
 SF_EVENTS = [   # the two camps, in the order of the client's document; facts are values lifted from the text
     {'url': SF_URL + '/i-am-not-afraid',
      'facts': [('Where', 'Cambodia'), ('When', 'February 2025'), ('CMA coaches', '26'), ('Young leaders', '120')],
-     'media': {'kind': 'video', 'href': 'https://www.youtube.com/watch?v=194TgmaGq60', 'label': 'I Am NOT Afraid Camp 2025, Cambodia'}},
+     'media': {'kind': 'video', 'href': 'https://www.youtube.com/watch?v=194TgmaGq60', 'label': 'I Am NOT Afraid Camp 2025, Cambodia',
+               'cover': '/assets/img/sf-i-am-not-afraid-video.jpg'}},
     {'url': SF_URL + '/dare-to-dream',
      'facts': [('Where', 'Colombo, Sri Lanka'), ('When', 'February 2026'), ('Format', 'Three-day camp'), ('For', 'Graduating university students')],
      'media': {'kind': 'link', 'href': 'https://www.linkedin.com/posts/coach-masters-academy-sri-lanka_testimonial-activity-7427576886320422913-EcPf',
@@ -2337,6 +2338,7 @@ def social_event(page):
     m = ev['media']
     if m['kind'] == 'video':
         media = ('<div class="video-card ev-video" data-reveal="scale">'
+                 + ('<img src="' + esc(m['cover']) + '" alt="" loading="lazy">' if m.get('cover') else '') +
                  '<a class="video-card__play" href="' + esc(m['href']) + '" data-video aria-label="Play video">'
                  '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></a>'
                  '<p class="ev-video__label">' + esc(m['label']) + '</p></div>')
