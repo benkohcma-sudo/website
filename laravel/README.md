@@ -3,6 +3,10 @@
 The front end for these three pages is finished. This folder holds them as Blade
 views with their routes, so they can be dropped into the Laravel site.
 
+> **Laravel or WordPress?** Both versions are in this repo and show the same pages.
+> Use this folder if the pages go into the Laravel site. Use [`wordpress/README.md`](../wordpress/README.md)
+> if they go into WordPress. You only need one of them.
+
 | Page | URL | Blade view | Preview |
 |---|---|---|---|
 | Our Social Foundation | `/pages/our-social-foundation` | `social-foundation/index.blade.php` | https://website-one-dun-67.vercel.app/pages/our-social-foundation |

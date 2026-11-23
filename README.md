@@ -27,11 +27,14 @@ If someone told you this was React, they were looking at something else.
 
 ## Which guide do you need?
 
-The main site is **Laravel** (Blade); only `/blog/` is WordPress.
+The current live site runs the main pages on **Laravel** (Blade) and only `/blog/` on
+WordPress. The new Social Foundation pages are delivered in **both** formats, so they can
+go into whichever system the developer chooses.
 
 | What you are doing | Read this |
 |---|---|
-| **Our Social Foundation + its two event pages** (new, Nov 2026) | **[`laravel/README.md`](laravel/README.md)** — ready-made Blade views, the three routes, and the steps |
+| **Our Social Foundation + its two camp pages, in WordPress** | **[`wordpress/README.md`](wordpress/README.md)** — page templates, the functions file, and the steps |
+| **Our Social Foundation + its two camp pages, in Laravel** | **[`laravel/README.md`](laravel/README.md)** — Blade views, the three routes, and the steps |
 | Converting the rest of the site to Blade | **[`src/HANDOFF.md`](src/HANDOFF.md)** |
 | The WordPress blog theme | the "WordPress blog" section of `src/HANDOFF.md` |
 
@@ -87,6 +90,7 @@ src/build.py                 pages.json -> dist/
 src/pages_custom.py          the hand-designed page templates
 src/verify.py                proves no original wording was lost
 laravel/                     Blade views + routes for Our Social Foundation (see laravel/README.md)
+wordpress/                   WordPress page templates for Our Social Foundation (see wordpress/README.md)
 vercel.json                  tells the preview host the site lives in dist/
 ```
 
