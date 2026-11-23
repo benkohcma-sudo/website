@@ -2151,6 +2151,18 @@ RENDERERS['/executive-leadership-coaching-service-for-managers-and-leaders'] = e
 
 
 # ====================================================================== OUR SOCIAL FOUNDATION
+SF_URL = '/pages/our-social-foundation'
+SF_EVENTS = [   # the two camps, in the order of the client's document; facts are values lifted from the text
+    {'url': SF_URL + '/i-am-not-afraid',
+     'facts': [('Where', 'Cambodia'), ('When', 'February 2025'), ('CMA coaches', '26'), ('Young leaders', '120')],
+     'media': {'kind': 'video', 'href': 'https://www.youtube.com/watch?v=194TgmaGq60', 'label': 'I Am NOT Afraid Camp 2025, Cambodia'}},
+    {'url': SF_URL + '/dare-to-dream',
+     'facts': [('Where', 'Colombo, Sri Lanka'), ('When', 'February 2026'), ('Format', 'Three-day camp'), ('For', 'Graduating university students')],
+     'media': {'kind': 'link', 'href': 'https://www.linkedin.com/posts/coach-masters-academy-sri-lanka_testimonial-activity-7427576886320422913-EcPf',
+               'label': 'Testimony'}},
+]
+
+
 def _sf_quote(text, cls=''):
     """A quoted line from the document: the quotation, then whoever said it.
     Both halves stay in the page text exactly as written, so the copy check still passes."""
@@ -2169,9 +2181,38 @@ def _sf_photo(name):
             '<img src="/assets/img/' + name + '.jpg" alt="" loading="lazy" data-parallax="18"></div>')
 
 
+def _sf_event_parts(page):
+    """An event page's content: where and when, the subtitle, then the running text."""
+    nodes = [n for n in top_nodes(page['content']) if _txt(n)]
+    meta = _txt(nodes[0]) if nodes and getattr(nodes[0], 'name', None) == 'p' and '|' in _txt(nodes[0]) else ''
+    rest = nodes[1:] if meta else nodes
+    sub = next((_inner(n) for n in rest if getattr(n, 'name', None) == 'h2'), '')
+    return meta, sub, [n for n in rest if getattr(n, 'name', None) != 'h2']
+
+
+def _sf_meta(meta):
+    bits = [b.strip() for b in meta.split('|') if b.strip()]
+    return ' <span class="ev-meta__sep">|</span> '.join('<span>' + esc(b) + '</span>' for b in bits)
+
+
+def _sf_event_cards(skip=None):
+    cards = ''
+    for ev in SF_EVENTS:
+        if ev['url'] == skip or ev['url'] not in PAGES:
+            continue
+        p = PAGES[ev['url']]
+        meta, sub, _ = _sf_event_parts(p)
+        cards += ('<a class="card sf-event" href="' + ev['url'] + '" data-reveal>'
+                  '<p class="sf-event__meta">' + _sf_meta(meta) + '</p>'
+                  '<h3>' + esc(p['h1']) + '</h3>'
+                  + ('<p class="sf-event__sub">' + sub + '</p>' if sub else '') +
+                  '<span class="link">Read the story' + ARROW + '</span></a>')
+    return cards
+
+
 def social_foundation(page):
     """The client's document as a full page: photo hero, three chapters with photographs,
-    a quotation between each, and the closing quotation on a green band.
+    a quotation between each, the two camps as cards, and the closing quotation on a green band.
     The wording is the document's own; only the arrangement is designed."""
     from build import strip_duplicate_heading
     nodes = top_nodes(strip_duplicate_heading(page['content'], page.get('h1')))
@@ -2241,6 +2282,14 @@ def social_foundation(page):
              '<div class="sf-split__text">' + ps(c['paras'][2:-1]) + statement(c['paras'][-1]) + '</div>'
              '</div></section>')
 
+    # the two camps, each with its own page
+    cards = _sf_event_cards()
+    if cards:
+        body += ('<section class="section section--white sf-events"><div class="container">'
+                 '<div class="section-head center" style="margin-inline:auto"><h2 data-reveal>Personal Development Boot Camps</h2></div>'
+                 '<div class="sf-events__grid" data-seq>' + cards + '</div>'
+                 '</div></section>')
+
     # the closing word, on green
     body += ('<section class="section section--green sf-band sf-band--closing"><div class="container">'
              + _sf_quote(c['quote'], 'sf-quote--light') + '</div></section>')
@@ -2248,4 +2297,71 @@ def social_foundation(page):
     return layout(page, body)
 
 
-RENDERERS['/pages/our-social-foundation'] = social_foundation
+def social_event(page):
+    """One camp: where and when under the title, four facts, the story as a reading column,
+    the video or testimony, and the document's last line on green."""
+    ev = next(e for e in SF_EVENTS if e['url'] == page['url'])
+    meta, sub, nodes = _sf_event_parts(page)
+
+    def is_bold(n):
+        s = n.find('strong')
+        return bool(s) and _txt(s) == _txt(n)
+
+    def plain(n):
+        s = n.find('strong')
+        return _inner(s) if is_bold(n) else _inner(n)
+
+    closing = plain(nodes[-1]) if nodes and nodes[-1].find('strong') else ''   # the document ends on a bold line
+    if closing:
+        nodes = nodes[:-1]
+
+    taglines = []
+    flow = ''
+    for n in nodes:
+        t = _txt(n)
+        if is_bold(n) and len(t) < 70:                       # a short bold line is the camp's motto
+            taglines.append(t)
+            flow += '<p class="sf-lead" data-reveal>' + plain(n) + '</p>'
+        elif is_bold(n):                                     # a bold paragraph carries the point
+            flow += '<p class="sf-statement" data-reveal>' + plain(n) + '</p>'
+        elif t in taglines:                                  # the motto said again, later in the story
+            flow += '<p class="ev-refrain" data-reveal>' + _inner(n) + '</p>'
+        elif t.lstrip().startswith('“'):
+            flow += ('<figure class="sf-quote ev-quote" data-reveal><i class="sf-quote__rule" aria-hidden="true"></i>'
+                     '<blockquote class="sf-quote__text">' + _inner(n) + '</blockquote></figure>')
+        else:
+            flow += '<p data-reveal>' + _inner(n) + '</p>'
+
+    facts = ''.join('<div class="ev-fact" data-reveal><dt>' + esc(k) + '</dt><dd>' + esc(v) + '</dd></div>' for k, v in ev['facts'])
+
+    m = ev['media']
+    if m['kind'] == 'video':
+        media = ('<div class="video-card ev-video" data-reveal="scale">'
+                 '<a class="video-card__play" href="' + esc(m['href']) + '" data-video aria-label="Play video">'
+                 '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></a>'
+                 '<p class="ev-video__label">' + esc(m['label']) + '</p></div>')
+    else:
+        media = ('<div class="ev-testimony" data-reveal><div><h3>' + esc(m['label']) + '</h3>'
+                 '<p>' + esc(page['h1']) + ', in the words of the people who were there.</p></div>'
+                 + btn('View on LinkedIn', m['href']) + '</div>')
+
+    body = subnav(page) + page_hero(page, lead='<span class="ev-meta">' + _sf_meta(meta) + '</span>')
+    body += '<section class="section section--white ev-facts"><div class="container"><dl class="ev-facts__list" data-seq>' + facts + '</dl></div></section>'
+    body += ('<section class="section ev-story"><div class="container"><div class="ev-story__col">'
+             + ('<h2 data-reveal>' + sub + '</h2>' if sub else '') + flow +
+             '</div></div></section>')
+    body += '<section class="section section--surface ev-media"><div class="container"><div class="ev-story__col">' + media + '</div></div></section>'
+    if closing:
+        body += ('<section class="section section--green sf-band sf-band--closing"><div class="container">'
+                 '<p class="ev-closing" data-reveal>' + closing + '</p></div></section>')
+    others = _sf_event_cards(skip=page['url'])
+    body += ('<section class="section section--white sf-events"><div class="container">'
+             '<div class="sf-events__grid sf-events__grid--one">' + others +
+             '<a class="card sf-event sf-event--back" href="' + SF_URL + '" data-reveal><p class="sf-event__meta"><span>About Us</span></p>'
+             '<h3>Our Social Foundation</h3><span class="link">Back to the page' + ARROW + '</span></a>'
+             '</div></div></section>')
+    return layout(page, body)
+
+
+RENDERERS[SF_URL] = social_foundation
+for _ev in SF_EVENTS: RENDERERS[_ev['url']] = social_event

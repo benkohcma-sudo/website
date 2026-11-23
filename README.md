@@ -27,12 +27,15 @@ If someone told you this was React, they were looking at something else.
 
 ## Which guide do you need?
 
-| Your back end | Read this |
-|---|---|
-| **The whole site in WordPress** | **[`src/WORDPRESS.md`](src/WORDPRESS.md)** — theme skeleton, which pages become Pages / Posts / custom post types, forms, assets, and the Schedule page |
-| **Laravel/Blade** (main site) **+ WordPress** (blog only) | **[`src/HANDOFF.md`](src/HANDOFF.md)** |
+The main site is **Laravel** (Blade); only `/blog/` is WordPress.
 
-Both start from the same `dist/` folder. The notes below are the Blade version.
+| What you are doing | Read this |
+|---|---|
+| **Our Social Foundation + its two event pages** (new, Nov 2026) | **[`laravel/README.md`](laravel/README.md)** — ready-made Blade views, the three routes, and the steps |
+| Converting the rest of the site to Blade | **[`src/HANDOFF.md`](src/HANDOFF.md)** |
+| The WordPress blog theme | the "WordPress blog" section of `src/HANDOFF.md` |
+
+All of it starts from the same `dist/` folder.
 
 ## Converting to Laravel Blade
 
@@ -43,7 +46,7 @@ The short version:
    the HTML is absolute (`/assets/css/main.css`), so update the prefix once if you
    move it.
 2. **Layout** — the `<head>`, top bar, header and footer are **byte-identical on all
-   620 pages**. Lift them once from any `index.html` into `layouts/app.blade.php`.
+   623 pages**. Lift them once from any `index.html` into `layouts/app.blade.php`.
    Only `<title>` and the meta description change per page, so make those
    `@section` variables.
 3. **Views** — everything inside `<main>` becomes one view's `@section('content')`.
@@ -70,7 +73,7 @@ same chrome (`header.php` / `footer.php`). Also covered in `HANDOFF.md`.
 ## What is in this repo
 
 ```
-dist/                        THE DELIVERABLE — 620 pages, one folder per URL
+dist/                        THE DELIVERABLE — 623 pages, one folder per URL
   about-us/index.html          (so /about-us is dist/about-us/index.html)
   assets/css/main.css          the whole design system, one file
   assets/js/main.js            all behaviour and animation, plain JS
@@ -83,6 +86,7 @@ src/content/pages.json       every page's copy, crawled verbatim from the live s
 src/build.py                 pages.json -> dist/
 src/pages_custom.py          the hand-designed page templates
 src/verify.py                proves no original wording was lost
+laravel/                     Blade views + routes for Our Social Foundation (see laravel/README.md)
 vercel.json                  tells the preview host the site lives in dist/
 ```
 
