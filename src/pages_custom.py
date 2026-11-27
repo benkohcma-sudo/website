@@ -2172,10 +2172,6 @@ SF_EVENTS = [   # the two camps, in the order of the client's document; facts ar
                ]}},
 ]
 
-LI_ICON = ('<svg class="li-mark" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="4" fill="#0A66C2"/>'
-           '<path fill="#fff" d="M7.1 9.6h2.6V18H7.1zM8.4 5.6a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zM11.3 9.6h2.5v1.15h.04c.35-.66 1.2-1.36 2.47-1.36 2.64 0 3.13 1.74 3.13 4V18h-2.6v-4.1c0-.98-.02-2.24-1.37-2.24-1.37 0-1.58 1.07-1.58 2.17V18h-2.6z"/></svg>')
-
-
 def _sf_reviews(m):
     """Testimonies as review cards in two columns that drift past each other (one up, one down),
     as on the voila.sg reviews. Each column holds its cards twice so the loop is seamless; the
@@ -2184,7 +2180,7 @@ def _sf_reviews(m):
         return ('<article class="ev-rv"' + (' aria-hidden="true"' if dup else '') + '>'
                 '<div class="ev-rv__top"><span class="ev-rv__av ev-rv__av--' + str(i % 3) + '">' + esc(name[0]) + '</span>'
                 '<div><p class="ev-rv__name">' + esc(name) + '</p><p class="ev-rv__meta">Youth Camp 2026 participant</p></div>'
-                + LI_ICON + '</div>'
+                '</div>'
                 '<blockquote class="ev-rv__text">“' + esc(text) + '”</blockquote>'
                 '<p class="ev-rv__foot">Shared on LinkedIn</p></article>')
     items = m['items']
@@ -2197,11 +2193,7 @@ def _sf_reviews(m):
                  '<div class="ev-marquee__inner">' + once + twice + '</div></div>')
     return ('<section class="section section--surface ev-reviews"><div class="container ev-reviews__layout">'
             '<div class="ev-reviews__head">'
-            '<span class="eyebrow" data-reveal>' + esc(m['event']) + '</span>'
             '<h2 data-reveal>What our participants say</h2>'
-            '<div class="ev-source" data-reveal>' + LI_ICON +
-            '<span><b>' + str(len(items)) + ' testimonies</b><small>Shared on LinkedIn by ' + esc(m['source']) + '</small></span></div>'
-            '<a class="link" href="' + esc(m['href']) + '" target="_blank" rel="noopener" data-reveal>View the post on LinkedIn' + ARROW + '</a>'
             '</div>'
             '<div class="ev-marquee" aria-label="Participant testimonies">' + cols + '</div>'
             '</div></section>')

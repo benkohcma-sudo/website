@@ -62,8 +62,7 @@ wordpress/theme-files/
      open the two camp pages.
    * On I Am NOT Afraid, the play button opens the YouTube video in a popup.
    * On Dare to Dream, "What our participants say" shows six testimony cards drifting in two
-     columns (they pause on hover, and sit still on phones), and "View the post on LinkedIn"
-     opens the original post in a new tab.
+     columns (they pause on hover, and sit still on phones).
 
 ## Things to know
 
