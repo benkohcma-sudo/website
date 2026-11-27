@@ -75,6 +75,30 @@ the layout from any `dist/*/index.html`).
   `main.js` through the `data-reveal`, `data-seq` and `data-video` attributes already
   in the views. Leave those attributes where they are.
 
+## Editing the testimonies (Dare to Dream)
+
+The six cards under "What our participants say" are **not** hard-coded. They come from a list
+at the top of `dare-to-dream.blade.php`:
+
+```php
+@php
+    $testimonies = $testimonies ?? [
+        ['name' => 'Sharu Vijayan', 'role' => 'Youth Camp 2026 participant', 'text' => 'The camp was well organized …'],
+        …
+    ];
+@endphp
+```
+
+* **Add one:** copy a line and change the name, role and text. Leave out the quotation marks;
+  the page adds them. The circle shows the first letter of the name, and the colours
+  (orange, green, dark orange) rotate by themselves.
+* **Remove one:** delete its line. Any number works; the cards split into the two columns
+  by themselves.
+* **Let the admin edit them (optional):** store testimonies in a table (`name`, `role`, `text`)
+  and pass them to the view as `$testimonies`, for example
+  `Route::get(..., fn () => view('social-foundation.dare-to-dream', ['testimonies' => Testimony::orderBy('sort')->get(['name', 'role', 'text'])->toArray()]))`.
+  When `$testimonies` is passed, the list in the file is skipped.
+
 ## If the client needs to edit these pages in the admin
 
 The views are static on purpose, to get the pages live quickly. To make them

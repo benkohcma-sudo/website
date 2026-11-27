@@ -64,6 +64,28 @@ wordpress/theme-files/
    * On Dare to Dream, "What our participants say" shows six testimony cards drifting in two
      columns (they pause on hover, and sit still on phones).
 
+## Editing the testimonies (Dare to Dream)
+
+The six cards under "What our participants say" are **not** hard-coded. They come from a list
+at the top of `template-sf-dare-to-dream.php`:
+
+```php
+$cma_testimonies = array(
+	array( 'name' => 'Sharu Vijayan', 'role' => 'Youth Camp 2026 participant', 'text' => 'The camp was well organized …' ),
+	…
+);
+```
+
+* **Add one:** copy a line and change the name, role and text. Leave out the quotation marks;
+  the page adds them. The circle shows the first letter of the name, and the colours
+  (orange, green, dark orange) rotate by themselves.
+* **Remove one:** delete its line. Any number works; the cards split into the two columns
+  by themselves.
+* **Let the admin edit them (optional):** with Advanced Custom Fields, add a **Repeater**
+  field named `testimonies` to the Dare to Dream page with three sub fields: `name`, `role`
+  and `text`. Once it has rows, it replaces the list in the file, and the client can change
+  testimonies in the page editor without touching code.
+
 ## Things to know
 
 * **Header and footer.** The templates call `get_header()` and `get_footer()`, so they use

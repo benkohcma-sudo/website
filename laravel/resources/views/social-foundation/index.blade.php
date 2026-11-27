@@ -1,5 +1,6 @@
 {{-- Our Social Foundation | Coach Masters Academy
-     Generated from dist/pages/our-social-foundation/index.html by src/tools/blade_export.py. Do not edit by hand:
+     Generated from dist/pages/our-social-foundation/index.html by src/tools/blade_export.py. Do not edit by hand (except
+     the TESTIMONIES list, if there is one):
      ask the designer for a change and this file is regenerated.
      Change 'layouts.app' and the section names below to match the site's own layout. --}}
 @extends('layouts.app')

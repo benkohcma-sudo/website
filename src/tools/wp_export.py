@@ -7,6 +7,7 @@ Writes wordpress/theme-files/ from the pages in dist/. Run it again after any ch
 pages; the templates are regenerated, never edited by hand.
 """
 import os, re, html
+import testimonies
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DIST = os.path.join(ROOT, 'dist')
@@ -34,18 +35,28 @@ def template(url, fname, tname):
                   lambda g: 'href="<?php echo esc_url( home_url( \'%s/\' ) ); ?>"' % (WP_SF + (g.group(1) or '').rstrip('/')), main)
     # every other link (About Us, Our Story ...) stays as it is: those pages are not part of WordPress
 
+    # testimonies become an editable list at the top of the template and a loop in the page
+    head = ''
+    rows = testimonies.items(url)
+    if rows:
+        main, ok = testimonies.swap(main, testimonies.WP_LOOP)
+        assert ok, 'testimony cards not found in ' + url
+        head = testimonies.wp_list(rows)
+
     out = ("<?php\n"
            "/**\n"
            " * Template Name: %s\n"
            " *\n"
            " * Generated from dist%s/index.html by src/tools/wp_export.py.\n"
-           " * Do not edit by hand: ask the designer for a change and this file is regenerated.\n"
+           " * Do not edit by hand (except the TESTIMONIES list, if there is one): ask the designer for a\n"
+           " * change and this file is regenerated.\n"
            " */\n"
+           "%s"
            "get_header();\n"
            "?>\n"
            "<main class=\"page-enter\">\n%s\n</main>\n"
            "<?php\n"
-           "get_footer();\n") % (tname, url, main)
+           "get_footer();\n") % (tname, url, head, main)
     os.makedirs(os.path.join(OUT, 'page-templates'), exist_ok=True)
     path = os.path.join(OUT, 'page-templates', fname)
     open(path, 'w', encoding='utf-8').write(out)

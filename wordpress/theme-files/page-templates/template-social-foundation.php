@@ -3,7 +3,8 @@
  * Template Name: Our Social Foundation
  *
  * Generated from dist/pages/our-social-foundation/index.html by src/tools/wp_export.py.
- * Do not edit by hand: ask the designer for a change and this file is regenerated.
+ * Do not edit by hand (except the TESTIMONIES list, if there is one): ask the designer for a
+ * change and this file is regenerated.
  */
 get_header();
 ?>

@@ -7,6 +7,7 @@ Writes laravel/resources/views/social-foundation/*.blade.php from the pages in d
 Run it again after any change to those pages; the views are regenerated, never edited by hand.
 """
 import os, re, html
+import testimonies
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DIST = os.path.join(ROOT, 'dist')
@@ -33,18 +34,27 @@ def blade(url, name):
     main = re.sub(r'\b(src|href|poster)="/assets/([^"]+)"', lambda g: '%s="{{ asset(\'assets/%s\') }}"' % (g.group(1), g.group(2)), main)
     main = re.sub(r'\bhref="(/[^"/][^"]*|/)"', lambda g: 'href="{{ url(\'%s\') }}"' % g.group(1), main)
 
+    # testimonies become an editable list at the top of the view and a loop in the page
+    head = ''
+    rows = testimonies.items(url)
+    if rows:
+        main, ok = testimonies.swap(main, testimonies.BLADE_LOOP)
+        assert ok, 'testimony cards not found in ' + url
+        head = testimonies.blade_list(rows)
+
     q = lambda s: s.replace('\\', '\\\\').replace("'", "\\'")
     out = ("{{-- %s\n"
-           "     Generated from dist%s/index.html by src/tools/blade_export.py. Do not edit by hand:\n"
+           "     Generated from dist%s/index.html by src/tools/blade_export.py. Do not edit by hand (except\n"
+           "     the TESTIMONIES list, if there is one):\n"
            "     ask the designer for a change and this file is regenerated.\n"
            "     Change 'layouts.app' and the section names below to match the site's own layout. --}}\n"
            "@extends('layouts.app')\n\n"
            "@section('title', '%s')\n"
            "@section('meta_description', '%s')\n\n"
-           "@section('content')\n"
+           "@section('content')\n%s"
            "{{-- If the layout already opens <main>, delete this wrapper and keep what is inside it. --}}\n"
            "<main class=\"page-enter\">\n%s\n</main>\n"
-           "@endsection\n") % (title, url, q(title), q(desc), main)
+           "@endsection\n") % (title, url, q(title), q(desc), head, main)
     os.makedirs(OUT, exist_ok=True)
     path = os.path.join(OUT, name + '.blade.php')
     open(path, 'w', encoding='utf-8').write(out)
