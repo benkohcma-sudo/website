@@ -64,7 +64,9 @@ the layout from any `dist/*/index.html`).
      open the two event pages.
    * On I Am NOT Afraid, the play button opens the YouTube video in a popup
      (`https://www.youtube.com/watch?v=194TgmaGq60`).
-   * On Dare to Dream, "View on LinkedIn" opens the testimony post in a new tab.
+   * On Dare to Dream, "What our participants say" shows six testimony cards drifting in two
+     columns (they pause on hover, and sit still on phones), and "View the post on LinkedIn"
+     opens the original post in a new tab.
 
 ## Nothing else is needed from the back end
 

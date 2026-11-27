@@ -2159,9 +2159,52 @@ SF_EVENTS = [   # the two camps, in the order of the client's document; facts ar
                'cover': '/assets/img/sf-i-am-not-afraid-video.jpg'}},
     {'url': SF_URL + '/dare-to-dream',
      'facts': [('Where', 'Colombo, Sri Lanka'), ('When', 'February 2026'), ('Format', 'Three-day camp'), ('For', 'Graduating university students')],
-     'media': {'kind': 'link', 'href': 'https://www.linkedin.com/posts/coach-masters-academy-sri-lanka_testimonial-activity-7427576886320422913-EcPf',
-               'label': 'Testimony'}},
+     # the participants' own words, word for word from the slides of the LinkedIn post
+     'media': {'kind': 'reviews', 'href': 'https://www.linkedin.com/posts/coach-masters-academy-sri-lanka_testimonial-activity-7427576886320422913-EcPf',
+               'source': 'Coach Masters Academy Sri Lanka', 'event': 'Dare to Dream, CMA Youth Camp 2026',
+               'items': [
+                   ('Sharu Vijayan', 'The camp was well organized and engaging, and it created a safe space for learning, teamwork, and personal growth. The activities were meaningful, and the facilitators were very supportive. Overall, it was a memorable and enriching experience.'),
+                   ('Priya Saththivel', 'This workshop helped me to understand many aspects of achieving goal, self confidence, leadership skills, communication strategies, team work and how to handle a hard situation. Shared many things in night session that I have never shared with anyone and the coaches helped me to solve my problems.'),
+                   ('Srinika Weerasundara', 'Thank you for the guidance, support, and honesty that brought clarity to my thoughts and purpose to my life. You helped me see myself better and move forward with confidence. This experience and the people behind it will always be remembered'),
+                   ('Hudha Haleem Ishak', 'Being as a participant in multicultural and multinational program helped me a lot to build up my self in many ways. Learnt a lot through experience and practical. Thank you each and every individual who made this very special and unique!'),
+                   ('Keshan Malinga', 'The camp was very well organized and informative. The sessions were inspiring and helped improve leadership skills, teamwork, and confidence. Thank you to the organizers and trainers for a great experience.'),
+                   ('Christina Jenifer', 'This camp has given a moment to look at the star we always had in the heart, the courage to pursue it with a strong mentally. And I am really thankful for the every coaches that shared their valuable knowledge with us.'),
+               ]}},
 ]
+
+LI_ICON = ('<svg class="li-mark" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="4" fill="#0A66C2"/>'
+           '<path fill="#fff" d="M7.1 9.6h2.6V18H7.1zM8.4 5.6a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zM11.3 9.6h2.5v1.15h.04c.35-.66 1.2-1.36 2.47-1.36 2.64 0 3.13 1.74 3.13 4V18h-2.6v-4.1c0-.98-.02-2.24-1.37-2.24-1.37 0-1.58 1.07-1.58 2.17V18h-2.6z"/></svg>')
+
+
+def _sf_reviews(m):
+    """Testimonies as review cards in two columns that drift past each other (one up, one down),
+    as on the voila.sg reviews. Each column holds its cards twice so the loop is seamless; the
+    second copy is hidden from screen readers and dropped when motion is off or on phones."""
+    def card(i, name, text, dup=False):
+        return ('<article class="ev-rv"' + (' aria-hidden="true"' if dup else '') + '>'
+                '<div class="ev-rv__top"><span class="ev-rv__av ev-rv__av--' + str(i % 3) + '">' + esc(name[0]) + '</span>'
+                '<div><p class="ev-rv__name">' + esc(name) + '</p><p class="ev-rv__meta">Youth Camp 2026 participant</p></div>'
+                + LI_ICON + '</div>'
+                '<blockquote class="ev-rv__text">“' + esc(text) + '”</blockquote>'
+                '<p class="ev-rv__foot">Shared on LinkedIn</p></article>')
+    items = m['items']
+    cols = ''
+    for c in range(2):
+        mine = [(i, n, t) for i, (n, t) in enumerate(items) if i % 2 == c]
+        once = ''.join(card(i, n, t) for i, n, t in mine)
+        twice = ''.join(card(i, n, t, True) for i, n, t in mine)
+        cols += ('<div class="ev-marquee__col' + (' is-down' if c else '') + '" style="--dur:' + str(len(mine) * 11 + c * 6) + 's">'
+                 '<div class="ev-marquee__inner">' + once + twice + '</div></div>')
+    return ('<section class="section section--surface ev-reviews"><div class="container ev-reviews__layout">'
+            '<div class="ev-reviews__head">'
+            '<span class="eyebrow" data-reveal>' + esc(m['event']) + '</span>'
+            '<h2 data-reveal>What our participants say</h2>'
+            '<div class="ev-source" data-reveal>' + LI_ICON +
+            '<span><b>' + str(len(items)) + ' testimonies</b><small>Shared on LinkedIn by ' + esc(m['source']) + '</small></span></div>'
+            '<a class="link" href="' + esc(m['href']) + '" target="_blank" rel="noopener" data-reveal>View the post on LinkedIn' + ARROW + '</a>'
+            '</div>'
+            '<div class="ev-marquee" aria-label="Participant testimonies">' + cols + '</div>'
+            '</div></section>')
 
 
 def _sf_quote(text, cls=''):
@@ -2336,13 +2379,14 @@ def social_event(page):
     facts = ''.join('<div class="ev-fact" data-reveal><dt>' + esc(k) + '</dt><dd>' + esc(v) + '</dd></div>' for k, v in ev['facts'])
 
     m = ev['media']
+    media = ''
     if m['kind'] == 'video':
         media = ('<div class="video-card ev-video" data-reveal="scale">'
                  + ('<img src="' + esc(m['cover']) + '" alt="" loading="lazy">' if m.get('cover') else '') +
                  '<a class="video-card__play" href="' + esc(m['href']) + '" data-video aria-label="Play video">'
                  '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></a>'
                  '<p class="ev-video__label">' + esc(m['label']) + '</p></div>')
-    else:
+    elif m['kind'] == 'link':
         media = ('<div class="ev-testimony" data-reveal><div><h3>' + esc(m['label']) + '</h3>'
                  '<p>' + esc(page['h1']) + ', in the words of the people who were there.</p></div>'
                  + btn('View on LinkedIn', m['href']) + '</div>')
@@ -2352,7 +2396,10 @@ def social_event(page):
     body += ('<section class="section ev-story"><div class="container"><div class="ev-story__col">'
              + ('<h2 data-reveal>' + sub + '</h2>' if sub else '') + flow +
              '</div></div></section>')
-    body += '<section class="section section--surface ev-media"><div class="container"><div class="ev-story__col">' + media + '</div></div></section>'
+    if media:
+        body += '<section class="section section--surface ev-media"><div class="container"><div class="ev-story__col">' + media + '</div></div></section>'
+    if m['kind'] == 'reviews':
+        body += _sf_reviews(m)
     if closing:
         body += ('<section class="section section--green sf-band sf-band--closing"><div class="container">'
                  '<p class="ev-closing" data-reveal>' + closing + '</p></div></section>')

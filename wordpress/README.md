@@ -61,7 +61,9 @@ wordpress/theme-files/
    * On Our Social Foundation, the two cards under "Personal Development Boot Camps"
      open the two camp pages.
    * On I Am NOT Afraid, the play button opens the YouTube video in a popup.
-   * On Dare to Dream, "View on LinkedIn" opens the testimony post in a new tab.
+   * On Dare to Dream, "What our participants say" shows six testimony cards drifting in two
+     columns (they pause on hover, and sit still on phones), and "View the post on LinkedIn"
+     opens the original post in a new tab.
 
 ## Things to know
 
